@@ -1,14 +1,7 @@
 package main
 
 import (
-	"encoding/base64"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
-	"os/exec"
-	"path/filepath"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"

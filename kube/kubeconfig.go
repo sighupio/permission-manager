@@ -5,23 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
-
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/sighupio/permission-manager/server/kube"
-
-	v1 "k8s.io/api/core/v1"
-	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
-
-func CreateKubeconfigYAML(username string) {
+// CreateKubeconfigYAML returns a kubeconfig YAML string
+func CreateKubeconfigYAML(username string) (kubeconfigYAML string) {
 	rsaFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		log.Fatal("Cannot create temporary file", err)
@@ -72,7 +62,7 @@ func CreateKubeconfigYAML(username string) {
 	crtBase64 := base64.StdEncoding.EncodeToString(crt)
 	rsaPrivateKeyBase64 := base64.StdEncoding.EncodeToString(rsaPrivateKey)
 
-	kubeconfig := fmt.Sprintf(`apiVersion: v1
+	kubeconfigYAML := fmt.Sprintf(`apiVersion: v1
 kind: Config
 preferences:
     colors: true
@@ -94,4 +84,5 @@ users:
       client-key-data: %s`,
 		clusterName, clusterName, cacertPath, clusterName, username, clusterName, username, crtBase64, rsaPrivateKeyBase64)
 
+	return kubeconfigYAML
 }
