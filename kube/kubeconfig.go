@@ -12,6 +12,10 @@ import (
 
 // CreateKubeconfigYAML returns a kubeconfig YAML string
 func CreateKubeconfigYAML(username string) (kubeconfigYAML string) {
+
+	/* TODO */
+	// refactor to use CSR api
+
 	rsaFile, err := ioutil.TempFile(os.TempDir(), "prefix-")
 	if err != nil {
 		log.Fatal("Cannot create temporary file", err)
