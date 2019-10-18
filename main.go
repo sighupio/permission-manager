@@ -13,12 +13,21 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-var kubeclient *kubernetes.Clientset
+// AppContext echo context extended with application specific fields
+type AppContext struct {
+	echo.Context
+	Kubeclient *kubernetes.Clientset
+}
 
-func main() {	
-	kubeclient = kube.NewKubeclient()
-
+func main() {
 	e := echo.New()
+
+	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			customContext := &AppContext{Context: c, Kubeclient: kube.NewKubeclient()}
+			return next(customContext)
+		}
+	})
 
 	// e.Use(middleware.Logger())
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
@@ -83,7 +92,9 @@ func listGroups(c echo.Context) error {
 }
 
 func listNamespaces(c echo.Context) error {
-	namespaces, err := kubeclient.CoreV1().Namespaces().List(metav1.ListOptions{})
+	ac := c.(AppContext)
+
+	namespaces, err := ac.Kubeclient.CoreV1().Namespaces().List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -98,6 +109,7 @@ func listNamespaces(c echo.Context) error {
 }
 
 func listRbac(c echo.Context) error {
+	ac := c.(AppContext)
 	type Response struct {
 		ClusterRoles        []rbacv1.ClusterRole        `json:"clusterRoles"`
 		ClusterRoleBindings []rbacv1.ClusterRoleBinding `json:"clusterRoleBindings"`
@@ -105,22 +117,22 @@ func listRbac(c echo.Context) error {
 		RoleBindings        []rbacv1.RoleBinding        `json:"roleBindinds"`
 	}
 
-	clusterRoles, err := kubeclient.RbacV1().ClusterRoles().List(metav1.ListOptions{})
+	clusterRoles, err := ac.Kubeclient.RbacV1().ClusterRoles().List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	clusterRoleBindings, err := kubeclient.RbacV1().ClusterRoleBindings().List(metav1.ListOptions{})
+	clusterRoleBindings, err := ac.Kubeclient.RbacV1().ClusterRoleBindings().List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	roles, err := kubeclient.RbacV1().Roles("").List(metav1.ListOptions{})
+	roles, err := ac.Kubeclient.RbacV1().Roles("").List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	roleBindings, err := kubeclient.RbacV1().RoleBindings("").List(metav1.ListOptions{})
+	roleBindings, err := ac.Kubeclient.RbacV1().RoleBindings("").List(metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -134,6 +146,7 @@ func listRbac(c echo.Context) error {
 }
 
 func createClusterRole(c echo.Context) error {
+	ac := c.(AppContext)
 	type Request struct {
 		RoleName string              `json:"roleName"`
 		Rules    []rbacv1.PolicyRule `json:"rules"`
@@ -147,7 +160,7 @@ func createClusterRole(c echo.Context) error {
 		Ok bool `json:"ok"`
 	}
 
-	kubeclient.RbacV1().ClusterRoles().Create(&rbacv1.ClusterRole{
+	ac.Kubeclient.RbacV1().ClusterRoles().Create(&rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.RoleName,
 		},
@@ -158,6 +171,7 @@ func createClusterRole(c echo.Context) error {
 }
 
 func createRolebinding(c echo.Context) error {
+	ac := c.(AppContext)
 	type Request struct {
 		RolebindingName string           `json:"rolebindingName"`
 		Namespace       string           `json:"namespace"`
@@ -175,7 +189,7 @@ func createRolebinding(c echo.Context) error {
 		Ok bool `json:"ok"`
 	}
 
-	kubeclient.RbacV1().RoleBindings(r.Namespace).Create(&rbacv1.RoleBinding{
+	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(&rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.RolebindingName,
 			Namespace: r.Namespace,
@@ -193,6 +207,7 @@ func createRolebinding(c echo.Context) error {
 }
 
 func createClusterRolebinding(c echo.Context) error {
+	ac := c.(AppContext)
 	type Request struct {
 		ClusterRolebindingName string           `json:"clusterRolebindingName"`
 		Username               string           `json:"user"`
@@ -208,7 +223,7 @@ func createClusterRolebinding(c echo.Context) error {
 		Ok bool `json:"ok"`
 	}
 
-	kubeclient.RbacV1().ClusterRoleBindings().Create(&rbacv1.ClusterRoleBinding{
+	ac.Kubeclient.RbacV1().ClusterRoleBindings().Create(&rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   r.ClusterRolebindingName,
 			Labels: map[string]string{"generated_for_user": r.Username},
@@ -225,6 +240,7 @@ func createClusterRolebinding(c echo.Context) error {
 }
 
 func deleteClusterRole(c echo.Context) error {
+	ac := c.(AppContext)
 	type Request struct {
 		RoleName string `json:"roleName"`
 	}
@@ -237,11 +253,12 @@ func deleteClusterRole(c echo.Context) error {
 		return err
 	}
 
-	kubeclient.RbacV1().ClusterRoles().Delete(r.RoleName, nil)
+	ac.Kubeclient.RbacV1().ClusterRoles().Delete(r.RoleName, nil)
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
 func deleteClusterRolebinding(c echo.Context) error {
+	ac := c.(AppContext)
 	type Request struct {
 		RolebindingName string `json:"rolebindingName"`
 	}
@@ -254,11 +271,13 @@ func deleteClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	kubeclient.RbacV1().ClusterRoleBindings().Delete(r.RolebindingName, nil)
+	ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(r.RolebindingName, nil)
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
 func deleteRole(c echo.Context) error {
+	ac := c.(AppContext)
+
 	type Request struct {
 		RoleName  string `json:"roleName"`
 		Namespace string `json:"namespace"`
@@ -272,11 +291,12 @@ func deleteRole(c echo.Context) error {
 		return err
 	}
 
-	kubeclient.RbacV1().Roles(r.Namespace).Delete(r.RoleName, nil)
+	ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(r.RoleName, nil)
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
 func deleteRolebinding(c echo.Context) error {
+	ac := c.(AppContext)
 	type Request struct {
 		RolebindingName string `json:"rolebindingName"`
 		Namespace       string `json:"namespace"`
@@ -290,7 +310,7 @@ func deleteRolebinding(c echo.Context) error {
 		return err
 	}
 
-	kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(r.RolebindingName, nil)
+	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(r.RolebindingName, nil)
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
