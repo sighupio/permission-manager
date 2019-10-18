@@ -5,7 +5,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/sighupio/permission-manager/server/kube"
+	"github.com/sighupio/permission-manager/kube"
 
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -15,7 +15,7 @@ import (
 
 var kubeclient *kubernetes.Clientset
 
-func main() {
+func main() {	
 	kubeclient = kube.NewKubeclient()
 
 	e := echo.New()

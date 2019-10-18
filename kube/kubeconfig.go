@@ -62,7 +62,7 @@ func CreateKubeconfigYAML(username string) (kubeconfigYAML string) {
 	crtBase64 := base64.StdEncoding.EncodeToString(crt)
 	rsaPrivateKeyBase64 := base64.StdEncoding.EncodeToString(rsaPrivateKey)
 
-	kubeconfigYAML := fmt.Sprintf(`apiVersion: v1
+	kubeconfigYAML = fmt.Sprintf(`apiVersion: v1
 kind: Config
 preferences:
     colors: true
