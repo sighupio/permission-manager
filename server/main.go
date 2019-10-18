@@ -66,7 +66,7 @@ var users []user
 
 func listUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, []user{
-		user{Name: "jaga"},
+		user{Name: "popo"},
 	})
 }
 

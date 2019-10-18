@@ -20,8 +20,7 @@ func newRestConfig() *rest.Config {
 		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
 	}
 	flag.Parse()
-
-	fmt.Println(*kubeconfig)
+	fmt.Printf("kubeconfig path: %s\n", *kubeconfig)
 
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
