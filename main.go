@@ -7,6 +7,8 @@ import (
 	"github.com/labstack/echo/middleware"
 	"github.com/sighupio/permission-manager/kube"
 
+	"github.com/rakyll/statik/fs"
+	_ "github.com/sighupio/permission-manager/statik"
 	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,9 +24,10 @@ type AppContext struct {
 func main() {
 	e := echo.New()
 
+	kc := kube.NewKubeclient()
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			customContext := &AppContext{Context: c, Kubeclient: kube.NewKubeclient()}
+			customContext := &AppContext{Context: c, Kubeclient: kc}
 			return next(customContext)
 		}
 	})
@@ -33,10 +36,6 @@ func main() {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
-
-	e.GET("/", func(c echo.Context) error {
-		return c.String(http.StatusOK, "Hello, World!")
-	})
 
 	e.GET("/api/list-users", listUsers)
 	e.GET("/api/list-groups", listGroups)
@@ -54,6 +53,14 @@ func main() {
 	e.POST("/api/delete-role", deleteRole)
 
 	e.POST("/api/create-kubeconfig", createKubeconfig)
+
+	statikFS, err := fs.New()
+	if err != nil {
+		e.Logger.Fatal(err)
+	}
+
+	spaHandler := http.FileServer(statikFS)
+	e.GET("/*", echo.WrapHandler(http.StripPrefix("/", spaHandler)))
 
 	e.Logger.Fatal(e.Start(":4000"))
 }
@@ -92,7 +99,7 @@ func listGroups(c echo.Context) error {
 }
 
 func listNamespaces(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 
 	namespaces, err := ac.Kubeclient.CoreV1().Namespaces().List(metav1.ListOptions{})
 	if err != nil {
@@ -109,7 +116,7 @@ func listNamespaces(c echo.Context) error {
 }
 
 func listRbac(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Response struct {
 		ClusterRoles        []rbacv1.ClusterRole        `json:"clusterRoles"`
 		ClusterRoleBindings []rbacv1.ClusterRoleBinding `json:"clusterRoleBindings"`
@@ -146,7 +153,7 @@ func listRbac(c echo.Context) error {
 }
 
 func createClusterRole(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Request struct {
 		RoleName string              `json:"roleName"`
 		Rules    []rbacv1.PolicyRule `json:"rules"`
@@ -171,7 +178,7 @@ func createClusterRole(c echo.Context) error {
 }
 
 func createRolebinding(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Request struct {
 		RolebindingName string           `json:"rolebindingName"`
 		Namespace       string           `json:"namespace"`
@@ -207,7 +214,7 @@ func createRolebinding(c echo.Context) error {
 }
 
 func createClusterRolebinding(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Request struct {
 		ClusterRolebindingName string           `json:"clusterRolebindingName"`
 		Username               string           `json:"user"`
@@ -240,7 +247,7 @@ func createClusterRolebinding(c echo.Context) error {
 }
 
 func deleteClusterRole(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Request struct {
 		RoleName string `json:"roleName"`
 	}
@@ -258,7 +265,7 @@ func deleteClusterRole(c echo.Context) error {
 }
 
 func deleteClusterRolebinding(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Request struct {
 		RolebindingName string `json:"rolebindingName"`
 	}
@@ -276,7 +283,7 @@ func deleteClusterRolebinding(c echo.Context) error {
 }
 
 func deleteRole(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 
 	type Request struct {
 		RoleName  string `json:"roleName"`
@@ -296,7 +303,7 @@ func deleteRole(c echo.Context) error {
 }
 
 func deleteRolebinding(c echo.Context) error {
-	ac := c.(AppContext)
+	ac := c.(*AppContext)
 	type Request struct {
 		RolebindingName string `json:"rolebindingName"`
 		Namespace       string `json:"namespace"`

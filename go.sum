@@ -89,6 +89,8 @@ github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR
 github.com/pmezard/go-difflib v0.0.0-20151028094244-d8ed2627bdf0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
+github.com/rakyll/statik v0.1.6 h1:uICcfUXpgqtw2VopbIncslhAmE5hwc4g20TEyEENBNs=
+github.com/rakyll/statik v0.1.6/go.mod h1:OEi9wJV/fMUAGx1eNjq75DKDsJVuEv1U0oYdX6GX8Zs=
 github.com/sighupio/permission-manager v0.0.0-20191010162925-581936bfe091 h1:XFCW2PfCU+fKDyfYjUClg6UKAVzEeeHDnbi10Ov7FMk=
 github.com/sighupio/permission-manager/server v0.0.0-20191018144808-a91524e5fe5f h1:GFIidVzQh7m+lcvEHpihdh2oZI2K3v0AWufkPItcjUY=
 github.com/sighupio/permission-manager/server v0.0.0-20191018144808-a91524e5fe5f/go.mod h1:JCEWThtZudPNNhaRd1Yi1HNdb9jHq7yuf3q97Kx85yg=
