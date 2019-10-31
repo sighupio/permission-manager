@@ -123,7 +123,7 @@ func listRbac(c echo.Context) error {
 		ClusterRoles        []rbacv1.ClusterRole        `json:"clusterRoles"`
 		ClusterRoleBindings []rbacv1.ClusterRoleBinding `json:"clusterRoleBindings"`
 		Roles               []rbacv1.Role               `json:"roles"`
-		RoleBindings        []rbacv1.RoleBinding        `json:"roleBindinds"`
+		RoleBindings        []rbacv1.RoleBinding        `json:"roleBindings"`
 	}
 
 	clusterRoles, err := ac.Kubeclient.RbacV1().ClusterRoles().List(metav1.ListOptions{})

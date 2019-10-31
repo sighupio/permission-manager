@@ -6,11 +6,15 @@ import TemplateSelect from './TemplateSelect'
 export default function TemplatePairSelect({ onSave, initialValues }) {
   const [namespaces, setNamespaces] = useState(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState(
-    initialValues.namespaces === 'ALL_NAMESPACES',
+    initialValues.namespaces === 'ALL_NAMESPACES' ? true : null,
   )
   const [template, setTemplate] = useState(initialValues.template)
 
   useEffect(() => {
+    if (allNamespace === null) {
+      return
+    }
+
     if (allNamespace) {
       setNamespaces('ALL_NAMESPACES')
     } else {
@@ -55,7 +59,7 @@ export default function TemplatePairSelect({ onSave, initialValues }) {
           <label className="block uppercase tracking-wide text-gray-700 text-xs mb-2">
             <input
               type="checkbox"
-              checked={allNamespace}
+              checked={!!allNamespace}
               onChange={e => setAllNamespaces(e.target.checked)}
             />
             <span className="ml-2">all Namespaces</span>

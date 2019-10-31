@@ -1,0 +1,141 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: yellow
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: blue
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___operation
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "*"
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___developer
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      # - "bindings"
+      - "configmaps"
+      - "endpoints"
+      # - "limitranges"
+      - "persistentvolumeclaims"
+      - "pods"
+      - "podtemplates"
+      - "replicationcontrollers"
+      - "resourcequotas"
+      - "secrets"
+      - "serviceaccounts"
+      - "services"
+      # - "controllerrevisions"
+      # - "statefulsets"
+      # - "localsubjectaccessreviews"
+      # - "horizontalpodautoscalers"
+      - "cronjobs"
+      - "jobs"
+      # - "leases"
+      - "events"
+      - "daemonsets"
+      - "deployments"
+      - "replicasets"
+      - "ingresses"
+      - "networkpolicies"
+      - "poddisruptionbudgets"
+      # - "rolebindings"
+      # - "roles"
+    verbs:
+      - "*"
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-cluster-resources___read-only
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "componentstatuses"
+      - "namespaces"
+      - "nodes"
+      - "persistentvolumes"
+      - "mutatingwebhookconfigurations"
+      - "validatingwebhookconfigurations"
+      - "customresourcedefinitions"
+      - "apiservices"
+      - "tokenreviews"
+      - "selfsubjectaccessreviews"
+      - "selfsubjectrulesreviews"
+      - "subjectaccessreviews"
+      - "certificatesigningrequests"
+      - "runtimeclasses"
+      - "podsecuritypolicies"
+      - "clusterrolebindings"
+      - "clusterroles"
+      - "priorityclasses"
+      - "csidrivers"
+      - "csinodes"
+      - "storageclasses"
+      - "volumeattachment"
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-cluster-resources___admin
+rules:
+  - apiGroups:
+      - "*"
+    resources:
+      - "componentstatuses"
+      - "namespaces"
+      - "nodes"
+      - "persistentvolumes"
+      - "mutatingwebhookconfigurations"
+      - "validatingwebhookconfigurations"
+      - "customresourcedefinitions"
+      - "apiservices"
+      - "tokenreviews"
+      - "selfsubjectaccessreviews"
+      - "selfsubjectrulesreviews"
+      - "subjectaccessreviews"
+      - "certificatesigningrequests"
+      - "runtimeclasses"
+      - "podsecuritypolicies"
+      - "clusterrolebindings"
+      - "clusterroles"
+      - "priorityclasses"
+      - "csidrivers"
+      - "csinodes"
+      - "storageclasses"
+      - "volumeattachment"
+    verbs: ["*"]
+# ---
+# apiVersion: rbac.authorization.k8s.io/v1
+# # This role binding allows "jane" to read pods in the "default" namespace.
+# kind: ClusterRoleBinding
+# metadata:
+#   name: read-pods
+#   namespace: mynamespace
+# subjects:
+# - kind: User
+#   name: jaga # Name is case sensitive
+#   apiGroup: rbac.authorization.k8s.io
+# roleRef:
+#   kind: ClusterRole #this must be Role or ClusterRole
+#   name: pod-reader # this must match the name of the Role or ClusterRole you wish to bind to
+#   apiGroup: rbac.authorization.k8s.io
+# ---

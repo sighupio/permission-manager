@@ -21,13 +21,6 @@ export default function Users() {
         }}
       >
         <h3>Create from template</h3>
-        <style jsx>
-          {`
-            button {
-              margin-bottom: 4px;
-            }
-          `}
-        </style>
         <button>developer</button>
         <button>SRE</button>
         <button>namespace developer</button>

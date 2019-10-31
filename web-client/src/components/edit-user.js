@@ -11,9 +11,7 @@ import Summary from './Summary'
 export default function EditUser({ user }) {
   const [showLoader, setShowLoader] = useState(false)
   const username = user.name
-
-  const { clusterRoleBindings } = useRbac()
-  const { roleBindings } = useRbac()
+  const { clusterRoleBindings, roleBindings } = useRbac()
 
   const rbs = (roleBindings || []).filter(rb => {
     return rb.metadata.name.startsWith(username)
@@ -63,30 +61,30 @@ export default function EditUser({ user }) {
   const [initialClusterAccess, setInitialClusterAccess] = useState(null)
 
   const [pairItems, setPairItems] = useState(xxx)
-  useEffect(() => {
-    if (pairItems.length === 0) {
-      setPairItems(xxx)
+  // useEffect(() => {
+  //   if (pairItems.length === 0) {
+  //     setPairItems(xxx)
 
-      const ca = crbs.find(crb =>
-        crb.metadata.name.includes(templateClusterResourceRolePrefix),
-      )
-      if (ca) {
-        if (ca.roleRef.name.endsWith('admin')) {
-          if (initialClusterAccess === null) {
-            setInitialClusterAccess('write')
-          }
-          setClusterAccess('write')
-        }
+  //     const ca = crbs.find(crb =>
+  //       crb.metadata.name.includes(templateClusterResourceRolePrefix),
+  //     )
+  //     if (ca) {
+  //       if (ca.roleRef.name.endsWith('admin')) {
+  //         if (initialClusterAccess === null) {
+  //           setInitialClusterAccess('write')
+  //         }
+  //         setClusterAccess('write')
+  //       }
 
-        if (ca.roleRef.name.endsWith('read-only')) {
-          if (initialClusterAccess === null) {
-            setInitialClusterAccess('read')
-          }
-          setClusterAccess('read')
-        }
-      }
-    }
-  }, [crbs, initialClusterAccess, pairItems.length, xxx])
+  //       if (ca.roleRef.name.endsWith('read-only')) {
+  //         if (initialClusterAccess === null) {
+  //           setInitialClusterAccess('read')
+  //         }
+  //         setClusterAccess('read')
+  //       }
+  //     }
+  //   }
+  // }, [crbs, initialClusterAccess, pairItems.length, xxx])
 
   async function handleSubmit(e) {
     const consumed = []
