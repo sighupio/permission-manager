@@ -37,22 +37,24 @@ func main() {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
-	e.GET("/api/list-users", listUsers)
-	e.GET("/api/list-groups", listGroups)
-	e.GET("/api/list-namespace", listNamespaces)
-	e.GET("/api/rbac", listRbac)
+	api := e.Group("/api")
 
-	e.POST("/api/create-cluster-role", createClusterRole)
-	e.POST("/api/create-user", createUser)
-	e.POST("/api/create-rolebinding", createRolebinding)
-	e.POST("/api/create-cluster-rolebinding", createClusterRolebinding)
+	api.GET("/list-users", listUsers)
+	api.GET("/list-groups", listGroups)
+	api.GET("/list-namespace", listNamespaces)
+	api.GET("/rbac", listRbac)
 
-	e.POST("/api/delete-cluster-role", deleteClusterRole)
-	e.POST("/api/delete-cluster-rolebinding", deleteClusterRolebinding)
-	e.POST("/api/delete-rolebinding", deleteRolebinding)
-	e.POST("/api/delete-role", deleteRole)
+	api.POST("/create-cluster-role", createClusterRole)
+	api.POST("/create-user", createUser)
+	api.POST("/create-rolebinding", createRolebinding)
+	api.POST("/create-cluster-rolebinding", createClusterRolebinding)
 
-	e.POST("/api/create-kubeconfig", createKubeconfig)
+	api.POST("/delete-cluster-role", deleteClusterRole)
+	api.POST("/delete-cluster-rolebinding", deleteClusterRolebinding)
+	api.POST("/delete-rolebinding", deleteRolebinding)
+	api.POST("/delete-role", deleteRole)
+
+	api.POST("/create-kubeconfig", createKubeconfig)
 
 	statikFS, err := fs.New()
 	if err != nil {
@@ -60,7 +62,7 @@ func main() {
 	}
 
 	spaHandler := http.FileServer(statikFS)
-	e.GET("/*", echo.WrapHandler(http.StripPrefix("/", spaHandler)))
+	e.GET("*", echo.WrapHandler(spaHandler))
 
 	e.Logger.Fatal(e.Start(":4000"))
 }
