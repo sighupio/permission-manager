@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useContext, createContext } from 'react'
+import React, {
+  useState,
+  useEffect,
+  useContext,
+  createContext,
+  useCallback,
+} from 'react'
 import axios from 'axios'
 
 function useRbacFromApi() {
@@ -9,14 +15,14 @@ function useRbacFromApi() {
     clusterRoles: null,
   })
 
-  async function fetchData() {
+  const fetchData = useCallback(async function fetchData() {
     const { data } = await axios.get('/api/rbac')
     setData(data)
-  }
+  }, [])
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [fetchData])
 
   return {
     roles: data.roles,
