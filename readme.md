@@ -4,6 +4,11 @@
 
 ## to run image on k8s
 
+compile frontend to go file running
+
+`npm run build --prefix web-client`
+`statik -src=./web-client/build`
+
 ```
 # Start minikube
 minikube start
