@@ -62,7 +62,7 @@ func main() {
 	}
 
 	spaHandler := http.FileServer(statikFS)
-	e.GET("*", echo.WrapHandler(spaHandler))
+	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, "/index.html")))
 
 	e.Logger.Fatal(e.Start(":4000"))
 }
@@ -339,4 +339,50 @@ func createKubeconfig(c echo.Context) error {
 		Kubeconfig string `json:"kubeconfig"`
 	}
 	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeconfig})
+}
+
+type (
+	// FallbackResponseWriter wraps an http.Requesthandler and surpresses
+	// a 404 status code. In such case a given local file will be served.
+	FallbackResponseWriter struct {
+		WrappedResponseWriter http.ResponseWriter
+		FileNotFound          bool
+	}
+)
+
+// Header returns the header of the wrapped response writer
+func (frw *FallbackResponseWriter) Header() http.Header {
+	return frw.WrappedResponseWriter.Header()
+}
+
+// Write sends bytes to wrapped response writer, in case of FileNotFound
+// It surpresses further writes (concealing the fact though)
+func (frw *FallbackResponseWriter) Write(b []byte) (int, error) {
+	if frw.FileNotFound {
+		return len(b), nil
+	}
+	return frw.WrappedResponseWriter.Write(b)
+}
+
+// WriteHeader sends statusCode to wrapped response writer
+func (frw *FallbackResponseWriter) WriteHeader(statusCode int) {
+	if statusCode == http.StatusNotFound {
+		frw.FileNotFound = true
+		return
+	}
+	frw.WrappedResponseWriter.WriteHeader(statusCode)
+}
+
+// AddFallbackHandler wraps the handler func in another handler func covering authentication
+func AddFallbackHandler(handler http.HandlerFunc, filename string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		frw := FallbackResponseWriter{
+			WrappedResponseWriter: w,
+			FileNotFound:          false,
+		}
+		handler(&frw, r)
+		if frw.FileNotFound {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+		}
+	}
 }
