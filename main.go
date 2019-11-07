@@ -71,12 +71,12 @@ type user struct {
 	Name string `json:"name"`
 }
 
-var users []user
+var users []user = []user{
+	user{Name: "popo"},
+}
 
 func listUsers(c echo.Context) error {
-	return c.JSON(http.StatusOK, []user{
-		user{Name: "popo"},
-	})
+	return c.JSON(http.StatusOK, users)
 }
 
 func createUser(c echo.Context) error {
