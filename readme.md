@@ -20,7 +20,7 @@ eval $(minikube docker-env)
 docker build -t foo:0.0.1 .
 
 # Run in minikube
-kubectl run hello-foo --image=foo:0.0.1 --image-pull-policy=Never
+kubectl run hello-foo --image=foo:0.0.1 --image-pull-policy=Always
 
 # Check that it's running
 kubectl get pods

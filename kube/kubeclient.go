@@ -32,12 +32,18 @@ func newRestConfig() *rest.Config {
 
 // NewKubeclient returns a kubernetes client already configured
 func NewKubeclient() *kubernetes.Clientset {
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	panic(err.Error())
-	// }
+	var config *rest.Config
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		c, err := rest.InClusterConfig()
+		if err != nil {
+			panic(err.Error())
+		}
+		config = c
+	} else {
+		config = newRestConfig()
+	}
 
-	kubeclient, err := kubernetes.NewForConfig(newRestConfig())
+	kubeclient, err := kubernetes.NewForConfig(config)
 	// kubeclient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
