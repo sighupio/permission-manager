@@ -74,8 +74,8 @@ current-context: %s
 clusters:
   - name: %s
     cluster:
-      server: https://192.168.99.100:8443
-      certificate-authority: %s}
+      server: https://192.168.64.24:8443
+      certificate-authority: %s
 contexts:
   - context:
       cluster: %s
