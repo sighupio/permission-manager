@@ -11,7 +11,11 @@ import Summary from './Summary'
 export default function EditUser({ user }) {
   const [showLoader, setShowLoader] = useState(false)
   const username = user.name
-  const { clusterRoleBindings, roleBindings } = useRbac()
+  const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()
+
+  useEffect(() => {
+    refreshRbacData()
+  }, [refreshRbacData])
 
   const rbs = (roleBindings || []).filter(rb => {
     return rb.metadata.name.startsWith(username)
