@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
         - name: foo
-          image: foo:0.0.3
+          image: foo:0.0.9
           ports:
             - containerPort: 4000

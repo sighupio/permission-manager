@@ -61,7 +61,24 @@ func CreateKubeconfigYAML(username string) (kubeconfigYAML string) {
 	}
 
 	clusterName := "minikube"
-	cacertPath := filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt")
+
+	s := "cert | base64 | tr -d '\n'"
+
+	ca := ""
+
+	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+		ca = "certificate-authority: " + filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt")
+		fmt.Println("################# ca:")
+		fmt.Println(ca)
+	} else {
+		caBase64, err := exec.Command("sh", "-c", s).Output()
+		fmt.Println("$$$$$$$$$$$ caBase64:")
+		fmt.Println(caBase64)
+		if err != nil {
+			panic(err)
+		}
+		ca = "certificate-authority-data: " + string(caBase64)
+	}
 
 	crtBase64 := base64.StdEncoding.EncodeToString(crt)
 	rsaPrivateKeyBase64 := base64.StdEncoding.EncodeToString(rsaPrivateKey)
@@ -75,7 +92,7 @@ clusters:
   - name: %s
     cluster:
       server: https://192.168.64.24:8443
-      certificate-authority: %s
+      %s
 contexts:
   - context:
       cluster: %s
@@ -86,7 +103,7 @@ users:
     user:
       client-certificate-data: %s
       client-key-data: %s`,
-		clusterName, clusterName, cacertPath, clusterName, username, clusterName, username, crtBase64, rsaPrivateKeyBase64)
+		clusterName, clusterName, ca, clusterName, username, clusterName, username, crtBase64, rsaPrivateKeyBase64)
 
 	return kubeconfigYAML
 }
