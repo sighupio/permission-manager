@@ -24,7 +24,7 @@ func CreateKubeconfigYAML(username string) (kubeconfigYAML string) {
 
 	rsaPrivateKey, err := exec.Command("openssl", "genrsa", "4096").Output()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	if _, err = rsaFile.Write(rsaPrivateKey); err != nil {
@@ -45,19 +45,20 @@ func CreateKubeconfigYAML(username string) (kubeconfigYAML string) {
 	if _, err = clientCsrFile.Write(csr); err != nil {
 		log.Fatal("Failed to write to temporary file", err)
 	}
+
 	defer os.Remove(clientCsrFile.Name())
 	crt, err := exec.Command("openssl", "x509", "-req", "-days", "365", "-sha256",
 		"-in",
 		clientCsrFile.Name(),
 		"-CA",
 		filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt"),
-		"-CAkey",
-		filepath.Join(os.Getenv("HOME"), ".minikube", "ca.key"),
+		// "-CAkey",
+		// filepath.Join(os.Getenv("HOME"), ".minikube", "ca.key"),
 		"-set_serial",
 		"2",
 	).Output()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	clusterName := "minikube"

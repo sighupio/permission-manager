@@ -1,6 +1,6 @@
 ## pod needs permissions to call api server
 
-`kubectl create clusterrolebinding --user system:serviceaccount:default:default xxx --cluste rrole cluster-admin`
+`kubectl create clusterrolebinding --user system:serviceaccount:default:default xxx --clusterrole cluster-admin`
 
 ## to run image on k8s
 
