@@ -1,3 +1,5 @@
+# NOT UPDATE - dont trust these informations ❗️
+
 ## pod needs permissions to call api server
 
 `kubectl create clusterrolebinding --user system:serviceaccount:default:default xxx --clusterrole cluster-admin`
