@@ -8,6 +8,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"log"
+	"time"
 
 	v1beta1 "k8s.io/api/certificates/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,7 +18,7 @@ import (
 func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, privateKey *rsa.PrivateKey) (certificatePemBytes []byte) {
 	_, csrPemByte := createCSR(username, privateKey)
 	certsClients := kc.CertificatesV1beta1()
-	csrObjectName := "CSR_FOR_" + username
+	csrObjectName := "CSR_FOR_" + username + time.Now().String()
 
 	_, err := certsClients.CertificateSigningRequests().Create(&v1beta1.CertificateSigningRequest{
 		Spec: v1beta1.CertificateSigningRequestSpec{
@@ -55,12 +56,13 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 		log.Fatalf("Failed to approve CSR: %s\n%v", csrObjectName, err)
 	}
 
+	/* NEED TO DEAL WITH RACE CONDITION CAUSING THE READ TO HAPPEN BEFORE THE SIGNIGN REQUEST IS SUCCESSFULL */
+
 	res, err := certsClients.CertificateSigningRequests().Get(csrObjectName, metav1.GetOptions{})
 	if err != nil {
 		log.Fatalf("Failed to get CSR: %s\n%v", csrObjectName, err)
 	}
 
-	/* saving in a new variables otherwhise deleting the CSR will dereference the res variables */
 	certificatePemBytes = res.Status.Certificate
 
 	err = certsClients.CertificateSigningRequests().Delete(csrObjectName, nil)
@@ -68,7 +70,7 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 		log.Fatalf("Failed to delete CSR: %s\n%v", csrObjectName, err)
 	}
 
-	return
+	return res.Status.Certificate
 }
 
 func createRsaPrivateKeyPem() (privateKey *rsa.PrivateKey, privPemBytes []byte) {
