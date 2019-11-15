@@ -68,9 +68,9 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 			if len(cert) > 0 {
 				certificatePemBytes = res.Status.Certificate
 				return nil
-			} else {
-				return fmt.Errorf("certificate not yet approved")
 			}
+
+			return fmt.Errorf("certificate not yet approved")
 		},
 	)
 	if err != nil {
