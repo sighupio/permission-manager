@@ -1,0 +1,106 @@
+package kube
+
+import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"fmt"
+	"log"
+
+	v1beta1 "k8s.io/api/certificates/v1beta1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+)
+
+func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, privateKey *rsa.PrivateKey) (certificatePemBytes []byte) {
+	_, csrPemByte := createCSR(username, privateKey)
+	certsClients := kc.CertificatesV1beta1()
+	csrObjectName := "CSR_FOR_" + username
+
+	_, err := certsClients.CertificateSigningRequests().Create(&v1beta1.CertificateSigningRequest{
+		Spec: v1beta1.CertificateSigningRequestSpec{
+			Groups:  []string{"system:authenticated"},
+			Request: []byte(csrPemByte),
+			Usages:  []v1beta1.KeyUsage{"digital signature", "key encipherment", "client auth"},
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: csrObjectName,
+		},
+	})
+	if err != nil {
+		log.Fatalf("Failed to create CSR Object %s\n%v", csrObjectName, err)
+	}
+
+	_, err = certsClients.CertificateSigningRequests().UpdateApproval(&v1beta1.CertificateSigningRequest{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "CertificateSigningRequest",
+			APIVersion: "certificates.k8s.io/v1beta1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: csrObjectName,
+		},
+		Status: v1beta1.CertificateSigningRequestStatus{
+			Conditions: []v1beta1.CertificateSigningRequestCondition{
+				v1beta1.CertificateSigningRequestCondition{
+					Type:    "Approved",
+					Reason:  "New User",
+					Message: fmt.Sprintf("Approving CSR for user: %s", username),
+				},
+			},
+		},
+	})
+	if err != nil {
+		log.Fatalf("Failed to approve CSR: %s\n%v", csrObjectName, err)
+	}
+
+	res, err := certsClients.CertificateSigningRequests().Get(csrObjectName, metav1.GetOptions{})
+	if err != nil {
+		log.Fatalf("Failed to get CSR: %s\n%v", csrObjectName, err)
+	}
+
+	/* saving in a new variables otherwhise deleting the CSR will dereference the res variables */
+	certificatePemBytes = res.Status.Certificate
+
+	err = certsClients.CertificateSigningRequests().Delete(csrObjectName, nil)
+	if err != nil {
+		log.Fatalf("Failed to delete CSR: %s\n%v", csrObjectName, err)
+	}
+
+	return
+}
+
+func createRsaPrivateKeyPem() (privateKey *rsa.PrivateKey, privPemBytes []byte) {
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		log.Fatalf("Failed to generate RSA key\n%v", err)
+	}
+
+	privPemBytes = pem.EncodeToMemory(
+		&pem.Block{
+			Type:  "RSA PRIVATE KEY",
+			Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+		},
+	)
+
+	return
+}
+
+func createCSR(username string, privateKey *rsa.PrivateKey) (csrBytes []byte, csrPemBytes []byte) {
+	template := x509.CertificateRequest{
+		Subject: pkix.Name{
+			CommonName: username,
+		},
+		SignatureAlgorithm: x509.SHA256WithRSA,
+	}
+
+	csrBytes, err := x509.CreateCertificateRequest(rand.Reader, &template, privateKey)
+	if err != nil {
+		log.Fatalf("Failed to create CSR for user: %s\n%v", username, err)
+	}
+
+	csrPemBytes = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes})
+
+	return
+}

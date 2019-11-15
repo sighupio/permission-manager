@@ -324,6 +324,7 @@ func deleteRolebinding(c echo.Context) error {
 }
 
 func createKubeconfig(c echo.Context) error {
+	ac := c.(*AppContext)
 	type Request struct {
 		Username string `json:"username"`
 	}
@@ -332,7 +333,7 @@ func createKubeconfig(c echo.Context) error {
 		return err
 	}
 
-	kubeconfig := kube.CreateKubeconfigYAML(r.Username)
+	kubeconfig := kube.CreateKubeconfigYAML(ac.Kubeclient, r.Username)
 
 	type Response struct {
 		Ok         bool   `json:"ok"`
