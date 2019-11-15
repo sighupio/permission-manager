@@ -18,6 +18,7 @@ func CreateKubeconfigYAML(kc *kubernetes.Clientset, username string) (kubeconfig
 
 	ca := ""
 
+	/* REFACTOR: read and encode base64 from go */
 	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
 		fp := filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt")
 		s := fmt.Sprintf("cat %s | base64 | tr -d '\n'", fp)
