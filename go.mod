@@ -3,6 +3,7 @@ module github.com/sighupio/permission-manager
 go 1.12
 
 require (
+	github.com/avast/retry-go v2.4.2+incompatible
 	github.com/davecgh/go-spew v1.1.1
 	github.com/julesguesnon/gomon v0.0.0-20190326114326-f7608dfb7114 // indirect
 	github.com/labstack/echo v3.3.10+incompatible

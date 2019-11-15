@@ -10,6 +10,7 @@ import (
 	"log"
 	"time"
 
+	retry "github.com/avast/retry-go"
 	v1beta1 "k8s.io/api/certificates/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -56,21 +57,32 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 		log.Fatalf("Failed to approve CSR: %s\n%v", csrObjectName, err)
 	}
 
-	/* NEED TO DEAL WITH RACE CONDITION CAUSING THE READ TO HAPPEN BEFORE THE SIGNIGN REQUEST IS SUCCESSFULL */
+	err = retry.Do(
+		func() error {
+			res, err := certsClients.CertificateSigningRequests().Get(csrObjectName, metav1.GetOptions{})
+			if err != nil {
+				log.Fatalf("Failed to get approved CSR: %s\n%v", csrObjectName, err)
+			}
+			cert := res.Status.Certificate
 
-	res, err := certsClients.CertificateSigningRequests().Get(csrObjectName, metav1.GetOptions{})
+			if len(cert) > 0 {
+				certificatePemBytes = res.Status.Certificate
+				return nil
+			} else {
+				return fmt.Errorf("certificate not yet approved")
+			}
+		},
+	)
 	if err != nil {
-		log.Fatalf("Failed to get CSR: %s\n%v", csrObjectName, err)
+		log.Fatal("Failed to retry get approved CSR")
 	}
-
-	certificatePemBytes = res.Status.Certificate
 
 	err = certsClients.CertificateSigningRequests().Delete(csrObjectName, nil)
 	if err != nil {
 		log.Fatalf("Failed to delete CSR: %s\n%v", csrObjectName, err)
 	}
 
-	return res.Status.Certificate
+	return
 }
 
 func createRsaPrivateKeyPem() (privateKey *rsa.PrivateKey, privPemBytes []byte) {
