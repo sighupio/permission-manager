@@ -27,3 +27,7 @@ kubectl run hello-foo --image=foo:0.0.1 --image-pull-policy=Always
 # Check that it's running
 kubectl get pods
 ```
+
+## useful links
+
+http://localhost:8001/apis/permissionmanager.user/v1alpha1/permissionmanagerusers

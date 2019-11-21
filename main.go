@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/sighupio/permission-manager/kube"
+	"github.com/sighupio/permission-manager/users"
 
 	"github.com/rakyll/statik/fs"
 	_ "github.com/sighupio/permission-manager/statik"
@@ -67,30 +68,25 @@ func main() {
 	e.Logger.Fatal(e.Start(":4000"))
 }
 
-type user struct {
-	Name string `json:"name"`
-}
-
-var users []user = []user{
-	user{Name: "popo"},
-}
-
 func listUsers(c echo.Context) error {
-	return c.JSON(http.StatusOK, users)
+	ac := c.(*AppContext)
+	return c.JSON(http.StatusOK, users.GetAll(ac.Kubeclient))
 }
 
 func createUser(c echo.Context) error {
+	ac := c.(*AppContext)
 	type Request struct {
 		Name string `json:"name"`
 	}
+	type Reponse = users.User
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		panic(err)
 	}
 
-	users = append(users, user{Name: r.Name})
+	u := users.CreateUser(ac.Kubeclient, r.Name)
 
-	return c.JSON(http.StatusOK, r)
+	return c.JSON(http.StatusOK, Reponse{Name: u.Name})
 }
 
 func listGroups(c echo.Context) error {
