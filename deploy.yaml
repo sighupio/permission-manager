@@ -1,21 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: foo-deployment
+  name: permission-manager-deployment
   labels:
-    app: foo
+    app: permission-manager
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: foo
+      app: permission-manager
   template:
     metadata:
       labels:
-        app: foo
+        app: permission-manager
     spec:
       containers:
-        - name: foo
-          image: foo:0.0.20
+        - name: permission-manager
+          image: permission-manager:1.0.0-beta
           ports:
             - containerPort: 4000
+          env:
+            - name: CLUSTER_NAME
+              value: "my-cluster"
+            - name: CONTROL_PLANE_ADDRESS
+              value: "https://192.168.64.26:8443"

@@ -3,6 +3,7 @@ package kube
 import (
 	"encoding/base64"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -14,10 +15,18 @@ import (
 func CreateKubeconfigYAML(kc *kubernetes.Clientset, username string) (kubeconfigYAML string) {
 	priv, privPem := createRsaPrivateKeyPem()
 	certificatePemBytes := getSignedCertificateForUser(kc, username, priv)
-	clusterName := "minikube"
+
+	clusterName := os.Getenv("CLUSTER_NAME")
+	if clusterName == "" {
+		log.Fatal("CLUSTER_NAME env cannot be empty")
+	}
+
+	clusterControlPlaceAddress := os.Getenv("CONTROL_PLANE_ADDRESS")
+	if clusterControlPlaceAddress == "" {
+		log.Fatal("CONTROL_PLANE_ADDRESS env cannot be empty")
+	}
 
 	ca := ""
-
 	/* REFACTOR: read and encode base64 from go */
 	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
 		fp := filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt")
@@ -48,7 +57,7 @@ current-context: %s
 clusters:
   - name: %s
     cluster:
-      server: https://192.168.64.24:8443
+      server: %s
       %s
 contexts:
   - context:
@@ -60,7 +69,7 @@ users:
     user:
       client-certificate-data: %s
       client-key-data: %s`,
-		clusterName, clusterName, ca, clusterName, username, clusterName, username, crtBase64, privateKeyBase64)
+		clusterName, clusterName, clusterControlPlaceAddress, ca, clusterName, username, clusterName, username, crtBase64, privateKeyBase64)
 
 	return kubeconfigYAML
 }
