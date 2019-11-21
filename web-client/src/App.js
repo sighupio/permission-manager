@@ -18,15 +18,30 @@ export default function App() {
       <RbacProvider>
         <GroupsProvider>
           <UsersProvider>
-            <div className="h-screen">
-              <Header />
-              <Switch>
-                <Route path="/advanced" exact component={Advanced} />
-                <Route path="/new-user" exact component={NewUser} />
-                <Route path="/users/:username" exact component={EditUser} />
-                <Route path="/" exact component={Home} />
-              </Switch>
-              <Footer />
+            <div
+              style={{
+                minHeight: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'stretch'
+              }}
+            >
+              <div style={{ flexShrink: 0 }}>
+                <Header />
+              </div>
+
+              <div style={{ flexGrow: 1, backgroundColor: '#edf2f7' }}>
+                <Switch>
+                  <Route path="/advanced" exact component={Advanced} />
+                  <Route path="/new-user" exact component={NewUser} />
+                  <Route path="/users/:username" exact component={EditUser} />
+                  <Route path="/" exact component={Home} />
+                </Switch>
+              </div>
+
+              <div style={{ flexShrink: 0 }}>
+                <Footer />
+              </div>
             </div>
           </UsersProvider>
         </GroupsProvider>

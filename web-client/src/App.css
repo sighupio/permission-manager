@@ -2,6 +2,13 @@
   --reach-dialog: 1;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   line-height: 1.4;
 }
