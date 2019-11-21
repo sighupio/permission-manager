@@ -11,7 +11,7 @@ export default () => {
   const { refreshRbacData, clusterRoleBindings } = useRbac()
   const [
     hideSystemCusterRoleBindings,
-    setHideSystemCusterRoleBindings,
+    setHideSystemCusterRoleBindings
   ] = useState(true)
 
   if (!clusterRoleBindings) return <div>no data</div>
@@ -59,12 +59,12 @@ export default () => {
 }
 
 function RoleBinding({ rolebinding: rb, fetchData }) {
-  const [showMore, setShowMore] = useState(false)
+  const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
     await axios.post('/api/delete-cluster-rolebinding', {
       rolebindingName: rb.metadata.name,
-      namespace: rb.metadata.namespace,
+      namespace: rb.metadata.namespace
     })
     fetchData()
   }
@@ -111,9 +111,9 @@ function NewClusterRoleBindingForm({ fetchData }) {
       roleName,
       subjects: subjects.map(s => ({
         ...s,
-        apiGroup: 'rbac.authorization.k8s.io',
+        apiGroup: 'rbac.authorization.k8s.io'
       })),
-      clusterRolebindingName,
+      clusterRolebindingName
     })
     fetchData()
   }

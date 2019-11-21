@@ -37,12 +37,12 @@ export default () => {
 }
 
 function RoleBinding({ rolebinding: rb, fetchData }) {
-  const [showMore, setShowMore] = useState(false)
+  const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
-    const res = await axios.post('/api/delete-rolebinding', {
+    await axios.post('/api/delete-rolebinding', {
       rolebindingName: rb.metadata.name,
-      namespace: rb.metadata.namespace,
+      namespace: rb.metadata.namespace
     })
     fetchData()
   }
@@ -100,10 +100,10 @@ function NewRoleBindingForm({ fetchData }) {
       roleName,
       subjects: subjects.map(s => ({
         ...s,
-        apiGroup: 'rbac.authorization.k8s.io',
+        apiGroup: 'rbac.authorization.k8s.io'
       })),
       roleKind,
-      rolebindingName,
+      rolebindingName
     })
     fetchData()
     resetForm()

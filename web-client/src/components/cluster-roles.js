@@ -5,7 +5,7 @@ import JSONPretty from 'react-json-pretty'
 import {
   RESOURCE_TYPES_NAMESPACED,
   RESOURCE_TYPES_NON_NAMESPACED,
-  VERBS,
+  VERBS
 } from '../constants'
 import { useRbac } from '../hooks/useRbac'
 import uuid from 'uuid'
@@ -68,7 +68,7 @@ function NewRoleForm({ refreshRbacData }) {
         const o = {
           ...r,
           apiGroups: [
-            '*',
+            '*'
             // '',
             // 'admissionregistration.k8s.io',
             // 'apiextensions.k8s.io',
@@ -88,11 +88,11 @@ function NewRoleForm({ refreshRbacData }) {
             // 'rbac.authorization.k8s.io',
             // 'scheduling.k8s.io',
             // 'storage.k8s.io',
-          ],
+          ]
         }
         delete o.id
         return o
-      }),
+      })
     })
     refreshRbacData()
   }
@@ -127,7 +127,7 @@ function Role({ role: r, refreshRbacData }) {
 
   async function deleteRole(e) {
     await axios.post('/api/delete-cluster-role', {
-      roleName: r.metadata.name,
+      roleName: r.metadata.name
     })
     refreshRbacData()
   }
@@ -199,7 +199,7 @@ function RuleItem({ id, updateRule }) {
 
   useEffect(() => {
     updateRule({ id, verbs, resources })
-  }, [verbs, resources])
+  }, [verbs, resources, updateRule, id])
 
   return (
     <div>
@@ -216,14 +216,14 @@ function RuleItem({ id, updateRule }) {
                   if (e.target.checked) {
                     const r = [
                       ...resources.filter(
-                        x => !RESOURCE_TYPES_NAMESPACED.includes(x),
+                        x => !RESOURCE_TYPES_NAMESPACED.includes(x)
                       ),
-                      ...RESOURCE_TYPES_NAMESPACED,
+                      ...RESOURCE_TYPES_NAMESPACED
                     ]
                     setResources(r)
                   } else {
                     const r = resources.filter(
-                      x => !RESOURCE_TYPES_NAMESPACED.includes(x),
+                      x => !RESOURCE_TYPES_NAMESPACED.includes(x)
                     )
                     setResources(r)
                   }
@@ -262,14 +262,14 @@ function RuleItem({ id, updateRule }) {
                   if (e.target.checked) {
                     const r = [
                       ...resources.filter(
-                        x => !RESOURCE_TYPES_NON_NAMESPACED.includes(x),
+                        x => !RESOURCE_TYPES_NON_NAMESPACED.includes(x)
                       ),
-                      ...RESOURCE_TYPES_NON_NAMESPACED,
+                      ...RESOURCE_TYPES_NON_NAMESPACED
                     ]
                     setResources(r)
                   } else {
                     const r = resources.filter(
-                      x => !RESOURCE_TYPES_NON_NAMESPACED.includes(x),
+                      x => !RESOURCE_TYPES_NON_NAMESPACED.includes(x)
                     )
                     setResources(r)
                   }

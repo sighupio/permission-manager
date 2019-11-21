@@ -18,7 +18,7 @@ export default function App() {
       <RbacProvider>
         <GroupsProvider>
           <UsersProvider>
-            <div>
+            <div className="h-screen">
               <Header />
               <Switch>
                 <Route path="/advanced" exact component={Advanced} />
