@@ -18,12 +18,12 @@ func CreateKubeconfigYAML(kc *kubernetes.Clientset, username string) (kubeconfig
 
 	clusterName := os.Getenv("CLUSTER_NAME")
 	if clusterName == "" {
-		log.Fatal("CLUSTER_NAME env cannot be empty")
+		log.Print("CLUSTER_NAME env cannot be empty")
 	}
 
 	clusterControlPlaceAddress := os.Getenv("CONTROL_PLANE_ADDRESS")
 	if clusterControlPlaceAddress == "" {
-		log.Fatal("CONTROL_PLANE_ADDRESS env cannot be empty")
+		log.Print("CONTROL_PLANE_ADDRESS env cannot be empty")
 	}
 
 	ca := ""

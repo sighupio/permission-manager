@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 	"github.com/sighupio/permission-manager/kube"
@@ -22,8 +23,23 @@ type AppContext struct {
 	Kubeclient *kubernetes.Clientset
 }
 
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
+type ErrorRes struct {
+	Error string `json:"error"`
+}
+
+/* how to improve error messages */
+/* https://medium.com/@apzuk3/input-validation-in-golang-bc24cdec1835 */
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
+
 func main() {
 	e := echo.New()
+	e.Validator = &CustomValidator{validator: validator.New()}
 
 	kc := kube.NewKubeclient()
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -76,12 +92,15 @@ func listUsers(c echo.Context) error {
 func createUser(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
-		Name string `json:"name"`
+		Name string `json:"name" validate:"required"`
 	}
 	type Reponse = users.User
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		panic(err)
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	u := users.CreateUser(ac.Kubeclient, r.Name)
@@ -153,12 +172,15 @@ func listRbac(c echo.Context) error {
 func createClusterRole(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
-		RoleName string              `json:"roleName"`
-		Rules    []rbacv1.PolicyRule `json:"rules"`
+		RoleName string              `json:"roleName" validate:"required"`
+		Rules    []rbacv1.PolicyRule `json:"rules" validate:"required"`
 	}
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	type Response struct {
@@ -178,16 +200,19 @@ func createClusterRole(c echo.Context) error {
 func createRolebinding(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
-		RolebindingName string           `json:"rolebindingName"`
-		Namespace       string           `json:"namespace"`
-		Username        string           `json:"user"`
-		Subjects        []rbacv1.Subject `json:"subjects"`
-		RoleKind        string           `json:"roleKind"`
-		RoleName        string           `json:"roleName"`
+		RolebindingName string           `json:"rolebindingName" validate:"required"`
+		Namespace       string           `json:"namespace" validate:"required"`
+		Username        string           `json:"user" validate:"required"`
+		Subjects        []rbacv1.Subject `json:"subjects" validate:"required"`
+		RoleKind        string           `json:"roleKind" validate:"required"`
+		RoleName        string           `json:"roleName" validate:"required"`
 	}
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	type Response struct {
@@ -247,7 +272,7 @@ func createClusterRolebinding(c echo.Context) error {
 func deleteClusterRole(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
-		RoleName string `json:"roleName"`
+		RoleName string `json:"roleName" validate:"required"`
 	}
 	type Response struct {
 		Ok bool `json:"ok"`
@@ -256,6 +281,9 @@ func deleteClusterRole(c echo.Context) error {
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	ac.Kubeclient.RbacV1().ClusterRoles().Delete(r.RoleName, nil)
@@ -275,6 +303,9 @@ func deleteClusterRolebinding(c echo.Context) error {
 	if err := c.Bind(r); err != nil {
 		return err
 	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+	}
 
 	ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(r.RolebindingName, nil)
 	return c.JSON(http.StatusOK, Response{Ok: true})
@@ -284,8 +315,8 @@ func deleteRole(c echo.Context) error {
 	ac := c.(*AppContext)
 
 	type Request struct {
-		RoleName  string `json:"roleName"`
-		Namespace string `json:"namespace"`
+		RoleName  string `json:"roleName" validate:"required"`
+		Namespace string `json:"namespace" validate:"required"`
 	}
 	type Response struct {
 		Ok bool `json:"ok"`
@@ -294,6 +325,9 @@ func deleteRole(c echo.Context) error {
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(r.RoleName, nil)
@@ -303,8 +337,8 @@ func deleteRole(c echo.Context) error {
 func deleteRolebinding(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
-		RolebindingName string `json:"rolebindingName"`
-		Namespace       string `json:"namespace"`
+		RolebindingName string `json:"rolebindingName" validate:"required"`
+		Namespace       string `json:"namespace" validate:"required"`
 	}
 	type Response struct {
 		Ok bool `json:"ok"`
@@ -313,6 +347,9 @@ func deleteRolebinding(c echo.Context) error {
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
 		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(r.RolebindingName, nil)

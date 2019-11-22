@@ -2,6 +2,7 @@ package users
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"time"
 
@@ -12,6 +13,8 @@ import (
 type User struct {
 	Name string `json:"name"`
 }
+
+const resourceUrl = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers"
 
 func GetAll(kc *kubernetes.Clientset) []User {
 	users := []User{}
@@ -46,13 +49,13 @@ func GetAll(kc *kubernetes.Clientset) []User {
 	}
 
 	var res resType
-	r, err := kc.RESTClient().Get().AbsPath("apis/permissionmanager.user/v1alpha1/permissionmanagerusers").DoRaw()
+	r, err := kc.RESTClient().Get().AbsPath(resourceUrl).DoRaw()
 	if err != nil {
-		log.Fatal("Failed to get users from k8s CRUD api", err)
+		log.Print("Failed to get users from k8s CRUD api", err)
 	}
 	err = json.Unmarshal(r, &res)
 	if err != nil {
-		log.Fatal("Failed to decode users from k8s CRUD api", err)
+		log.Print("Failed to decode users from k8s CRUD api", err)
 	}
 
 	for _, v := range res.Items {
@@ -63,6 +66,23 @@ func GetAll(kc *kubernetes.Clientset) []User {
 }
 
 func CreateUser(kc *kubernetes.Clientset, username string) User {
+
+	metadataName := "permissionmanager.user." + username
+	jsonPayload := fmt.Sprintf(`{
+		"apiVersion":"permissionmanager.user/v1alpha1",
+		"kind":"Permissionmanageruser",
+		"metadata":{
+			"name": "%s"
+		},
+		"spec": {
+			"name": "%s"
+		}
+	}`, metadataName, username)
+
+	_, err := kc.RESTClient().Post().AbsPath(resourceUrl).Body([]byte(jsonPayload)).DoRaw()
+	if err != nil {
+		log.Printf("Failed to create user:%s\n", username, err)
+	}
 
 	return User{Name: username}
 }

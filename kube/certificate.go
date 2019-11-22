@@ -32,7 +32,7 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 		},
 	})
 	if err != nil {
-		log.Fatalf("Failed to create CSR Object %s\n%v", csrObjectName, err)
+		log.Printf("Failed to create CSR Object %s\n%v", csrObjectName, err)
 	}
 
 	_, err = certsClients.CertificateSigningRequests().UpdateApproval(&v1beta1.CertificateSigningRequest{
@@ -54,14 +54,14 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 		},
 	})
 	if err != nil {
-		log.Fatalf("Failed to approve CSR: %s\n%v", csrObjectName, err)
+		log.Printf("Failed to approve CSR: %s\n%v", csrObjectName, err)
 	}
 
 	err = retry.Do(
 		func() error {
 			res, err := certsClients.CertificateSigningRequests().Get(csrObjectName, metav1.GetOptions{})
 			if err != nil {
-				log.Fatalf("Failed to get approved CSR: %s\n%v", csrObjectName, err)
+				log.Printf("Failed to get approved CSR: %s\n%v", csrObjectName, err)
 			}
 			cert := res.Status.Certificate
 
@@ -74,12 +74,12 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 		},
 	)
 	if err != nil {
-		log.Fatal("Failed to retry get approved CSR")
+		log.Print("Failed to retry get approved CSR")
 	}
 
 	err = certsClients.CertificateSigningRequests().Delete(csrObjectName, nil)
 	if err != nil {
-		log.Fatalf("Failed to delete CSR: %s\n%v", csrObjectName, err)
+		log.Printf("Failed to delete CSR: %s\n%v", csrObjectName, err)
 	}
 
 	return
@@ -88,7 +88,7 @@ func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, priv
 func createRsaPrivateKeyPem() (privateKey *rsa.PrivateKey, privPemBytes []byte) {
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		log.Fatalf("Failed to generate RSA key\n%v", err)
+		log.Printf("Failed to generate RSA key\n%v", err)
 	}
 
 	privPemBytes = pem.EncodeToMemory(
@@ -111,7 +111,7 @@ func createCSR(username string, privateKey *rsa.PrivateKey) (csrBytes []byte, cs
 
 	csrBytes, err := x509.CreateCertificateRequest(rand.Reader, &template, privateKey)
 	if err != nil {
-		log.Fatalf("Failed to create CSR for user: %s\n%v", username, err)
+		log.Printf("Failed to create CSR for user: %s\n%v", username, err)
 	}
 
 	csrPemBytes = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes})
