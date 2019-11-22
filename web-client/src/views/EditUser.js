@@ -1,11 +1,14 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import EditUser from '../components/edit-user'
 import CreateKubeconfigButton from '../components/CreateKubeconfigButton'
 import { useUsers } from '../hooks/useUsers'
 import { useParams } from 'react-router-dom'
 export default function UserPage() {
   const { username } = useParams()
-  const { users } = useUsers()
+  const { users, refreshUsers } = useUsers()
+
+  useEffect(refreshUsers, [])
+
   const user = users.find(u => u.name === username)
 
   return (

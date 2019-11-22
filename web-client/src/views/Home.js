@@ -3,7 +3,7 @@ import { useUsers } from '../hooks/useUsers'
 import { Link } from 'react-router-dom'
 
 export default function Home() {
-  const { users } = useUsers()
+  const { users, loading, loaded } = useUsers()
 
   return (
     <div className=" bg-gray-200  pt-16">
@@ -11,8 +11,10 @@ export default function Home() {
         <div className=" bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4">
           <h2 className="text-3xl mb-4 text-gray-800">Users</h2>
           <ul className="list-disc pl-6 ">
-            {users.length === 0
+            {loading
               ? '...loading'
+              : loaded && users.length === 0
+              ? 'no users'
               : users.map(u => {
                   return (
                     <li key={u.name}>

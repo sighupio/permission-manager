@@ -4,10 +4,14 @@ import { useGroups } from './useGroups'
 
 function useUsersFromApi() {
   const [users, setUsers] = useState([])
-  const { refreshGroups } = useGroups()
+  const [loading, setLoading] = useState(false)
+  const [loaded, setLoaded] = useState(false)
 
   function fetchUsers() {
+    setLoading(true)
     axios.get('/api/list-users').then(res => {
+      setLoading(false)
+      setLoaded(true)
       setUsers(res.data)
     })
   }
@@ -19,18 +23,23 @@ function useUsersFromApi() {
   function addUser({ name, groups }) {
     axios.post('/api/create-user', { name, groups }).then(res => {
       fetchUsers()
-      refreshGroups()
     })
   }
 
   function removeUser({ id }) {
     axios.post('/api/delete-user', { id }).then(res => {
       fetchUsers()
-      refreshGroups()
     })
   }
 
-  return { users, addUser, removeUser, refreshUsers: fetchUsers }
+  return {
+    users,
+    addUser,
+    removeUser,
+    refreshUsers: fetchUsers,
+    loading,
+    loaded
+  }
 }
 
 const UsersContext = createContext(null)
