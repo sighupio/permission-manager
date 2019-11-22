@@ -11,20 +11,24 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+var clusterName, clusterControlPlaceAddress string
+
+func init() {
+	clusterName = os.Getenv("CLUSTER_NAME")
+	if clusterName == "" {
+		log.Fatal("CLUSTER_NAME env cannot be empty")
+	}
+
+	clusterControlPlaceAddress = os.Getenv("CONTROL_PLANE_ADDRESS")
+	if clusterControlPlaceAddress == "" {
+		log.Fatal("CONTROL_PLANE_ADDRESS env cannot be empty")
+	}
+}
+
 // CreateKubeconfigYAML returns a kubeconfig YAML string
 func CreateKubeconfigYAML(kc *kubernetes.Clientset, username string) (kubeconfigYAML string) {
 	priv, privPem := createRsaPrivateKeyPem()
 	certificatePemBytes := getSignedCertificateForUser(kc, username, priv)
-
-	clusterName := os.Getenv("CLUSTER_NAME")
-	if clusterName == "" {
-		log.Print("CLUSTER_NAME env cannot be empty")
-	}
-
-	clusterControlPlaceAddress := os.Getenv("CONTROL_PLANE_ADDRESS")
-	if clusterControlPlaceAddress == "" {
-		log.Print("CONTROL_PLANE_ADDRESS env cannot be empty")
-	}
 
 	ca := ""
 	/* REFACTOR: read and encode base64 from go */

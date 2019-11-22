@@ -1,7 +1,7 @@
 run: 
 	go run main.go
 dev:
-	gomon .
+	CLUSTER_NAME=minikube CONTROL_PLANE_ADDRESS=https://192.168.64.26:8443 gomon .
 
 build-ui:
 	rm -r statik
