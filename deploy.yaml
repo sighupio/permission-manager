@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: permission-manager
-          image: permission-manager:1.0.0-beta
+          image: permission-manager:1.0.1-beta
           ports:
             - containerPort: 4000
           env:
