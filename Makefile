@@ -9,3 +9,6 @@ build-ui:
 
 	npm run build --prefix ./web-client 
 	statik -src=./web-client/build
+
+delete-users:
+	kubectl delete -f ./crd/user-crd-definition.yml && kubectl apply -f ./crd/user-crd-definition.yml
