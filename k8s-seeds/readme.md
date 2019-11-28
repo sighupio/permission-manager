@@ -1,1 +1,1 @@
-to seed templates for development
+manifests to apply

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: permission-manager
-          image: permission-manager:1.0.1-beta
+          image: permission-manager:1.0.2-beta
           ports:
             - containerPort: 4000
           env:
@@ -24,3 +24,15 @@ spec:
               value: "my-cluster"
             - name: CONTROL_PLANE_ADDRESS
               value: "https://192.168.64.26:8443"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: permission-manager-service
+spec:
+  selector:
+    app: permission-manager
+  ports:
+    - protocol: TCP
+      port: 4000
+      targetPort: 4000

@@ -202,7 +202,7 @@ func createRolebinding(c echo.Context) error {
 	type Request struct {
 		RolebindingName string           `json:"rolebindingName" validate:"required"`
 		Namespace       string           `json:"namespace" validate:"required"`
-		Username        string           `json:"user" validate:"required"`
+		Username        string           `json:"generated_for_user" validate:"required"`
 		Subjects        []rbacv1.Subject `json:"subjects" validate:"required"`
 		RoleKind        string           `json:"roleKind" validate:"required"`
 		RoleName        string           `json:"roleName" validate:"required"`

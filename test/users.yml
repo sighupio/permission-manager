@@ -1,0 +1,20 @@
+# apiVersion: "permissionmanager.user/v1alpha1"
+# kind: "Permissionmanageruser"
+# metadata:
+#   name: "permissionmanager.user.popo"
+# spec:
+#   name: "popo"
+# ---
+# apiVersion: "permissionmanager.user/v1alpha1"
+# kind: "Permissionmanageruser"
+# metadata:
+#   name: "permissionmanager.user.jaga"
+# spec:
+#   name: "jaga"
+# ---
+# apiVersion: "permissionmanager.user/v1alpha1"
+# kind: "Permissionmanageruser"
+# metadata:
+#   name: "permissionmanager.user.archer"
+# spec:
+#   name: "archer"

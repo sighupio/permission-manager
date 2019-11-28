@@ -45,6 +45,12 @@ these ENV are required
 kubectl apply -f k8s-seeds/seed.yml
 ```
 
+## applying CRD for users
+
+```
+kubectl apply -f crd/user-crd-definition.yml
+```
+
 ## Setup for Local developlment
 
 run UI
@@ -94,3 +100,11 @@ deploy the manifest (update the version in deploy.yml)
 ```
 kubectl apply -f deploy.yaml
 ```
+
+port forward the service
+
+```
+kubectl port-forward service/permission-manager-service 4000:4000
+```
+
+navigate to localhost:4000 to see the web UI
