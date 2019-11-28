@@ -75,9 +75,15 @@ to build
 run `make build-ui`
 it will build the app and save the files as a single go file that the server will then expose
 
-### How to test inside a Kubernetes cluster
+### How to test inside Minikube
 
-buid the Docker image
+use Minikube's docker daemon (all subsequent commands needs to be run in the same shell where this command is run becuase ENV are set)
+
+```
+eval $(minikube docker-env)
+```
+
+build the Docker image
 
 ```
 docker build -t permission-manager:1.0.x-beta .
