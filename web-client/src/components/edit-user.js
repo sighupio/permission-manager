@@ -27,7 +27,7 @@ export default function EditUser({ user }) {
 
   const pairs = [...rbs, ...crbs]
     .filter(
-      crb => !crb.metadata.name.includes(templateClusterResourceRolePrefix),
+      crb => !crb.metadata.name.includes(templateClusterResourceRolePrefix)
     )
     .map(v => {
       const name = v.metadata.name
@@ -54,7 +54,7 @@ export default function EditUser({ user }) {
           item.namespace === 'ALL_NAMESPACES'
             ? 'ALL_NAMESPACES'
             : [item.namespace],
-        template: item.template,
+        template: item.template
       })
     }
 
@@ -70,7 +70,7 @@ export default function EditUser({ user }) {
       setPairItems(xxx)
 
       const ca = crbs.find(crb =>
-        crb.metadata.name.includes(templateClusterResourceRolePrefix),
+        crb.metadata.name.includes(templateClusterResourceRolePrefix)
       )
       if (ca) {
         if (ca.roleRef.name.endsWith('admin')) {
@@ -96,13 +96,13 @@ export default function EditUser({ user }) {
     for await (const p of rbs) {
       await axios.post('/api/delete-rolebinding', {
         rolebindingName: p.metadata.name,
-        namespace: p.metadata.namespace,
+        namespace: p.metadata.namespace
       })
     }
 
     for await (const p of crbs) {
       await axios.post('/api/delete-cluster-rolebinding', {
-        rolebindingName: p.metadata.name,
+        rolebindingName: p.metadata.name
       })
     }
 
@@ -118,10 +118,10 @@ export default function EditUser({ user }) {
               {
                 kind: 'User',
                 name: username,
-                apiGroup: 'rbac.authorization.k8s.io',
-              },
+                apiGroup: 'rbac.authorization.k8s.io'
+              }
             ],
-            clusterRolebindingName,
+            clusterRolebindingName
           })
           consumed.push(clusterRolebindingName)
         }
@@ -131,16 +131,17 @@ export default function EditUser({ user }) {
           if (!consumed.includes(rolebindingName)) {
             await axios.post('/api/create-rolebinding', {
               roleName: p.template,
+              generated_for_user: username,
               namespace: n,
               roleKind: 'ClusterRole',
               subjects: [
                 {
                   kind: 'User',
                   name: username,
-                  apiGroup: 'rbac.authorization.k8s.io',
-                },
+                  apiGroup: 'rbac.authorization.k8s.io'
+                }
               ],
-              rolebindingName,
+              rolebindingName
             })
             consumed.push(rolebindingName)
           }
@@ -177,10 +178,10 @@ export default function EditUser({ user }) {
           {
             kind: 'User',
             name: username,
-            apiGroup: 'rbac.authorization.k8s.io',
-          },
+            apiGroup: 'rbac.authorization.k8s.io'
+          }
         ],
-        clusterRolebindingName,
+        clusterRolebindingName
       })
     }
     window.location.reload()

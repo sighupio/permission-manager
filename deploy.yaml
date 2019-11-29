@@ -1,6 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  namespace: permission-manager
   name: permission-manager-deployment
   labels:
     app: permission-manager
@@ -28,6 +29,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
+  namespace: permission-manager
   name: permission-manager-service
 spec:
   selector:
