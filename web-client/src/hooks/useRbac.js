@@ -3,7 +3,7 @@ import React, {
   useEffect,
   useContext,
   createContext,
-  useCallback,
+  useCallback
 } from 'react'
 import axios from 'axios'
 
@@ -12,7 +12,7 @@ function useRbacFromApi() {
     roleBindings: null,
     roles: null,
     clusterRoleBindings: null,
-    clusterRoles: null,
+    clusterRoles: null
   })
 
   const fetchData = useCallback(async function fetchData() {
@@ -29,7 +29,7 @@ function useRbacFromApi() {
     roleBindings: data.roleBindings,
     clusterRoles: data.clusterRoles,
     clusterRoleBindings: data.clusterRoleBindings,
-    refreshRbacData: fetchData,
+    refreshRbacData: fetchData
   }
 }
 
