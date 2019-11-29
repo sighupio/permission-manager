@@ -10,13 +10,23 @@ export default function Header() {
         </span>
       </div>
       <div className="w-full block flex-grow lg:flex lg:items-center lg:w-auto">
-        <div className="text-sm lg:flex-grow">
-          <Link
-            to="/"
-            className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
-          >
-            users
-          </Link>
+        <div className="flex  lg:flex-grow">
+          <div className="text-sm">
+            <Link
+              to="/"
+              className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
+            >
+              users
+            </Link>
+          </div>
+          <div className="text-sm ml-2">
+            <Link
+              to="/advanced"
+              className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
+            >
+              advanced
+            </Link>
+          </div>
         </div>
         <div>
           <Link
