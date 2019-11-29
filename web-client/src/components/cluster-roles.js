@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import JSONPretty from 'react-json-pretty'
@@ -154,7 +154,7 @@ function Role({ role: r, refreshRbacData }) {
 function RulesList({ rules, setRules }) {
   const addRule = s => setRules(state => [...state, s])
   const removeRule = id => setRules(state => state.filter(sub => sub.id !== id))
-  const updateRule = s => {
+  const updateRule = useCallback(s => {
     setRules(state => {
       return state.map(sub => {
         if (s.id === sub.id) {
@@ -164,7 +164,7 @@ function RulesList({ rules, setRules }) {
         return sub
       })
     })
-  }
+  }, [setRules])
 
   return (
     <div style={{ padding: 10, margin: '20px 0', background: 'orange' }}>

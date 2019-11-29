@@ -1,8 +1,7 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import uuid from 'uuid'
 import { useRbac } from '../hooks/useRbac'
 import { useUsers } from '../hooks/useUsers'
-import { useGroups } from '../hooks/useGroups'
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { ClusterRoleSelect } from './cluster-role-select'
@@ -155,7 +154,8 @@ function SubjectList({ subjects, setSubjects }) {
   const addSubject = s => setSubjects(state => [...state, s])
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
-  const updateSubject = s => {
+
+  const updateSubject = useCallback(s => {
     setSubjects(state => {
       return state.map(sub => {
         if (s.id === sub.id) {
@@ -165,7 +165,7 @@ function SubjectList({ subjects, setSubjects }) {
         return sub
       })
     })
-  }
+  }, [setSubjects])
 
   const { users } = useUsers()
 
@@ -201,15 +201,10 @@ function SubjectItem({ id, updateSubject }) {
   const [kind, setKind] = useState('User')
   const [subjectName, setSubjectName] = useState('')
   const { users } = useUsers()
-  const { groups } = useGroups()
 
   useEffect(() => {
-    if (kind === 'User') {
-      setSubjectName(users[0].name)
-    } else {
-      setSubjectName(groups[0].name)
-    }
-  }, [groups, kind, users])
+    setSubjectName(users[0].name)
+  }, [kind, users])
 
   useEffect(() => {
     updateSubject({ id, kind, name: subjectName })
@@ -231,18 +226,6 @@ function SubjectItem({ id, updateSubject }) {
           />
           user
         </label>
-        <label>
-          <input
-            type="radio"
-            checked={kind === 'Group'}
-            onChange={e => {
-              if (e.target.checked) {
-                setKind('Group')
-              }
-            }}
-          />
-          group
-        </label>
       </div>
       <div>
         <label>
@@ -251,21 +234,13 @@ function SubjectItem({ id, updateSubject }) {
             value={subjectName}
             onChange={e => setSubjectName(e.target.value)}
           >
-            {kind === 'User'
-              ? users.map(u => {
-                  return (
-                    <option key={u.id} value={u.name}>
-                      {u.name}
-                    </option>
-                  )
-                })
-              : groups.map(g => {
-                  return (
-                    <option key={g.id} value={g.name}>
-                      {g.name}
-                    </option>
-                  )
-                })}
+            {users.map(u => {
+              return (
+                <option key={u.id} value={u.name}>
+                  {u.name}
+                </option>
+              )
+            })}
             )}
           </select>
         </label>

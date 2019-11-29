@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import JSONPretty from 'react-json-pretty'
 import {
   RESOURCE_TYPES_NAMESPACED,
   RESOURCE_TYPES_NON_NAMESPACED,
-  VERBS,
+  VERBS
 } from '../constants'
 import { useRbac } from '../hooks/useRbac'
 import uuid from 'uuid'
@@ -58,7 +58,7 @@ function NewRoleForm({ refreshRbacData }) {
         const o = {
           ...r,
           apiGroups: [
-            '*',
+            '*'
             // '',
             // 'admissionregistration.k8s.io',
             // 'apiextensions.k8s.io',
@@ -78,11 +78,11 @@ function NewRoleForm({ refreshRbacData }) {
             // 'rbac.authorization.k8s.io',
             // 'scheduling.k8s.io',
             // 'storage.k8s.io',
-          ],
+          ]
         }
         delete o.id
         return o
-      }),
+      })
     })
     refreshRbacData()
   }
@@ -134,7 +134,7 @@ function Role({ role: r, refreshRbacData }) {
   async function deleteRole(e) {
     await axios.post('/api/delete-role', {
       roleName: r.metadata.name,
-      namespace: r.metadata.namespace,
+      namespace: r.metadata.namespace
     })
     refreshRbacData()
   }
@@ -162,7 +162,7 @@ function Role({ role: r, refreshRbacData }) {
 function RulesList({ rules, setRules }) {
   const addRule = s => setRules(state => [...state, s])
   const removeRule = id => setRules(state => state.filter(sub => sub.id !== id))
-  const updateRule = s => {
+  const updateRule = useCallback(s => {
     setRules(state => {
       return state.map(sub => {
         if (s.id === sub.id) {
@@ -172,7 +172,7 @@ function RulesList({ rules, setRules }) {
         return sub
       })
     })
-  }
+  }, [setRules])
 
   return (
     <div style={{ padding: 10, margin: '20px 0', background: 'orange' }}>

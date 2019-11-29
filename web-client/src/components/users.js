@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { useUsers } from '../hooks/useUsers'
-import { useGroups } from '../hooks/useGroups'
 import CreateKubeconfigButton from './CreateKubeconfigButton'
 
 export default function Users() {
@@ -17,7 +16,7 @@ export default function Users() {
           margin: 30,
           background: 'lightblue',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'column'
         }}
       >
         <h3>Create from template</h3>
@@ -32,14 +31,12 @@ export default function Users() {
       </div>
       <div style={{ padding: 20, margin: 30, background: 'lightblue' }}>
         <NewUserForm
-          onSubmit={formValues =>
-            addUser({ name: formValues.name, groups: formValues.userGroups })
-          }
+          onSubmit={formValues => addUser({ name: formValues.name })}
         />
         <ul>
           {users.map(u => {
             return (
-              <li key={u.id}>
+              <li key={u.name}>
                 <div>{u.name}</div>
                 <CreateKubeconfigButton user={u} />
                 <button onClick={() => removeUser({ id: u.id })}>delete</button>
@@ -54,14 +51,12 @@ export default function Users() {
 
 function NewUserForm({ onSubmit }) {
   const [name, setName] = useState('')
-  const { groups } = useGroups()
-  const [userGroups, setUserGroups] = useState([])
 
   return (
     <form
       onSubmit={e => {
         e.preventDefault()
-        onSubmit({ name, userGroups })
+        onSubmit({ name })
         setName('')
       }}
     >
@@ -74,31 +69,6 @@ function NewUserForm({ onSubmit }) {
           onChange={e => setName(e.target.value)}
         ></input>
       </label>
-
-      <div>
-        groups
-        <ul>
-          {groups.map(g => {
-            return (
-              <li key={g.id}>
-                <label>
-                  <input
-                    type="checkbox"
-                    onChange={e => {
-                      if (e.target.checked) {
-                        setUserGroups(state => [...state, g])
-                      } else {
-                        setUserGroups(state => state.filter(s => s.id !== g.id))
-                      }
-                    }}
-                  />
-                  {g.name}
-                </label>
-              </li>
-            )
-          })}
-        </ul>
-      </div>
 
       <button type="submit">submit</button>
     </form>

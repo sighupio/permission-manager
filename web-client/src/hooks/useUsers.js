@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from 'react'
 import axios from 'axios'
-import { useGroups } from './useGroups'
 
 function useUsersFromApi() {
   const [users, setUsers] = useState([])
@@ -20,8 +19,8 @@ function useUsersFromApi() {
     fetchUsers()
   }, [])
 
-  function addUser({ name, groups }) {
-    axios.post('/api/create-user', { name, groups }).then(res => {
+  function addUser({ name }) {
+    axios.post('/api/create-user', { name }).then(res => {
       fetchUsers()
     })
   }
