@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: permission-manager
-          image: permission-manager:1.0.2-beta
+          image: reg.sighup.io/sighup-products/permission-manager:latest
           ports:
             - containerPort: 4000
           env:
