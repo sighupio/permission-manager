@@ -25,13 +25,13 @@ rules:
   - apiGroups:
       - "*"
     resources:
+      - "permissionmanagerusers"
       - "clusterrolebindings"
       - "clusterroles"
       - "rolebindings"
       - "roles"
       - "certificatesigningrequests"
       - "certificatesigningrequests/approval"
-      - "permissionmanagerusers"
     verbs:
       - "*"
 
