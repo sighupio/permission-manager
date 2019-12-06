@@ -81,7 +81,7 @@ func CreateUser(kc *kubernetes.Clientset, username string) User {
 
 	_, err := kc.RESTClient().Post().AbsPath(resourceUrl).Body([]byte(jsonPayload)).DoRaw()
 	if err != nil {
-		log.Printf("Failed to create user:%s\n", username, err)
+		log.Printf("Failed to create user:%s\n %v\n", username, err)
 	}
 
 	return User{Name: username}
