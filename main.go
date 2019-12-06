@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -79,7 +82,7 @@ func main() {
 	}
 
 	spaHandler := http.FileServer(statikFS)
-	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, "/index.html")))
+	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
 
 	e.Logger.Fatal(e.Start(":4000"))
 }
@@ -408,7 +411,7 @@ func (frw *FallbackResponseWriter) WriteHeader(statusCode int) {
 }
 
 // AddFallbackHandler wraps the handler func in another handler func covering authentication
-func AddFallbackHandler(handler http.HandlerFunc, filename string) http.HandlerFunc {
+func AddFallbackHandler(handler http.HandlerFunc, fs http.FileSystem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		frw := FallbackResponseWriter{
 			WrappedResponseWriter: w,
@@ -416,7 +419,18 @@ func AddFallbackHandler(handler http.HandlerFunc, filename string) http.HandlerF
 		}
 		handler(&frw, r)
 		if frw.FileNotFound {
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			f, err := fs.Open("/index.html")
+			if err != nil {
+				log.Fatal("Failed to open index.html")
+			}
+			defer f.Close()
+			content, err := ioutil.ReadAll(f)
+			if err != nil {
+				log.Fatal("Failed to read index.html")
+			}
+
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+			fmt.Fprint(w, string(content))
 		}
 	}
 }
