@@ -29,7 +29,8 @@ rules:
       - "clusterroles"
       - "rolebindings"
       - "roles"
-      - "CertificateSigningRequest"
+      - "certificatesigningrequests"
+      - "certificatesigningrequests/approval"
       - "permissionmanagerusers"
     verbs:
       - "*"
