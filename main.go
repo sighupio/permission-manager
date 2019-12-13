@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
@@ -42,6 +43,19 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 func main() {
 	e := echo.New()
+
+	basicAuthPassword := os.Getenv("BASIC_AUTH_PASSWORD")
+	if basicAuthPassword == "" {
+		log.Fatal("BASIC_AUTH_PASSWORD env cannot be empty")
+	}
+
+	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == "admin" && password == basicAuthPassword {
+			return true, nil
+		}
+		return false, nil
+	}))
+
 	e.Validator = &CustomValidator{validator: validator.New()}
 
 	kc := kube.NewKubeclient()
@@ -84,7 +98,7 @@ func main() {
 	spaHandler := http.FileServer(statikFS)
 	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
 
-	e.Logger.Fatal(e.Start(":4000"))
+	e.Logger.Fatal(e.Start(":5000"))
 }
 
 func listUsers(c echo.Context) error {

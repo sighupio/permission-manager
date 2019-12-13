@@ -1,3 +1,4 @@
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -97,7 +98,12 @@ spec:
             - name: CLUSTER_NAME
               value: "my-cluster"
             - name: CONTROL_PLANE_ADDRESS
-              value: "https://35.233.96.103"
+              value: "https://192.168.64.33:8443"
+             - name: BASIC_AUTH_PASSWORD
+               valueFrom:
+                 secretKeyRef:
+                   name: auth-password-secret
+                   key: password  
 ---
 apiVersion: v1
 kind: Service

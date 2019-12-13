@@ -19,14 +19,14 @@ export default function Header() {
               users
             </Link>
           </div>
-          <div className="text-sm ml-2">
+          {/* <div className="text-sm ml-2">
             <Link
               to="/advanced"
               className="block mt-4 lg:inline-block lg:mt-0 text-teal-200 hover:text-white mr-4"
             >
               advanced
             </Link>
-          </div>
+          </div> */}
         </div>
         <div>
           <Link
