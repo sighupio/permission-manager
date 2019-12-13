@@ -8,6 +8,7 @@ import ClusterAccessRadio from './ClusterAccessRadio'
 import Templates from './Templates'
 import { FullScreenLoader } from './Loader'
 import Summary from './Summary'
+import { useUsers } from '../hooks/useUsers'
 
 export default function NewUserWizard() {
   const history = useHistory()
@@ -18,22 +19,26 @@ export default function NewUserWizard() {
   const [clusterAccess, setClusterAccess] = useState('none')
   const [formTouched, setFormTouched] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
+  const { users } = useUsers()
 
   const validateUsername = useCallback(() => {
     if (username.length < 3) {
-      setUsernameError(true)
+      setUsernameError('Required to be at least 3 characters long')
+      return false
+    } else if (users.map(u => u.name).includes(username)) {
+      setUsernameError(`user ${username} already exists`)
       return false
     } else {
       setUsernameError(null)
       return true
     }
-  }, [username.length])
+  }, [username, users])
 
   useEffect(
     function validateUsernameOnChange() {
       validateUsername()
     },
-    [username.length, validateUsername],
+    [username.length, validateUsername]
   )
 
   const saveButtonDisabled =
@@ -67,10 +72,10 @@ export default function NewUserWizard() {
               {
                 kind: 'User',
                 name: username,
-                apiGroup: 'rbac.authorization.k8s.io',
-              },
+                apiGroup: 'rbac.authorization.k8s.io'
+              }
             ],
-            clusterRolebindingName,
+            clusterRolebindingName
           })
         } else {
           for await (const n of p.namespaces) {
@@ -84,10 +89,10 @@ export default function NewUserWizard() {
                 {
                   kind: 'User',
                   name: username,
-                  apiGroup: 'rbac.authorization.k8s.io',
-                },
+                  apiGroup: 'rbac.authorization.k8s.io'
+                }
               ],
-              rolebindingName,
+              rolebindingName
             })
           }
         }
@@ -109,10 +114,10 @@ export default function NewUserWizard() {
             {
               kind: 'User',
               name: username,
-              apiGroup: 'rbac.authorization.k8s.io',
-            },
+              apiGroup: 'rbac.authorization.k8s.io'
+            }
           ],
-          clusterRolebindingName,
+          clusterRolebindingName
         })
       }
 
@@ -180,9 +185,7 @@ export default function NewUserWizard() {
             />
 
             {usernameError && formTouched ? (
-              <p className="text-red-500 text-xs italic">
-                Required to be at least 3 characters long
-              </p>
+              <p className="text-red-500 text-xs italic">{usernameError}</p>
             ) : null}
           </div>
 
