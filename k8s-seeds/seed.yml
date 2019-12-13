@@ -29,6 +29,8 @@ rules:
       # - "limitranges"
       - "persistentvolumeclaims"
       - "pods"
+      - "pods/log"
+      - "pods/portforward"
       - "podtemplates"
       - "replicationcontrollers"
       - "resourcequotas"

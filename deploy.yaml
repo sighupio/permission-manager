@@ -97,7 +97,7 @@ spec:
             - name: CLUSTER_NAME
               value: "my-cluster"
             - name: CONTROL_PLANE_ADDRESS
-              value: "https://192.168.64.33:8443"
+              value: "https://34.69.6.96"
             - name: BASIC_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
