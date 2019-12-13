@@ -21,11 +21,16 @@ the template system is an abstrction over cluter roles, rolebinding and cluster 
 
 ### What is a template
 
-TBD
+A template a clusterrole with the prefix
+
+`template-namespaced-resources___`
+
+for example
+`template-namespaced-resources___developer`
 
 ### How to add a new template
 
-TBD
+Crate a clusterrole starting with `template-namespaced-resources___` and apply it
 
 ### setup
 
@@ -108,3 +113,17 @@ kubectl port-forward service/permission-manager-service 4000:4000
 ```
 
 navigate to localhost:4000 to see the web UI
+
+## How To deploy
+
+> change version in the below snippets
+
+```
+make build-ui
+docker build -t reg.sighup.io/sighup-products/permission-manager:x.x.x .
+docker push reg.sighup.io/sighup-products/permission-manager:x.x.x
+```
+
+apply files inside `k8s-seeds`
+
+update image tag of the pod
