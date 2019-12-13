@@ -98,7 +98,7 @@ func main() {
 	spaHandler := http.FileServer(statikFS)
 	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
 
-	e.Logger.Fatal(e.Start(":5000"))
+	e.Logger.Fatal(e.Start(":4000"))
 }
 
 func listUsers(c echo.Context) error {

@@ -17,4 +17,6 @@ release-image:
 	docker build -t reg.sighup.io/sighup-products/permission-manager:1.0.0 .
 	docker push reg.sighup.io/sighup-products/permission-manager:1.0.0
 	
+forward-service:
+	kubectl port-forward svc/permission-manager-service 4000 --namespace permission-manager	
 
