@@ -90,7 +90,7 @@ spec:
       serviceAccountName: permission-manager-service-account
       containers:
         - name: permission-manager
-          image: reg.sighup.io/sighup-products/permission-manager:1.0.0
+          image: reg.sighup.io/sighup-products/permission-manager:1.1.0
           ports:
             - containerPort: 4000
           env:
