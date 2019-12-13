@@ -66,7 +66,6 @@ func GetAll(kc *kubernetes.Clientset) []User {
 }
 
 func CreateUser(kc *kubernetes.Clientset, username string) User {
-
 	metadataName := "permissionmanager.user." + username
 	jsonPayload := fmt.Sprintf(`{
 		"apiVersion":"permissionmanager.user/v1alpha1",
@@ -82,6 +81,16 @@ func CreateUser(kc *kubernetes.Clientset, username string) User {
 	_, err := kc.RESTClient().Post().AbsPath(resourceUrl).Body([]byte(jsonPayload)).DoRaw()
 	if err != nil {
 		log.Printf("Failed to create user:%s\n %v\n", username, err)
+	}
+
+	return User{Name: username}
+}
+
+func DeleteUser(kc *kubernetes.Clientset, username string) User {
+	metadataName := "permissionmanager.user." + username
+	_, err := kc.RESTClient().Delete().AbsPath(resourceUrl + "/" + metadataName).DoRaw()
+	if err != nil {
+		log.Printf("Failed to delete user:%s\n %v\n", username, err)
 	}
 
 	return User{Name: username}

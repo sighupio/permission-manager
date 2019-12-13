@@ -87,6 +87,7 @@ func main() {
 	api.POST("/delete-cluster-rolebinding", deleteClusterRolebinding)
 	api.POST("/delete-rolebinding", deleteRolebinding)
 	api.POST("/delete-role", deleteRole)
+	api.POST("/delete-user", deleteUser)
 
 	api.POST("/create-kubeconfig", createKubeconfig)
 
@@ -348,6 +349,28 @@ func deleteRole(c echo.Context) error {
 	}
 
 	ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(r.RoleName, nil)
+	return c.JSON(http.StatusOK, Response{Ok: true})
+}
+
+func deleteUser(c echo.Context) error {
+	ac := c.(*AppContext)
+
+	type Request struct {
+		Username string `json:"username" validate:"required"`
+	}
+	type Response struct {
+		Ok bool `json:"ok"`
+	}
+
+	r := new(Request)
+	if err := c.Bind(r); err != nil {
+		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+	}
+
+	users.DeleteUser(ac.Kubeclient, r.Username)
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 

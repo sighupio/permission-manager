@@ -1,4 +1,5 @@
 import { useRbac } from '../hooks/useRbac'
+import { useUsers } from '../hooks/useUsers'
 import React, { useState, useEffect, useCallback } from 'react'
 import uuid from 'uuid'
 import axios from 'axios'
@@ -7,11 +8,14 @@ import { templateClusterResourceRolePrefix } from '../constants'
 import Templates from './Templates'
 import { FullScreenLoader } from './Loader'
 import Summary from './Summary'
+import { useHistory } from 'react-router-dom'
 
 export default function EditUser({ user }) {
   const [showLoader, setShowLoader] = useState(false)
   const username = user.name
   const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()
+  const history = useHistory()
+  const { refreshUsers } = useUsers()
 
   useEffect(() => {
     refreshRbacData()
@@ -90,9 +94,15 @@ export default function EditUser({ user }) {
     }
   }, [crbs, initialClusterAccess, pairItems.length, xxx])
 
-  async function handleSubmit(e) {
-    const consumed = []
+  async function handleUserDeletion() {
+    setShowLoader(true)
+    await deleteUserResources()
+    await axios.post('/api/delete-user', {
+      username
+    })
+  }
 
+  async function deleteUserResources() {
     for await (const p of rbs) {
       await axios.post('/api/delete-rolebinding', {
         rolebindingName: p.metadata.name,
@@ -105,6 +115,10 @@ export default function EditUser({ user }) {
         rolebindingName: p.metadata.name
       })
     }
+  }
+  async function handleSubmit(e) {
+    await deleteUserResources()
+    const consumed = []
 
     for await (const p of pairItems) {
       if (p.namespaces === 'ALL_NAMESPACES') {
@@ -219,7 +233,31 @@ export default function EditUser({ user }) {
     <div>
       {showLoader && <FullScreenLoader />}
 
-      <h2 className="text-3xl mb-4 text-gray-800">User: {username}</h2>
+      <div className="flex content-between items-center mb-4">
+        <h2 className="text-3xl text-gray-800">User: {username}</h2>
+        <div>
+          <button
+            tabIndex={-1}
+            type="button"
+            className="bg-transparent hover:bg-red-600 text-gray-700 hover:text-gray-100 py-1 px-2 rounded hover:shadow ml-2 text-xs"
+            onClick={() => {
+              const confirmed = window.confirm(
+                `Confirm deletion of User ${username}`
+              )
+
+              if (confirmed) {
+                handleUserDeletion().then(async () => {
+                  await refreshUsers()
+                  history.push('/')
+                })
+              }
+            }}
+          >
+            delete
+          </button>
+        </div>
+      </div>
+
       <form
         onSubmit={e => {
           e.preventDefault()
