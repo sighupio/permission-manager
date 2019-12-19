@@ -42,18 +42,14 @@ these ENV are required
 | CONTROL_PLANE_ADDRESS | full address of the control plane to use in the generated kubeconfig file |
 |                       |                                                                           |
 
-#### applying default roles
+#### apply manifests
 
 `developer` and `operation` default templates can be created by applying the manifest located at _k8s-seeds/seed.yml_
 
-```
-kubectl apply -f k8s-seeds/seed.yml
-```
-
-## applying CRD for users
+CRD for users, and required secrets are can all be installed running
 
 ```
-kubectl apply -f crd/user-crd-definition.yml
+kubectl apply -f k8s-seeds
 ```
 
 ## Setup for Local developlment
