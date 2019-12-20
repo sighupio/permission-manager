@@ -12,6 +12,8 @@ Permission manager is an application that allow to a user specific kubeconfig, a
 
 - users are CRD inside k8s and will be stored inside ETCD
   the app recognise whenere is run inside kubernetes or not by checking the ENV `KUBERNETES_SERVICE_HOST` this will change how the app tries to autenticate to the api server (via token from within k8s or using `~/.kube/config` otherwhise)
+- using [`golang-standards/project-layout`](https://github.com/golang-standards/project-layout)
+- applying Clean Architecture / Hexgolan architecture patterns to decouple domain logic from implementations to allow easier testing, refactoring and future development
 
 ## How it works
 

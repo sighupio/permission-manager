@@ -7,7 +7,17 @@ export function useNamespaceList() {
     let unmounted = false
 
     axios.get('/api/list-namespace').then(res => {
-      if (!unmounted) setNamespaceList(res.data.namespaces)
+      if (!unmounted)
+        setNamespaceList(
+          res.data.namespaces.map(ns => {
+            /* to temporary handle api refactoring  */
+            return {
+              metadata: {
+                name: ns
+              }
+            }
+          })
+        )
     })
 
     return () => {

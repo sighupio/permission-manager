@@ -1,4 +1,4 @@
-package kube
+package createkubeconfigusecase
 
 import (
 	"crypto/rand"
@@ -8,6 +8,9 @@ import (
 	"encoding/pem"
 	"fmt"
 	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
 	"time"
 
 	retry "github.com/avast/retry-go"
@@ -16,7 +19,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-func getSignedCertificateForUser(kc *kubernetes.Clientset, username string, privateKey *rsa.PrivateKey) (certificatePemBytes []byte) {
+func getSignedCertificateForUser(kc kubernetes.Interface, username string, privateKey *rsa.PrivateKey) (certificatePemBytes []byte) {
 	_, csrPemByte := createCSR(username, privateKey)
 	certsClients := kc.CertificatesV1beta1()
 	csrObjectName := "CSR_FOR_" + username + time.Now().String()
@@ -117,4 +120,27 @@ func createCSR(username string, privateKey *rsa.PrivateKey) (csrBytes []byte, cs
 	csrPemBytes = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes})
 
 	return
+}
+
+func getCaBase64() string {
+	ca := ""
+	/* REFACTOR: read and encode base64 from go */
+	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
+		fp := filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt")
+		s := fmt.Sprintf("cat %s | base64 | tr -d '\n'", fp)
+		caBase64, err := exec.Command("sh", "-c", s).Output()
+		if err != nil {
+			panic(err)
+		}
+		ca = string(caBase64)
+	} else {
+		fmt.Println("detected runnig inside cluster")
+		s := "cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | base64 | tr -d '\n'"
+		caBase64, err := exec.Command("sh", "-c", s).Output()
+		if err != nil {
+			panic(err)
+		}
+		ca = string(caBase64)
+	}
+	return ca
 }

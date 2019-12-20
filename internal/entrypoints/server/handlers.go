@@ -1,156 +1,89 @@
-package main
+package server
 
 import (
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
-	"github.com/sighupio/permission-manager/kube"
-	"github.com/sighupio/permission-manager/users"
-
-	"github.com/rakyll/statik/fs"
-	_ "github.com/sighupio/permission-manager/statik"
-	v1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	"sighupio/permission-manager/internal/app/resources"
+	createKubeconfigUsecase "sighupio/permission-manager/internal/app/usecases/create-kubeconfig"
 )
-
-// AppContext echo context extended with application specific fields
-type AppContext struct {
-	echo.Context
-	Kubeclient *kubernetes.Clientset
-}
-
-type CustomValidator struct {
-	validator *validator.Validate
-}
 
 type ErrorRes struct {
 	Error string `json:"error"`
 }
 
-/* how to improve error messages */
-/* https://medium.com/@apzuk3/input-validation-in-golang-bc24cdec1835 */
-func (cv *CustomValidator) Validate(i interface{}) error {
-	return cv.validator.Struct(i)
-}
-
-func main() {
-	e := echo.New()
-
-	basicAuthPassword := os.Getenv("BASIC_AUTH_PASSWORD")
-	if basicAuthPassword == "" {
-		log.Fatal("BASIC_AUTH_PASSWORD env cannot be empty")
+func listUsers(us resources.UserService) echo.HandlerFunc {
+	type response = []resources.User
+	return func(c echo.Context) error {
+		users := us.GetAllUsers()
+		var r response = users
+		return c.JSON(http.StatusOK, r)
 	}
-
-	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if username == "admin" && password == basicAuthPassword {
-			return true, nil
+}
+func createUser(us resources.UserService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		type request struct {
+			Name string `json:"name" validate:"required"`
 		}
-		return false, nil
-	}))
-
-	e.Validator = &CustomValidator{validator: validator.New()}
-
-	kc := kube.NewKubeclient()
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			customContext := &AppContext{Context: c, Kubeclient: kc}
-			return next(customContext)
+		type reponse = resources.User
+		r := new(request)
+		if err := c.Bind(r); err != nil {
+			panic(err)
 		}
-	})
+		if err := c.Validate(r); err != nil {
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+		}
+		if !isValidUsername(r.Name) {
+			return c.JSON(http.StatusBadRequest, ErrorRes{invalidUsernameError})
+		}
 
-	// e.Use(middleware.Logger())
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "method=${method}, uri=${uri}, status=${status}\n",
-	}))
-
-	api := e.Group("/api")
-
-	api.GET("/list-users", listUsers)
-	api.GET("/list-groups", listGroups)
-	api.GET("/list-namespace", listNamespaces)
-	api.GET("/rbac", listRbac)
-
-	api.POST("/create-cluster-role", createClusterRole)
-	api.POST("/create-user", createUser)
-	api.POST("/create-rolebinding", createRolebinding)
-	api.POST("/create-cluster-rolebinding", createClusterRolebinding)
-
-	api.POST("/delete-cluster-role", deleteClusterRole)
-	api.POST("/delete-cluster-rolebinding", deleteClusterRolebinding)
-	api.POST("/delete-rolebinding", deleteRolebinding)
-	api.POST("/delete-role", deleteRole)
-	api.POST("/delete-user", deleteUser)
-
-	api.POST("/create-kubeconfig", createKubeconfig)
-
-	statikFS, err := fs.New()
-	if err != nil {
-		e.Logger.Fatal(err)
+		u := us.CreateUser(r.Name)
+		return c.JSON(http.StatusOK, reponse{Name: u.Name})
 	}
-
-	spaHandler := http.FileServer(statikFS)
-	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
-
-	e.Logger.Fatal(e.Start(":4000"))
 }
 
-func listUsers(c echo.Context) error {
-	ac := c.(*AppContext)
-	return c.JSON(http.StatusOK, users.GetAll(ac.Kubeclient))
+func deleteUser(us resources.UserService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		type Request struct {
+			Username string `json:"username" validate:"required"`
+		}
+		type Response struct {
+			Ok bool `json:"ok"`
+		}
+
+		r := new(Request)
+		if err := c.Bind(r); err != nil {
+			return err
+		}
+		if err := c.Validate(r); err != nil {
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+		}
+
+		us.DeleteUser(r.Username)
+		return c.JSON(http.StatusOK, Response{Ok: true})
+	}
 }
 
-func createUser(c echo.Context) error {
-	ac := c.(*AppContext)
-	type Request struct {
-		Name string `json:"name" validate:"required"`
-	}
-	type Reponse = users.User
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		panic(err)
-	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
+func ListNamespaces(rs resources.ResourcesService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		type Response struct {
+			Namespaces []string `json:"namespaces"`
+		}
 
-	u := users.CreateUser(ac.Kubeclient, r.Name)
-
-	return c.JSON(http.StatusOK, Reponse{Name: u.Name})
+		names, _ := rs.GetNamespaces()
+		return c.JSON(http.StatusOK, Response{
+			Namespaces: names,
+		})
+	}
 }
 
-func listGroups(c echo.Context) error {
-	type Group struct {
-		Name string `json:"name"`
-	}
-	return c.JSON(http.StatusOK, []Group{})
-}
-
-func listNamespaces(c echo.Context) error {
-	ac := c.(*AppContext)
-
-	namespaces, err := ac.Kubeclient.CoreV1().Namespaces().List(metav1.ListOptions{})
-	if err != nil {
-		panic(err.Error())
-	}
-
-	type Response struct {
-		Namespaces []v1.Namespace `json:"namespaces"`
-	}
-
-	return c.JSON(http.StatusOK, Response{
-		Namespaces: namespaces.Items,
-	})
-}
-
-func listRbac(c echo.Context) error {
+func ListRbac(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Response struct {
 		ClusterRoles        []rbacv1.ClusterRole        `json:"clusterRoles"`
@@ -187,7 +120,7 @@ func listRbac(c echo.Context) error {
 	})
 }
 
-func createClusterRole(c echo.Context) error {
+func CreateClusterRole(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
 		RoleName string              `json:"roleName" validate:"required"`
@@ -215,7 +148,7 @@ func createClusterRole(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
-func createRolebinding(c echo.Context) error {
+func CreateRolebinding(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
 		RolebindingName string           `json:"rolebindingName" validate:"required"`
@@ -352,28 +285,6 @@ func deleteRole(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
-func deleteUser(c echo.Context) error {
-	ac := c.(*AppContext)
-
-	type Request struct {
-		Username string `json:"username" validate:"required"`
-	}
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
-
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
-
-	users.DeleteUser(ac.Kubeclient, r.Username)
-	return c.JSON(http.StatusOK, Response{Ok: true})
-}
-
 func deleteRolebinding(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
@@ -396,23 +307,25 @@ func deleteRolebinding(c echo.Context) error {
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
-func createKubeconfig(c echo.Context) error {
-	ac := c.(*AppContext)
+func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.HandlerFunc {
 	type Request struct {
 		Username string `json:"username"`
 	}
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-
-	kubeconfig := kube.CreateKubeconfigYAML(ac.Kubeclient, r.Username)
-
 	type Response struct {
 		Ok         bool   `json:"ok"`
 		Kubeconfig string `json:"kubeconfig"`
 	}
-	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeconfig})
+	return func(c echo.Context) error {
+		ac := c.(*AppContext)
+		r := new(Request)
+		if err := c.Bind(r); err != nil {
+			return err
+		}
+
+		kubeconfig := createKubeconfigUsecase.CreateKubeconfigYAMLForUser(ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username)
+
+		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeconfig})
+	}
 }
 
 type (
@@ -447,7 +360,6 @@ func (frw *FallbackResponseWriter) WriteHeader(statusCode int) {
 	frw.WrappedResponseWriter.WriteHeader(statusCode)
 }
 
-// AddFallbackHandler wraps the handler func in another handler func covering authentication
 func AddFallbackHandler(handler http.HandlerFunc, fs http.FileSystem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		frw := FallbackResponseWriter{

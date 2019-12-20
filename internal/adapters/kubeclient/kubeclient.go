@@ -1,4 +1,4 @@
-package kube
+package kubeclient
 
 import (
 	"flag"
@@ -30,8 +30,8 @@ func newRestConfig() *rest.Config {
 	return config
 }
 
-// NewKubeclient returns a kubernetes client already configured
-func NewKubeclient() *kubernetes.Clientset {
+// New returns a kubernetes client already configured
+func New() kubernetes.Interface {
 	var config *rest.Config
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
 		c, err := rest.InClusterConfig()
@@ -43,11 +43,11 @@ func NewKubeclient() *kubernetes.Clientset {
 		config = newRestConfig()
 	}
 
-	kubeclient, err := kubernetes.NewForConfig(config)
+	client, err := kubernetes.NewForConfig(config)
 	// kubeclient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err.Error())
 	}
 
-	return kubeclient
+	return client
 }

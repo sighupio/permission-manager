@@ -1,7 +1,7 @@
 run: 
 	go run main.go
 dev:
-	CLUSTER_NAME=minikube CONTROL_PLANE_ADDRESS=https://192.168.64.33:8443 BASIC_AUTH_PASSWORD=secret gomon .
+	CLUSTER_NAME=minikube CONTROL_PLANE_ADDRESS=https://192.168.64.33:8443 BASIC_AUTH_PASSWORD=secret gomon cmd/run-server.go
 
 build-ui:
 	rm -r statik

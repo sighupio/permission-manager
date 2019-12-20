@@ -25,6 +25,15 @@ export default function NewUserWizard() {
     if (username.length < 3) {
       setUsernameError('Required to be at least 3 characters long')
       return false
+    } else if (
+      !username.match(
+        /^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)$/
+      )
+    ) {
+      setUsernameError(
+        `user can only contain lowercase letters, dots and dashes`
+      )
+      return false
     } else if (users.map(u => u.name).includes(username)) {
       setUsernameError(`user ${username} already exists`)
       return false
