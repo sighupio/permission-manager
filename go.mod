@@ -9,7 +9,6 @@ require (
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/rakyll/statik v0.1.6
-	github.com/sighupio/permission-manager v0.0.0-20191213135417-0b9e6e653116 // indirect
 	github.com/stretchr/testify v1.4.0
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
