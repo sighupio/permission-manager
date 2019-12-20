@@ -1,17 +1,20 @@
 package server
 
 import (
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
-	"github.com/rakyll/statik/fs"
-	"k8s.io/client-go/kubernetes"
 	"sighupio/permission-manager/internal/app/resources"
 	"sighupio/permission-manager/internal/config"
 	_ "sighupio/permission-manager/statik"
+
+	"github.com/rakyll/statik/fs"
+	"k8s.io/client-go/kubernetes"
 )
 
 // AppContext echo context extended with application specific fields
@@ -23,6 +26,18 @@ type AppContext struct {
 func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService resources.ResourcesService) *echo.Echo {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
+
+	basicAuthPassword := os.Getenv("BASIC_AUTH_PASSWORD")
+	if basicAuthPassword == "" {
+		log.Fatal("BASIC_AUTH_PASSWORD env cannot be empty")
+	}
+
+	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == "admin" && password == basicAuthPassword {
+			return true, nil
+		}
+		return false, nil
+	}))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
