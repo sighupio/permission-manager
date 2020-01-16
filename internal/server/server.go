@@ -9,8 +9,8 @@ import (
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 
-	"sighupio/permission-manager/internal/app/resources"
 	"sighupio/permission-manager/internal/config"
+	"sighupio/permission-manager/internal/resources"
 	_ "sighupio/permission-manager/statik"
 
 	"github.com/rakyll/statik/fs"

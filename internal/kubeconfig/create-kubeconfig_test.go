@@ -1,4 +1,4 @@
-package createkubeconfigusecase
+package kubeconfig
 
 import (
 	"testing"

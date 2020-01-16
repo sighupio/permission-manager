@@ -6,11 +6,11 @@ import (
 	"log"
 	"net/http"
 
+	"sighupio/permission-manager/internal/resources"
+
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"sighupio/permission-manager/internal/app/resources"
-	createKubeconfigUsecase "sighupio/permission-manager/internal/app/usecases/create-kubeconfig"
 )
 
 type ErrorRes struct {
