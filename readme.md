@@ -69,7 +69,7 @@ run go server (assuming using Minikube, othewhise change the ENVs set by `make d
 make dev
 ```
 
-> the application is also exposed at index from the go app, but this is not updated when frontend files change, if working only on the server this is enought
+> the application is also exposed at the index route "/" from the go app, but this is not updated when frontend files change, when working only on the backend this is enought
 
 ### How to make changes in the frontend
 
@@ -125,3 +125,9 @@ docker push reg.sighup.io/sighup-products/permission-manager:x.x.x
 apply files inside `k8s-seeds`
 
 update image tag of the pod
+
+### Local Development with Kind
+
+copy kind's `ca.crt` of the host machine
+`make copy-kind-ca-crt`  
+set env `CA_CRT_PATH` to the location of `ca.crt` just copied
