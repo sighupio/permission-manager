@@ -3,20 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@kubernetes/client-node": "^0.11.0",
     "@reach/dialog": "^0.2.9",
-    "@types/lodash": "^4.14.138",
     "@types/reach__dialog": "^0.1.0",
     "@types/react-router": "^5.1.2",
     "@types/react-router-dom": "^5.1.0",
     "@types/react-select": "^3.0.4",
     "axios": "^0.19.1",
-    "execa": "^2.0.4",
-    "lodash": "^4.17.15",
-    "next": "^9.0.3",
-    "pg": "^7.12.0",
     "prettyjson": "^1.2.1",
-    "prismjs": "^1.17.1",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-json-pretty": "^2.2.0",
@@ -26,9 +19,7 @@
     "react-select": "^3.0.4",
     "react-simple-code-editor": "^0.9.14",
     "react-spinners": "^0.6.1",
-    "sequelize": "^5.12.2",
     "tailwindcss": "^1.1.2",
-    "temp-write": "^4.0.0",
     "uuid": "^3.3.2"
   },
   "scripts": {
@@ -61,8 +52,7 @@
     "@types/react-dom": "^16.9.4",
     "@types/uuid": "^3.4.6",
     "@types/validator": "^10.11.2",
-    "prettier": "^1.19.1",
-    "typescript": "^3.6.4"
+    "prettier": "^1.19.1"
   },
   "proxy": "http://localhost:4000"
 }
