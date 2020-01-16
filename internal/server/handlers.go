@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"sighupio/permission-manager/internal/kubeconfig"
 	"sighupio/permission-manager/internal/resources"
 
 	"github.com/labstack/echo"
@@ -322,9 +323,9 @@ func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.Handl
 			return err
 		}
 
-		kubeconfig := createKubeconfigUsecase.CreateKubeconfigYAMLForUser(ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username)
+		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username)
 
-		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeconfig})
+		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 	}
 }
 
