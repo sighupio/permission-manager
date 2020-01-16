@@ -33,7 +33,8 @@ func newRestConfig() *rest.Config {
 // New returns a kubernetes client already configured
 func New() kubernetes.Interface {
 	var config *rest.Config
-	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+
+	if insideKubernetesCluster() {
 		c, err := rest.InClusterConfig()
 		if err != nil {
 			panic(err.Error())
@@ -50,4 +51,9 @@ func New() kubernetes.Interface {
 	}
 
 	return client
+}
+
+func insideKubernetesCluster() bool {
+	/* Control if running inside a kubernetes cluster by checking KUBERNETES_SERVICE_HOST env  */
+	return os.Getenv("KUBERNETES_SERVICE_HOST") != ""
 }

@@ -19,8 +19,6 @@ func CreateKubeconfigYAMLForUser(kc kubernetes.Interface, clusterName, clusterCo
 func createKubeconfig(clusterName string, username string, clusterControlPlaceAddress string, caBasebase64 string, crtBase64 string, privateKeyBase64 string) (kubeconfigYAML string) {
 	kubeconfigYAML = fmt.Sprintf(`apiVersion: v1
 kind: Config
-preferences:
-    colors: true
 current-context: %s
 clusters:
   - name: %s
