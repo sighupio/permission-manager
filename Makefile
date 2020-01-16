@@ -1,7 +1,19 @@
 run: 
 	go run main.go
+
+copy-kind-ca-crt:
+	docker cp kind-control-plane:/etc/kubernetes/pki ~/.kind
+
 dev:
-	CLUSTER_NAME=minikube CONTROL_PLANE_ADDRESS=https://192.168.64.33:8443 BASIC_AUTH_PASSWORD=secret gomon cmd/run-server.go
+	$(MAKE) copy-kind-ca-crt
+	CA_CRT_PATH=~/.kind/ca.crt \
+	CLUSTER_NAME=local-kind-development \
+	CONTROL_PLANE_ADDRESS=https://127.0.0.1:64970 \
+	BASIC_AUTH_PASSWORD=secret \
+	PORT=4000 \
+	gomon cmd/run-server.go
+
+
 
 build-ui:
 	rm -r statik
