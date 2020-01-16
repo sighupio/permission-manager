@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"os/user"
 	"path/filepath"
 	"time"
 
@@ -122,11 +123,23 @@ func createCSR(username string, privateKey *rsa.PrivateKey) (csrBytes []byte, cs
 	return
 }
 
+func expandHomePath(path string) string {
+	if len(path) == 0 || path[0] != '~' {
+		return path
+	}
+
+	usr, err := user.Current()
+	if err != nil {
+		panic(err)
+	}
+	return filepath.Join(usr.HomeDir, path[1:])
+}
+
 func getCaBase64() string {
 	ca := ""
 	/* REFACTOR: read and encode base64 from go */
 	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
-		fp := filepath.Join(os.Getenv("HOME"), ".minikube", "ca.crt")
+		fp := expandHomePath(os.Getenv("CA_CRT_PATH"))
 		s := fmt.Sprintf("cat %s | base64 | tr -d '\n'", fp)
 		caBase64, err := exec.Command("sh", "-c", s).Output()
 		if err != nil {
