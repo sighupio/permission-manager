@@ -13,5 +13,6 @@ func main() {
 	rs := resources.NewResourcesService(kc)
 
 	s := server.New(kc, cfg, rs)
-	s.Logger.Fatal(s.Start(":4000"))
+	addr := ":" + cfg.Port
+	s.Logger.Fatal(s.Start(addr))
 }
