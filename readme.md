@@ -2,24 +2,27 @@
 
 Permission manager is an application that allow to create a user and a kubeconfig YAML file and assign permissions to operate within a namespace or globally via a web interface
 
-## Quick core concepts
+## installation
 
-- A server written in go is responsive to talk with the k8s cluster
-  - in production the UI with be served as static asset from the go server compiled into a go file using [statik](https://github.com/rakyll/statik) so that a single binary can be deployed
-- The UI is a ReactJS single page application
-  - the UI run indipendently from the go server when developing
-- users are CRD inside k8s and will be stored inside ETCD
-  the app recognise whenere is run inside kubernetes or not by checking the ENV `KUBERNETES_SERVICE_HOST` this will change how the app tries to autenticate to the api server (via token from within k8s or using `~/.kube/config` otherwhise)
+a guide on how to deploy permission manager is located at [installation](docs/installation.md)
 
-## How it works
+## setup for development
 
-It uses a naming convention to identity some roles as "templates", this is used to filter the at UI
+a detailed guide on how to contribute is located at [how-to-contribute](docs/how-to-contribute.md)
 
-the template system is an abstraction over cluter roles, rolebinding and cluster roles bindigs, making the permissions "kubernetes native"
+## FAQ
+
+### How it works
+
+The application allow to select some templates and associated them with an user, a naming convention is used to only show templates in the UI (see below for details)
+
+the template system is an abstraction over cluter-roles, rolebinding and cluster roles bindigs, making the permissions "kubernetes native"
+
+In a future version the naming convention will be changed using CRDs and k8s labels
 
 ### What is a template
 
-A template a clusterrole with the prefix
+A template is a clusterrole with the prefix
 
 `template-namespaced-resources___`
 
@@ -34,100 +37,14 @@ at the time of development a template was one-to-one to a `clusterrole`, the usa
 
 Crate a clusterrole starting with `template-namespaced-resources___` and apply it
 
-### setup
+#### default templates
 
-these ENV are required
+`developer` and `operation` default templates can be created by applying the manifest located at _k8s/k8s-seeds/seed.yml_
 
-| Env Name              | Description                                                               |
-| --------------------- | ------------------------------------------------------------------------- |
-| CLUSTER_NAME          | name of the cluster to use in the generated kubeconfig file               |
-| CONTROL_PLANE_ADDRESS | full address of the control plane to use in the generated kubeconfig file |
-|                       |                                                                           |
-
-#### apply manifests
-
-`developer` and `operation` default templates can be created by applying the manifest located at _k8s-seeds/seed.yml_
-
-CRD for users, and required secrets are can all be installed running
-
-```
-kubectl apply -f k8s-seeds
+```sh
+kubectl apply -f k8s/k8s-seeds
 ```
 
-## Setup for Local developlment
+### what is a user
 
-run UI
-
-```
-cd web-client
-npm start
-```
-
-run go server (assuming using Minikube, othewhise change the ENVs set by `make dev`)
-
-```
-make dev
-```
-
-> the application is also exposed at the index route "/" from the go app, but this is not updated when frontend files change, when working only on the backend this is enought
-
-### How to make changes in the frontend
-
-to run
-
-```
-cd web-client
-npm start
-```
-
-to build
-run `make build-ui`
-it will build the app and save the files as a single go file that the server will then expose
-
-### How to test inside Minikube
-
-use Minikube's docker daemon (all subsequent commands needs to be run in the same shell where this command is run becuase ENV are set)
-
-```
-eval $(minikube docker-env)
-```
-
-build the Docker image
-
-```
-docker build -t permission-manager:1.0.x-beta .
-```
-
-deploy the manifest (update the version in deploy.yml)
-
-```
-kubectl apply -f deploy.yaml
-```
-
-port forward the service
-
-```
-kubectl port-forward service/permission-manager-service 4000:4000
-```
-
-navigate to localhost:4000 to see the web UI
-
-## How To deploy
-
-> change version in the below snippets
-
-```
-make build-ui
-docker build -t reg.sighup.io/sighup-products/permission-manager:x.x.x .
-docker push reg.sighup.io/sighup-products/permission-manager:x.x.x
-```
-
-apply files inside `k8s-seeds`
-
-update image tag of the pod
-
-### Local Development with Kind
-
-copy kind's `ca.crt` of the host machine
-`make copy-kind-ca-crt`  
-set env `CA_CRT_PATH` to the location of `ca.crt` just copied
+a user is an custom resource of kind `permissionmanagerusers.permissionmanager.user`

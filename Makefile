@@ -14,6 +14,10 @@ seed-cluster:
 	kubectl apply -f k8s/k8s-seeds
 	kubectl apply -f k8s/test-manifests
 
+seed-cluster-production:
+	kubectl apply -f k8s/k8s-seeds/namespace.yml
+	kubectl apply -f k8s/k8s-seeds
+
 dev-kind:
 	$(MAKE) copy-kind-ca-crt
 	CA_CRT_PATH=~/.kind/ca.crt \
