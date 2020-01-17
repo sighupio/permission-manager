@@ -62,6 +62,7 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 	api.POST("/create-rolebinding", CreateRolebinding)
 	api.POST("/create-cluster-rolebinding", createClusterRolebinding)
 
+	/* should use DELETE method, using POST due to a weird bug that looks now resolved */
 	api.POST("/delete-cluster-role", deleteClusterRole)
 	api.POST("/delete-cluster-rolebinding", deleteClusterRolebinding)
 	api.POST("/delete-rolebinding", deleteRolebinding)
