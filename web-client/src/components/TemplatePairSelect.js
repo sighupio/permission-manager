@@ -6,7 +6,7 @@ import TemplateSelect from './TemplateSelect'
 export default function TemplatePairSelect({ onSave, initialValues }) {
   const [namespaces, setNamespaces] = useState(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState(
-    initialValues.namespaces === 'ALL_NAMESPACES' ? true : null,
+    initialValues.namespaces === 'ALL_NAMESPACES' ? true : null
   )
   const [template, setTemplate] = useState(initialValues.template)
 
@@ -26,13 +26,13 @@ export default function TemplatePairSelect({ onSave, initialValues }) {
     onSave({
       id: initialValues.id,
       namespaces,
-      template,
+      template
     })
   }, [initialValues.id, namespaces, onSave, template])
 
   return (
     <div style={{ display: 'flex' }}>
-      <div style={{ flex: 3 }}>
+      <div style={{ flex: 3 }} data-testid="template-select">
         <div className="block uppercase tracking-wide text-gray-700 text-xs  mb-2">
           template
         </div>
@@ -41,7 +41,7 @@ export default function TemplatePairSelect({ onSave, initialValues }) {
           initialValue={initialValues.template}
         />
       </div>
-      <div style={{ marginLeft: 20, flex: 3 }}>
+      <div style={{ marginLeft: 20, flex: 3 }} data-testid="namespaces-select">
         <div className="block uppercase tracking-wide text-gray-700 text-xs  mb-2">
           <span className="text-red-400 pr-1">*</span>
           namespaces

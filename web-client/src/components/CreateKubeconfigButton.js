@@ -12,7 +12,7 @@ export default function CreateKubeconfigButton({ user }) {
     if (showModal && kubeconfig === '') {
       axios
         .post('/api/create-kubeconfig', {
-          username: user.name,
+          username: user.name
         })
         .then(({ data }) => {
           setKubeconfig(data.kubeconfig)
@@ -53,7 +53,7 @@ export default function CreateKubeconfigButton({ user }) {
                     },
                     function(err) {
                       console.error('Async: Could not copy text: ', err)
-                    },
+                    }
                   )
                 }}
               >
@@ -62,17 +62,19 @@ export default function CreateKubeconfigButton({ user }) {
             </div>
 
             {kubeconfig ? (
-              <Editor
-                autoFocus
-                onValueChange={code => code}
-                value={kubeconfig}
-                highlight={code => code}
-                padding={10}
-                style={{
-                  fontFamily: '"Fira code", "Fira Mono", monospace',
-                  fontSize: 12,
-                }}
-              />
+              <div data-testid="yaml">
+                <Editor
+                  autoFocus
+                  onValueChange={code => code}
+                  value={kubeconfig}
+                  highlight={code => code}
+                  padding={10}
+                  style={{
+                    fontFamily: '"Fira code", "Fira Mono", monospace',
+                    fontSize: 12
+                  }}
+                />
+              </div>
             ) : (
               '...loading'
             )}

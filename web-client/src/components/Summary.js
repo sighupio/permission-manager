@@ -21,7 +21,7 @@ export default function Summary({ pairItems }) {
       const ruleset = {
         template: p.template,
         rules,
-        namespaces: p.namespaces === 'ALL_NAMESPACES' ? ['all'] : p.namespaces,
+        namespaces: p.namespaces === 'ALL_NAMESPACES' ? ['all'] : p.namespaces
       }
 
       const itemForSameTemplate = acc.find(rs => rs.template === p.template)
@@ -34,7 +34,7 @@ export default function Summary({ pairItems }) {
         } else {
           const templates = new Set([
             ...itemForSameTemplate.namespaces,
-            ...ruleset.namespaces,
+            ...ruleset.namespaces
           ])
           itemForSameTemplate.namespaces = Array.from(templates)
         }
@@ -47,7 +47,7 @@ export default function Summary({ pairItems }) {
     .filter(x => x.namespaces.length > 0)
 
   return (
-    <div>
+    <div data-testid="summary">
       <h3 className="text-xl mb-2">Summary</h3>
       <div className="border rounded py-4 px-4 bg-gray-100 inline-block">
         <TemplateInfo ruleSets={ruleSets} />

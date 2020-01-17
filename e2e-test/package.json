@@ -1,0 +1,17 @@
+{
+  "name": "e2e-test",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "cypress open"
+  },
+  "devDependencies": {
+    "@testing-library/cypress": "^5.0.2",
+    "@types/testing-library__cypress": "^5.0.1",
+    "cypress": "^3.8.2",
+    "eslint": "^6.8.0",
+    "eslint-plugin-chai-friendly": "^0.5.0",
+    "eslint-plugin-cypress": "^2.8.1"
+  },
+  "dependencies": {}
+}

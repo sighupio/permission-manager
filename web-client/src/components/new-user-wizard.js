@@ -31,7 +31,7 @@ export default function NewUserWizard() {
       )
     ) {
       setUsernameError(
-        `user can only contain lowercase letters, dots and dashes`
+        `user can only contain lowercase letters, dots and dashes and numbers`
       )
       return false
     } else if (users.map(u => u.name).includes(username)) {
@@ -175,23 +175,23 @@ export default function NewUserWizard() {
             <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
               <span className="text-red-400 pr-1">*</span>
               Username
+              <input
+                autoFocus
+                placeholder="Kelsey Hightower"
+                className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${
+                  usernameError && formTouched ? 'border-red-500' : ''
+                }`}
+                required
+                type="text"
+                value={username}
+                onChange={e => {
+                  if (!formTouched) {
+                    setFormTouched(true)
+                  }
+                  setUsername(e.target.value)
+                }}
+              />
             </label>
-            <input
-              autoFocus
-              placeholder="Kelsey Hightower"
-              className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${
-                usernameError && formTouched ? 'border-red-500' : ''
-              }`}
-              required
-              type="text"
-              value={username}
-              onChange={e => {
-                if (!formTouched) {
-                  setFormTouched(true)
-                }
-                setUsername(e.target.value)
-              }}
-            />
 
             {usernameError && formTouched ? (
               <p className="text-red-500 text-xs italic">{usernameError}</p>
