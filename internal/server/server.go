@@ -39,6 +39,7 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 		return false, nil
 	}))
 
+	/* to deprecate, this is not tyesafe, see server.listUsers as a reference to how create new handlers */
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			customContext := &AppContext{Context: c, Kubeclient: kubeclient}
