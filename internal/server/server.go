@@ -77,6 +77,7 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 	}
 
 	spaHandler := http.FileServer(statikFS)
+	/* allow every call to unknown paths to return index.html, this necessary when refreshing the browser at an url that is not backed by a real file but only a client route*/
 	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
 
 	return e
