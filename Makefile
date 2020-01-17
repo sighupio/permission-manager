@@ -2,7 +2,11 @@ run:
 	go run main.go
 
 copy-kind-ca-crt:
-	docker cp kind-control-plane:/etc/kubernetes/pki ~/.kind
+	docker cp kind-control-plane:/etc/kubernetes/pki/ca.crt ~/.kind/ca.crt
+
+
+make gotest:
+	go test sighupio/permission-manager/...
 
 
 seed-cluster:
@@ -10,10 +14,19 @@ seed-cluster:
 	kubectl apply -f k8s/k8s-seeds
 	kubectl apply -f k8s/test-manifests
 
-dev:
-	# $(MAKE) copy-kind-ca-crt
-	CA_CRT_PATH=~/.minikube/ca.crt \
+dev-kind:
+	$(MAKE) copy-kind-ca-crt
+	CA_CRT_PATH=~/.kind/ca.crt \
 	CLUSTER_NAME=local-kind-development \
+	CONTROL_PLANE_ADDRESS=https://127.0.0.1:51064 \
+	BASIC_AUTH_PASSWORD=secret \
+	PORT=4000 \
+	gomon cmd/run-server.go
+
+
+dev-minikube:
+	CA_CRT_PATH=~/.minikube/ca.crt \
+	CLUSTER_NAME=local-minikube-development \
 	CONTROL_PLANE_ADDRESS=https://192.168.64.35:8443 \
 	BASIC_AUTH_PASSWORD=secret \
 	PORT=4000 \

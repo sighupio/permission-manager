@@ -1,25 +1,21 @@
 # Permission manager
 
-Permission manager is an application that allow to a user specific kubeconfig, and assign permissions to operate within a namespace or globally via a web interface
+Permission manager is an application that allow to create a user and a kubeconfig YAML file and assign permissions to operate within a namespace or globally via a web interface
 
 ## Quick core concepts
 
 - A server written in go is responsive to talk with the k8s cluster
   - in production the UI with be served as static asset from the go server compiled into a go file using [statik](https://github.com/rakyll/statik) so that a single binary can be deployed
 - The UI is a ReactJS single page application
-
   - the UI run indipendently from the go server when developing
-
 - users are CRD inside k8s and will be stored inside ETCD
   the app recognise whenere is run inside kubernetes or not by checking the ENV `KUBERNETES_SERVICE_HOST` this will change how the app tries to autenticate to the api server (via token from within k8s or using `~/.kube/config` otherwhise)
-- using [`golang-standards/project-layout`](https://github.com/golang-standards/project-layout)
-- applying Clean Architecture / Hexgolan architecture patterns to decouple domain logic from implementations to allow easier testing, refactoring and future development
 
 ## How it works
 
 It uses a naming convention to identity some roles as "templates", this is used to filter the at UI
 
-the template system is an abstrction over cluter roles, rolebinding and cluster roles bindigs, making the permissions "kubernetes native"
+the template system is an abstraction over cluter roles, rolebinding and cluster roles bindigs, making the permissions "kubernetes native"
 
 ### What is a template
 
@@ -29,6 +25,10 @@ A template a clusterrole with the prefix
 
 for example
 `template-namespaced-resources___developer`
+
+#### why a template is not a CRD
+
+at the time of development a template was one-to-one to a `clusterrole`, the usage of a CRD looked overkill, could could change in the future to avoid polluting `clusterrole`s and having a more precise incapsulation of what is owned by the permission manager
 
 ### How to add a new template
 

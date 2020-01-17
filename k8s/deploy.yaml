@@ -22,6 +22,8 @@ spec:
           ports:
             - containerPort: 4000
           env:
+            - name: PORT
+              value: 4000
             - name: CLUSTER_NAME
               value: "my-cluster"
             - name: CONTROL_PLANE_ADDRESS
