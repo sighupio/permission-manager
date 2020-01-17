@@ -4,16 +4,26 @@ run:
 copy-kind-ca-crt:
 	docker cp kind-control-plane:/etc/kubernetes/pki ~/.kind
 
+
+seed-cluster:
+	kubectl apply -f k8s/k8s-seeds/namespace.yml
+	kubectl apply -f k8s/k8s-seeds
+	kubectl apply -f k8s/test-manifests
+
 dev:
-	$(MAKE) copy-kind-ca-crt
-	CA_CRT_PATH=~/.kind/ca.crt \
+	# $(MAKE) copy-kind-ca-crt
+	CA_CRT_PATH=~/.minikube/ca.crt \
 	CLUSTER_NAME=local-kind-development \
-	CONTROL_PLANE_ADDRESS=https://127.0.0.1:64970 \
+	CONTROL_PLANE_ADDRESS=https://192.168.64.35:8443 \
 	BASIC_AUTH_PASSWORD=secret \
 	PORT=4000 \
 	gomon cmd/run-server.go
 
 
+
+e2e:
+	cd e2e-test && yarn test
+	
 
 build-ui:
 	rm -r statik

@@ -1,84 +1,82 @@
 /// <reference types="cypress" />
 /// <reference types="@types/testing-library__cypress" />
 
-describe("My First Test", function() {
-  it('clicking "type" shows the right headings', function() {
-    const username = "test-user-" + Date.now();
-    const templateName = "developer";
+it("Create use and save kubeconfig YAML to disk", function() {
+  /* SETUP */
+  const templateName = "developer";
+  const username = `test-user-${templateName}-${Date.now()}`;
 
-    cy.visit("http://admin:secret@localhost:3000");
+  /* INDEX PAGE */
+  cy.visit("http://admin:secret@localhost:4000");
 
-    cy.contains(/create new user/i).click();
+  cy.contains(/create new user/i).click();
 
-    /* USER CREATION PAGE */
+  /* USER CREATION PAGE */
+  cy.url().should("include", "/new-user");
 
-    cy.url().should("include", "/new-user");
+  cy.queryByTestId("summmary").should("not.exist");
 
-    // Get an input, type into it and verify that the value has been updated
+  cy.findByLabelText(/username/i)
+    .type(username)
+    .should("have.value", username);
 
-    cy.queryByTestId("summmary").should("not.exist");
+  cy.findByText(/add/i).should("be.disabled");
 
-    cy.findByLabelText(/username/i)
-      .type(username)
-      .should("have.value", username);
+  cy.findByText(/save/i).should("be.disabled");
 
-    cy.findByText(/add/i).should("be.disabled");
+  cy.findByTestId("template-select")
+    .findByText(templateName)
+    .should("exist");
 
-    cy.findByText(/save/i).should("be.disabled");
+  cy.get("[class$=-control]")
+    .eq(1)
+    .click(0, 0, { force: true });
 
-    cy.findByTestId("template-select")
-      .findByText(templateName)
-      .should("exist");
+  cy.findByTestId("namespaces-select")
+    .get("[class$=-option]")
+    .contains("default")
+    .click({ force: true });
 
-    cy.get("[class$=-control]")
-      .eq(1)
-      .click(0, 0, { force: true });
+  cy.findByTestId("namespaces-select")
+    .get(".css-12jo7m5") /* the tag of selected item */
+    .contains("default");
 
-    cy.findByTestId("namespaces-select")
-      .get("[class$=-option]")
-      .eq(0)
-      .click({ force: true });
+  cy.findByLabelText("none").should("be.checked");
 
-    cy.findByTestId("namespaces-select")
-      .get(".css-12jo7m5") /* the tag of selected item */
-      .contains("default");
+  cy.findByText(/add/i).should("not.be.disabled");
 
-    cy.findByLabelText("none").should("be.checked");
+  cy.findByText(/save/i).should("not.be.disabled");
 
-    cy.findByText(/add/i).should("not.be.disabled");
+  cy.get("[data-testid=summary]").should("exist");
 
-    cy.findByText(/save/i).should("not.be.disabled");
+  cy.findByText(/save/i).click();
 
-    cy.get("[data-testid=summary]").should("exist");
+  /* USER DETAIL PAGE */
+  cy.url().should("include", "/users/" + username);
 
-    cy.findByText(/save/i).click();
+  cy.findByTestId("username-heading").should("have.text", username);
 
-    /* USER DETAIL PAGE */
-    cy.url().should("include", "/users/" + username);
+  cy.findByTestId("template-select")
+    .findByText(templateName)
+    .should("exist");
 
-    cy.findByTestId("username-heading").should("have.text", username);
+  cy.findByText(/show kubeconfig/i).click();
 
-    cy.findByTestId("template-select")
-      .findByText(templateName)
-      .should("exist");
+  /* KUBECONFIG DIALOG */
 
-    cy.findByText(/show kubeconfig/i).click();
+  cy.wait(500);
+  cy.findByTestId("yaml").should("exist");
+  cy.findByText(/copy/i).click();
+  cy.findByText(/copied/i).should("exist");
+  cy.findByText(/copy/i).should("not.exist");
 
-    /* KUBECONFIG DIALOG */
+  cy.findByTestId("yaml")
+    .get("textarea")
+    .should("have.include.value", "apiVersion: v1")
+    .invoke("val")
+    .then(kubeconfigYAML => {
+      console.log(kubeconfigYAML);
 
-    cy.findByTestId("yaml").should("exist");
-    cy.findByText(/copy/i).click();
-    cy.findByText(/copied/i).should("exist");
-    cy.findByText(/copy/i).should("not.exist");
-
-    cy.findByTestId("yaml")
-      .get("textarea")
-      .should("have.include.value", "apiVersion: v1")
-      .invoke("val")
-      .then(kubeconfigYAML => {
-        console.log(kubeconfigYAML);
-
-        cy.writeFile(`data/kubeconfigs/${username}`, kubeconfigYAML);
-      });
-  });
+      cy.writeFile(`data/kubeconfigs/${username}`, kubeconfigYAML);
+    });
 });
