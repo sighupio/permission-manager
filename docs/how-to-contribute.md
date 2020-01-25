@@ -11,7 +11,7 @@ this guide is for contributing on the development of the Permission Manager itse
 - users are CRD inside k8s and will be stored inside ETCD
   the app recognise whenere is run inside kubernetes or not by checking the ENV `KUBERNETES_SERVICE_HOST` this will change how the app tries to autenticate to the api server (via token from within k8s or using `~/.kube/config` otherwhise)
 
-## How the application works works
+## How the application works
 
 The application allow to select some templates and associated them with an user, a naming convention is used to only show templates in the UI (see below for details)
 
