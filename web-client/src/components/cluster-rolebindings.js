@@ -1,8 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import uuid from 'uuid'
 import { useRbac } from '../hooks/useRbac'
 import { useUsers } from '../hooks/useUsers'
-import { useState, useEffect } from 'react'
 import axios from 'axios'
 import { ClusterRoleSelect } from './cluster-role-select'
 

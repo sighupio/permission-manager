@@ -1,6 +1,5 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import NamespaceMultiSelect from './NamespaceMultiSelect'
-import { useState, useEffect } from 'react'
 import TemplateSelect from './TemplateSelect'
 
 export default function TemplatePairSelect({ onSave, initialValues }) {

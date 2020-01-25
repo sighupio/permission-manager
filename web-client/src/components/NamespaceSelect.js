@@ -1,5 +1,6 @@
 import { useNamespaceList } from '../hooks/useNamespaceList'
 import React, { useState, useEffect } from 'react'
+
 export default function NamespaceSelect({ onSelect }) {
   const { namespaceList } = useNamespaceList()
   const [selected, setSelected] = useState()

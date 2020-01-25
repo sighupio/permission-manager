@@ -1,5 +1,9 @@
 import React from 'react'
-export default ({ clusterAccess, setClusterAccess }) => {
+
+export default function ClusterAccessRadio({
+  clusterAccess,
+  setClusterAccess
+}) {
   return (
     <div>
       <div>

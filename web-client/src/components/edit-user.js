@@ -234,7 +234,9 @@ export default function EditUser({ user }) {
       {showLoader && <FullScreenLoader />}
 
       <div className="flex content-between items-center mb-4">
-        <h2 className="text-3xl text-gray-800">User: <span data-testid="username-heading">{username}</span></h2>
+        <h2 className="text-3xl text-gray-800">
+          User: <span data-testid="username-heading">{username}</span>
+        </h2>
         <div>
           <button
             tabIndex={-1}
