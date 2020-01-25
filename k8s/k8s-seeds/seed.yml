@@ -160,8 +160,6 @@ kind: ServiceAccount
 metadata:
   name: permission-manager-service-account
   namespace: permission-manager
-imagePullSecrets:
-  - name: sighup-gitlab-registry
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

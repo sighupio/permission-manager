@@ -18,16 +18,16 @@ spec:
       serviceAccountName: permission-manager-service-account
       containers:
         - name: permission-manager
-          image: reg.sighup.io/sighup-products/permission-manager:1.5.0
+          image: quay.io/sighup/permission-manager:1.5.0
           ports:
             - containerPort: 4000
           env:
             - name: PORT
-              value: 4000
+              value: "4000"
             - name: CLUSTER_NAME
               value: "my-cluster"
             - name: CONTROL_PLANE_ADDRESS
-              value: "https://192.168.64.34:8443"
+              value: "https://172.17.0.3:6443"
             - name: BASIC_AUTH_PASSWORD
               valueFrom:
                 secretKeyRef:
