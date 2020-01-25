@@ -1,6 +1,9 @@
 # Permission manager
 
-Permission manager is an application that allow to create a user and a kubeconfig YAML file and assign permissions to operate within a namespace or globally via a web interface
+Welcome to the Permission Manager! :tada: :tada:
+Permission Manager is an application developed by SIGHUP that enables a super-easy and user-friendly RBAC management for Kubernetes.
+
+With Permission Manager, you can create users, assign namespaces/permissions, and distribute Kubeconfig YAML files via a nice&easy web UI.
 
 ## Screenshots
 
@@ -8,61 +11,66 @@ Permission manager is an application that allow to create a user and a kubeconfi
 
 ![First Page](docs/assets/first-page.png)
 
-*Creating an user*
+*Creating a user*
 
-![Creating an user](docs/assets/create-user.png)
+![Creating a user](docs/assets/create-user.png)
 
-*Creating an user - Summary*
+*Creating a user - Summary*
 
 ![Create user Sumary](docs/assets/create-user-summary.png)
 
-*User's kubeconfig*
+* User's Kubeconfig*
 
 ![User's Kubeconfig](docs/assets/users-kubeconfig.png)
 
 ## Installation
 
-A guide on how to deploy permission manager is located at [installation](docs/installation.md)
+To deploy and run the Permission Manager on your cluster, follow the [installation guide](docs/installation.md)
 
 ## Development Setup
 
-A detailed guide on how to contribute is located at [how-to-contribute](docs/how-to-contribute.md)
+We love contributions from the community <3
+Learn [how-to-contribute](docs/how-to-contribute.md)
 
 ## FAQ
 
 ### How it works
 
-The application allow to select some templates and associated them with an user, a naming convention is used to only show templates in the UI (see below for details)
+The application allows us to define and select permission standard templates (those defining who can do what, within a namespace or globally) and associate them with all the users you might want to create.
 
-the template system is an abstraction over cluter-roles, rolebinding and cluster roles bindigs, making the permissions "kubernetes native"
+The template system is an abstraction over Cluster-Roles, RoleBinding, and ClusterRolesBindigs.
 
-In a future version the naming convention will be changed using CRDs and k8s labels
+Do we plan to use CRDs and custom labels? Sure, it's in the product roadmap.
 
 ### What is a template
 
-A template is a clusterrole with the prefix
+A template is a ClusterRole with a prefix
 
 `template-namespaced-resources___`
 
 for example
 `template-namespaced-resources___developer`
 
-#### why a template is not a CRD
+#### Why a template is not a CRD
 
-at the time of development a template was one-to-one to a `clusterrole`, the usage of a CRD looked overkill, could could change in the future to avoid polluting `clusterrole`s and having a more precise incapsulation of what is owned by the permission manager
+When we started the development of this project, a template was one-to-one to a `clusterrole`, the usage of a CRD looked overkill. This will obviouosly change in future to avoid polluting `clusterroles` and will allow us to have a more precise incapsulation of what is owned by the permission manager.
 
 ### How to add a new template
 
-Crate a clusterrole starting with `template-namespaced-resources___` and apply it
+Crate a clusterrole starting with `template-namespaced-resources___` and apply it.
 
-#### default templates
+#### Default templates
 
 `developer` and `operation` default templates can be created by applying the manifest located at _k8s/k8s-seeds/seed.yml_
 
 ```sh
 kubectl apply -f k8s/k8s-seeds
-```
+`"
 
-### what is a user
+### What is a user
 
-a user is an custom resource of kind `permissionmanagerusers.permissionmanager.user`
+A user is a custom resource of kind `permissionmanagerusers.permissionmanager.user`
+
+## Commercial & Enterprise Support
+
+Are you using Permission Manager in your clusters and looking for commercial support? Let us know and [get in touch](mailto:sales@sighup.io)
