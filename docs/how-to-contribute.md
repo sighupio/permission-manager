@@ -95,6 +95,8 @@ the test flow creates a user and save a kubeconfig to disk at `e2e-test/data/kub
 
 use `make e2e` to run the tests
 
+![e2e](./assets/e2e.gif)
+
 ### Testing server
 
 to run all test use `make gotest`
