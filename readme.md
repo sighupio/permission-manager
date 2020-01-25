@@ -30,7 +30,7 @@ To deploy and run the Permission Manager on your cluster, follow the [installati
 
 ## Development Setup
 
-We love contributions from the community <3
+We love contributions from the community <3.  
 Learn [how-to-contribute](docs/how-to-contribute.md)
 
 ## FAQ
