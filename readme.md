@@ -2,13 +2,31 @@
 
 Permission manager is an application that allow to create a user and a kubeconfig YAML file and assign permissions to operate within a namespace or globally via a web interface
 
-## installation
+## Screenshots
 
-a guide on how to deploy permission manager is located at [installation](docs/installation.md)
+*First Page*
 
-## setup for development
+![First Page](docs/assets/first-page.png)
 
-a detailed guide on how to contribute is located at [how-to-contribute](docs/how-to-contribute.md)
+*Creating an user*
+
+![Creating an user](docs/assets/create-user.png)
+
+*Creating an user - Summary*
+
+![Create user Sumary](docs/assets/create-user-summary.png)
+
+*User's kubeconfig*
+
+![User's Kubeconfig](docs/assets/users-kubeconfig.png)
+
+## Installation
+
+A guide on how to deploy permission manager is located at [installation](docs/installation.md)
+
+## Development Setup
+
+A detailed guide on how to contribute is located at [how-to-contribute](docs/how-to-contribute.md)
 
 ## FAQ
 
