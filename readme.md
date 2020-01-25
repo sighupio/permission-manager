@@ -1,7 +1,8 @@
 # Permission manager
 
-Welcome to the Permission Manager! :tada: :tada:
-Permission Manager is an application developed by SIGHUP that enables a super-easy and user-friendly RBAC management for Kubernetes.
+Welcome to the Permission Manager! :tada: :tada:  
+
+Permission Manager is an application developed by [SIGHUP](https://sighup.io) that enables a super-easy and user-friendly **RBAC management for Kubernetes**. If you are looking for a simple and intuitive way of managing your users within a Kubernetes cluster, this is the right place.
 
 With Permission Manager, you can create users, assign namespaces/permissions, and distribute Kubeconfig YAML files via a nice&easy web UI.
 
@@ -65,7 +66,7 @@ Crate a clusterrole starting with `template-namespaced-resources___` and apply i
 
 ```sh
 kubectl apply -f k8s/k8s-seeds
-`"
+```
 
 ### What is a user
 
