@@ -60,7 +60,7 @@ When we started the development of this project, a template was one-to-one to a 
 
 ### How to add a new template
 
-Crate a clusterrole starting with `template-namespaced-resources___` and apply it.
+Create a clusterrole starting with `template-namespaced-resources___` and apply it.
 
 #### Default templates
 
