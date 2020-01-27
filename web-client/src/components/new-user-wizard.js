@@ -177,7 +177,7 @@ export default function NewUserWizard() {
               Username
               <input
                 autoFocus
-                placeholder="Kelsey Hightower"
+                placeholder="Jane Doe"
                 className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${
                   usernameError && formTouched ? 'border-red-500' : ''
                 }`}
