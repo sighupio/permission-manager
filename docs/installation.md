@@ -9,6 +9,7 @@ apply these manifests
 ```
 kubectl apply -f k8s/k8s-seeds/namespace.yml
 kubectl apply -f k8s/k8s-seeds
+kubectl apply -f k8s/deploy.yaml
 ```
 
 ## deploy application
