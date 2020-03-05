@@ -31,7 +31,7 @@ contexts:
   - context:
       cluster: %s
       user: %s
-    name: %s
+    name: %s@%s
 users:
   - name: %s
     user:
@@ -45,6 +45,7 @@ users:
 		clusterControlPlaceAddress,
 		caBasebase64,
 		clusterName,
+		username,
 		username,
 		clusterName,
 		username,

@@ -22,7 +22,7 @@ contexts:
   - context:
       cluster: My-cluster
       user: gino
-    name: My-cluster
+    name: gino@My-cluster
 users:
   - name: gino
     user:
