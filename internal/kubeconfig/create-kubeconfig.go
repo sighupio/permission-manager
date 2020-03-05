@@ -18,7 +18,8 @@ func CreateKubeconfigYAMLForUser(kc kubernetes.Interface, clusterName, clusterCo
 
 // CreateKubeconfigYAML returns a kubeconfig YAML string
 func createKubeconfig(clusterName, username, clusterControlPlaceAddress, caBasebase64, crtBase64, privateKeyBase64 string) (kubeconfigYAML string) {
-	kubeconfigYAML = fmt.Sprintf(`apiVersion: v1
+	certificate_tpl := `---
+apiVersion: v1
 kind: Config
 current-context: %s
 clusters:
@@ -35,8 +36,19 @@ users:
   - name: %s
     user:
       client-certificate-data: %s
-      client-key-data: %s`,
-		clusterName, clusterName, clusterControlPlaceAddress, caBasebase64, clusterName, username, clusterName, username, crtBase64, privateKeyBase64)
+      client-key-data: %s`
 
-	return kubeconfigYAML
+
+	return fmt.Sprintf(certificate_tpl,
+		clusterName,
+		clusterName,
+		clusterControlPlaceAddress,
+		caBasebase64,
+		clusterName,
+		username,
+		clusterName,
+		username,
+		crtBase64,
+		privateKeyBase64,
+	)
 }

@@ -9,7 +9,8 @@ import (
 func TestCreateKubeconfig(t *testing.T) {
 	got := createKubeconfig("My-cluster", "gino", "https://100.200.10.200", "CA_BASE64", "CERTIFICATE_BASE64", "PRIVATE_KEY_BASE64")
 
-	want := `apiVersion: v1
+	want := `---
+apiVersion: v1
 kind: Config
 current-context: My-cluster
 clusters:
