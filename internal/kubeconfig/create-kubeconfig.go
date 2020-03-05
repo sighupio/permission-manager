@@ -12,11 +12,12 @@ func CreateKubeconfigYAMLForUser(kc kubernetes.Interface, clusterName, clusterCo
 	certificatePemBytes := getSignedCertificateForUser(kc, username, priv)
 	crtBase64 := base64.StdEncoding.EncodeToString(certificatePemBytes)
 	privateKeyBase64 := base64.StdEncoding.EncodeToString(privPem)
+
 	return createKubeconfig(clusterName, username, clusterControlPlaceAddress, getCaBase64(), crtBase64, privateKeyBase64)
 }
 
 // CreateKubeconfigYAML returns a kubeconfig YAML string
-func createKubeconfig(clusterName string, username string, clusterControlPlaceAddress string, caBasebase64 string, crtBase64 string, privateKeyBase64 string) (kubeconfigYAML string) {
+func createKubeconfig(clusterName, username, clusterControlPlaceAddress, caBasebase64, crtBase64, privateKeyBase64 string) (kubeconfigYAML string) {
 	kubeconfigYAML = fmt.Sprintf(`apiVersion: v1
 kind: Config
 current-context: %s
