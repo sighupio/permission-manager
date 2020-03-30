@@ -56,7 +56,7 @@ for example
 
 #### Why a template is not a CRD
 
-When we started the development of this project, a template was one-to-one to a `clusterrole`, the usage of a CRD looked overkill. This will obviouosly change in future to avoid polluting `clusterroles` and will allow us to have a more precise incapsulation of what is owned by the permission manager.
+When we started the development of this project, a template was one-to-one to a `clusterrole`, the usage of a CRD looked overkill. This will obviously change in future to avoid polluting `clusterroles` and will allow us to have a more precise encapsulation of what is owned by the permission manager.
 
 ### How to add a new template
 
