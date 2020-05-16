@@ -1,138 +1,76 @@
-# how to contribute
+# How to contribute
 
-this guide is for contributing on the development of the Permission Manager itself
+This guide is for contributors to the Permission Manager development.
 
-## Quick core concepts
+## Core concepts
 
-- A server written in go is responsive to talk with the k8s cluster
-  - in production the UI with be served as static asset from the go server compiled into a go file using [statik](https://github.com/rakyll/statik) so that a single binary can be deploye
-- The UI is a ReactJS single page application
-  - the UI run indipendently from the go server when developing
-- users are CRD inside k8s and will be stored inside ETCD
-  the app recognise whenere is run inside kubernetes or not by checking the ENV `KUBERNETES_SERVICE_HOST` this will change how the app tries to autenticate to the api server (via token from within k8s or using `~/.kube/config` otherwhise)
+Permission Manager consists of two main components:
 
-## How the application works
+- A backend server, written in Go, providing a users access management API built on top fo the K8s APIs
+  - users are modeled as CRD objects stored, using the K8s APIs, into ETCD
+- An single-page web application, built using the ReactJS framework
+  - in production, the UI will be compiled to a go file using [statik](https://github.com/rakyll/statik), so that a single binary can be deployed to the K8s cluster
+  - during development, the UI can be executed indipendently from the backend server in order to ease development iterations
 
-The application allow to select some templates and associated them with an user, a naming convention is used to only show templates in the UI (see below for details)
+Operators of the cluster can define permissions templates to be used by Permission Manager to create new Users declaring in the cluster `ClusterRole` objects with the following naming convention: `template-namespaced-resources___<template-name>`.
 
-the template system is an abstraction over cluter-roles, rolebinding and cluster roles bindigs, making the permissions "kubernetes native"
+Note that in a future version of the software, the current naming convention will be replaced by CRDs and/or labels
 
-In a future version the naming convention will be changed using CRDs and k8s labels
+## Development environment
 
-## Setup
+### Requirements
 
-### requirements
-
-- go (developed on v1.13.5)
+- go (developed on v1.14)
 - nodejs (developed on v13.1.0)
-- [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/)
-- [gomon](https://github.com/JulesGuesnon/Gomon)
+- [kind](https://github.com/kubernetes-sigs/kind)
 
-### local cluster using minikube
+### Setup a local development cluster
 
-The project needs to communicate with a k8 cluster, in developmemt the project [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/) is used to bootstrap a local cluster
+Permission Manager development requires access to a K8s cluster.
+The easiest way to create a local Kubernetes cluster is to use [kind](https://github.com/kubernetes-sigs/kind).
 
-install minikube and run `minikube start`
+To create a local kind cluster, run the `make kind-cluster` command. 
 
-### local cluster using kind
+### Develop the Permission Manager server
 
-The project needs to communicate with a k8 cluster, in developmemt the project [kind](https://github.com/kubernetes-sigs/kind) is used to bootstrap a local cluster
+The `make kind` command can be used to quickly bootstrap a local kind cluster and run the Permission Manager server.
+Connect to http://localhost:4000 to access the UI. The default credentials are `admin:secret`.
 
-install kind and run `kind create cluster`
+Note that the UI served by the Permission Manager server is the content of the `statik/statik.go` file.
+In order to update the file to the latest UI changes run the `make build-ui` command.
 
-#### ca.crt
+### Develop the Permission Manager frontend
 
-when running `make dev-kind`, the command copies a required file (`ca.crt`) from the kind container to the host machine before starting the server, while not strictly necessary to do on every server startup, the overhead is minimal but it prevent problems caused by having an incorrect version of the file which could be very hard to debug, to change the location where `ca.crt` will be saved file edit the env `CA_CRT_PATH`
-
-## Seed the cluster with manifests
-
-when the cluster is ready apply manifests that install CRD and other Objects required by the application by running
-
-`make seed-cluster`
-
-## Running the application server
-
-### install dependecies
-
-`go mod downlaod`
-
-to run the server use `make dev-minikube` or `make dev-kind` the commands start the server on http://localhost:4000 and watch project to restart the server on change
-
-> the project depends on variables that are likely to change such as the k8s api server address these can be configured in `dev` task in the `Makefile` via environment variables
-
-the api server url can be found by running `kubectl cluster-info`
-
-navigating to http://localhost:4000 will server the UI
-
-## Frontend development
-
-the UI frontend served by the server is a production build, to edit the frontend it need to run as a separate project
+The UI frontend source code is stored in the `web-client` folder.
+In order to run the UI locally run the following commands
 
 ```
 cd web-client
 npm start
 ```
 
-the UI will be accessible at http://localhost:3000, the server must be started at http://localhost:4000
-
-Basic Auth is protecting the API server, in development the credentials are
-
-username: `admin`  
-password: `secret`
-
-### building the frontend
-
-When the frontend development is complete the project can be build and packaged to be server by the server by running `make build-ui`,
-it will build the app and save all static files files as a single go file localted at `statik`
+The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000, e.g. with `make kind`.
+In order to authenticate with the server, use the default credentials: `admin:secret`.
 
 ## Testing
 
-### Testing Frontend
+### Permission Manager server Unit Tests
 
-e2e package uses [Cypress](https://cypress.io) to run browser automation tests, in order for it to work the server must run on port `4000`
+In order to run the server unit tests run `make gotest`.
 
-the test flow creates a user and save a kubeconfig to disk at `e2e-test/data/kubeconfig/[username-template-timestamp]
+### Permission Manager frontend E2E Tests
 
-use `make e2e` to run the tests
+[Cypress](https://cypress.io) is used to run frontend e2e tests.
+Make sure to run the server on the default port, http://localhost:4000, in order for them to work properly.
+
+The tests creates a user and save a kubeconfig file to disk at `e2e-test/data/kubeconfig/[username-template-timestamp]
+Use `make e2e` to run them
 
 ![e2e](./assets/e2e.gif)
 
-### Testing server
+## Publish a new release
 
-to run all test use `make gotest`
-For testing the assertion library [testify](https://github.com/stretchr/testify) is used
-
-## how to deploy inside a minikube cluster
-
-use Minikube's docker daemon (all subsequent commands needs to be run in the same shell where this command is run becuase ENV are set)
-
-```sh
-eval $(minikube docker-env)
-```
-
-build the Docker image
-
-```sh
-docker build -t permission-manager:[tag] .
-```
-
-deploy the manifest (update the version in `k8s/deploy.yml` to match the new image tag and update ENVs if necessary)
-
-```sh
-kubectl apply -f k8s/deploy.yaml
-```
-
-port forward the service
-
-```sh
-kubectl port-forward service/permission-manager-service 4000:4000
-```
-
-navigate to localhost:4000 to see the web UI
-
-## publishing a new version
-
-the registry used is a gitlab repository located at reg.sighup.io
+To build and publish a new Permission Manager release run
 
 ```
 make build-ui
