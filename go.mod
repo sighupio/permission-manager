@@ -16,8 +16,9 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20191202225959-858c2ad4c8b6 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
-	k8s.io/api v0.17.0
-	k8s.io/apimachinery v0.17.0
-	k8s.io/client-go v0.0.0-20190819141724-e14f31a72a77
-	k8s.io/utils v0.0.0-20191218082557-f07c713de883 // indirect
+	k8s.io/api v0.18.2
+	k8s.io/apimachinery v0.18.2
+	k8s.io/client-go v0.18.2
+	k8s.io/utils v0.0.0-20200414100711-2df71ebbae66 // indirect
+	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e // indirect
 )
