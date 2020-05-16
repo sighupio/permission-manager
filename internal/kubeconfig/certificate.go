@@ -1,6 +1,7 @@
 package kubeconfig
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -17,35 +18,41 @@ import (
 	retry "github.com/avast/retry-go"
 	v1beta1 "k8s.io/api/certificates/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+	k8sclient "k8s.io/client-go/kubernetes"
 )
 
-func getSignedCertificateForUser(kc kubernetes.Interface, username string, privateKey *rsa.PrivateKey) (certificatePemBytes []byte) {
-	_, csrPemByte := createCSR(username, privateKey)
-	certsClients := kc.CertificatesV1beta1()
-	csrObjectName := "CSR_FOR_" + username + time.Now().String()
+// getSignedCertificateForUser generates a K8s API client certificate for the a User with the given username.
+func getSignedCertificateForUser(ctx context.Context, kc k8sclient.Interface, username string, privateKey *rsa.PrivateKey) []byte {
+	var csrName = "CSR_FOR_" + username + time.Now().String()
+	var certPemBytes []byte
 
-	_, err := certsClients.CertificateSigningRequests().Create(&v1beta1.CertificateSigningRequest{
-		Spec: v1beta1.CertificateSigningRequestSpec{
-			Groups:  []string{"system:authenticated"},
-			Request: []byte(csrPemByte),
-			Usages:  []v1beta1.KeyUsage{"digital signature", "key encipherment", "client auth"},
-		},
+	// make sure to delete the created certificates.k8s.io/v1beta1 CertificateSigningRequest object
+	// in case of both success or error
+	defer deleteCertificateSigningRequest(ctx, kc, csrName)
+
+	// create the certificates.k8s.io/v1beta1 CertificateSigningRequest object.
+	csrSignerName := "kubernetes.io/kube-apiserver-client-kubelet"
+	csr := &v1beta1.CertificateSigningRequest{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: csrObjectName,
+			Name: csrName,
 		},
-	})
+		Spec: v1beta1.CertificateSigningRequestSpec{
+			SignerName: &csrSignerName,
+			Groups:     []string{"system:authenticated"},
+			Request:    createCSR(username, privateKey),
+			Usages:     []v1beta1.KeyUsage{"digital signature", "key encipherment", "client auth"},
+		},
+	}
+	_, err := kc.CertificatesV1beta1().CertificateSigningRequests().Create(ctx, csr, metav1.CreateOptions{})
 	if err != nil {
-		log.Printf("Failed to create CSR Object %s\n%v", csrObjectName, err)
+		log.Printf("Failed to create CSR Object %s\n%v", csrName, err)
+		return nil
 	}
 
-	_, err = certsClients.CertificateSigningRequests().UpdateApproval(&v1beta1.CertificateSigningRequest{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "CertificateSigningRequest",
-			APIVersion: "certificates.k8s.io/v1beta1",
-		},
+	// mark the certificates.k8s.io/v1beta1 CertificateSigningRequest object as approved.
+	csrApproval := &v1beta1.CertificateSigningRequest{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: csrObjectName,
+			Name: csrName,
 		},
 		Status: v1beta1.CertificateSigningRequestStatus{
 			Conditions: []v1beta1.CertificateSigningRequestCondition{
@@ -56,37 +63,49 @@ func getSignedCertificateForUser(kc kubernetes.Interface, username string, priva
 				},
 			},
 		},
-	})
+	}
+	_, err = kc.CertificatesV1beta1().CertificateSigningRequests().UpdateApproval(ctx, csrApproval, metav1.UpdateOptions{})
 	if err != nil {
-		log.Printf("Failed to approve CSR: %s\n%v", csrObjectName, err)
+		log.Printf("Failed to approve CSR: %s\n%v", csrName, err)
+		return nil
 	}
 
+	// wait until the signed certificate for the certificates.k8s.io/v1beta1 CertificateSigningRequest object is created
+	// by the Kubernetes certificates-manager.
 	err = retry.Do(
 		func() error {
-			res, err := certsClients.CertificateSigningRequests().Get(csrObjectName, metav1.GetOptions{})
+			res, err := kc.CertificatesV1beta1().CertificateSigningRequests().Get(ctx, csrName, metav1.GetOptions{})
 			if err != nil {
-				log.Printf("Failed to get approved CSR: %s\n%v", csrObjectName, err)
+				return fmt.Errorf("Failed to get approved CSR: %s\n%v", csrName, err)
 			}
-			cert := res.Status.Certificate
 
+			// check if the Certificate fild is set in the status of the CSR
+			cert := res.Status.Certificate
 			if len(cert) > 0 {
-				certificatePemBytes = res.Status.Certificate
+				certPemBytes = res.Status.Certificate
 				return nil
 			}
-
 			return fmt.Errorf("certificate not yet approved")
 		},
+		retry.Attempts(10),
+		retry.Delay(100*time.Millisecond),
 	)
 	if err != nil {
 		log.Print("Failed to retry get approved CSR")
+		return nil
 	}
 
-	err = certsClients.CertificateSigningRequests().Delete(csrObjectName, nil)
+	// return the generate K8s api-server client certificate
+	return certPemBytes
+}
+
+// deleteCertificateSigningRequest deletes a certificates.k8s.io/v1beta1 CertificateSigningRequest object
+// with the given csrName from the Kubernetes cluster.
+func deleteCertificateSigningRequest(ctx context.Context, kc k8sclient.Interface, csrName string) {
+	err := kc.CertificatesV1beta1().CertificateSigningRequests().Delete(ctx, csrName, metav1.DeleteOptions{})
 	if err != nil {
-		log.Printf("Failed to delete CSR: %s\n%v", csrObjectName, err)
+		log.Printf("Failed to delete CSR: %s\n%v", csrName, err)
 	}
-
-	return
 }
 
 func createRsaPrivateKeyPem() (privateKey *rsa.PrivateKey, privPemBytes []byte) {
@@ -105,7 +124,11 @@ func createRsaPrivateKeyPem() (privateKey *rsa.PrivateKey, privPemBytes []byte) 
 	return
 }
 
-func createCSR(username string, privateKey *rsa.PrivateKey) (csrBytes []byte, csrPemBytes []byte) {
+// createCRS creates a new K8s client certificate signing request.
+// Following the K8s RBAC specifications, the CSR will have as common-name the username and will be signed with the
+// user private RSA key.
+// The content of the CSR is returnend in PEM format.
+func createCSR(username string, privateKey *rsa.PrivateKey) []byte {
 	template := x509.CertificateRequest{
 		Subject: pkix.Name{
 			CommonName: username,
@@ -118,9 +141,7 @@ func createCSR(username string, privateKey *rsa.PrivateKey) (csrBytes []byte, cs
 		log.Printf("Failed to create CSR for user: %s\n%v", username, err)
 	}
 
-	csrPemBytes = pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes})
-
-	return
+	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes})
 }
 
 func expandHomePath(path string) string {
