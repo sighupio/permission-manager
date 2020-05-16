@@ -1,6 +1,6 @@
 module sighupio/permission-manager
 
-go 1.13
+go 1.14
 
 require (
 	github.com/avast/retry-go v2.4.3+incompatible
