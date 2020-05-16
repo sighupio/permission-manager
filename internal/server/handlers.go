@@ -21,11 +21,12 @@ type ErrorRes struct {
 func listUsers(us resources.UserService) echo.HandlerFunc {
 	type response = []resources.User
 	return func(c echo.Context) error {
-		users := us.GetAllUsers()
+		users := us.GetAllUsers(c.Request().Context())
 		var r response = users
 		return c.JSON(http.StatusOK, r)
 	}
 }
+
 func createUser(us resources.UserService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		type request struct {
@@ -43,7 +44,7 @@ func createUser(us resources.UserService) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, ErrorRes{invalidUsernameError})
 		}
 
-		u := us.CreateUser(r.Name)
+		u := us.CreateUser(c.Request().Context(), r.Name)
 		return c.JSON(http.StatusOK, reponse{Name: u.Name})
 	}
 }
@@ -66,7 +67,7 @@ func deleteUser(us resources.UserService) echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 		}
 
-		us.DeleteUser(r.Username)
+		us.DeleteUser(c.Request().Context(), r.Username)
 		return c.JSON(http.StatusOK, Response{Ok: true})
 	}
 }
@@ -77,7 +78,7 @@ func ListNamespaces(rs resources.ResourcesService) echo.HandlerFunc {
 			Namespaces []string `json:"namespaces"`
 		}
 
-		names, _ := rs.GetNamespaces()
+		names, _ := rs.GetAllNamespaces(c.Request().Context())
 		return c.JSON(http.StatusOK, Response{
 			Namespaces: names,
 		})
@@ -93,22 +94,22 @@ func ListRbac(c echo.Context) error {
 		RoleBindings        []rbacv1.RoleBinding        `json:"roleBindings"`
 	}
 
-	clusterRoles, err := ac.Kubeclient.RbacV1().ClusterRoles().List(metav1.ListOptions{})
+	clusterRoles, err := ac.Kubeclient.RbacV1().ClusterRoles().List(c.Request().Context(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	clusterRoleBindings, err := ac.Kubeclient.RbacV1().ClusterRoleBindings().List(metav1.ListOptions{})
+	clusterRoleBindings, err := ac.Kubeclient.RbacV1().ClusterRoleBindings().List(c.Request().Context(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	roles, err := ac.Kubeclient.RbacV1().Roles("").List(metav1.ListOptions{})
+	roles, err := ac.Kubeclient.RbacV1().Roles("").List(c.Request().Context(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	roleBindings, err := ac.Kubeclient.RbacV1().RoleBindings("").List(metav1.ListOptions{})
+	roleBindings, err := ac.Kubeclient.RbacV1().RoleBindings("").List(c.Request().Context(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -139,12 +140,12 @@ func CreateClusterRole(c echo.Context) error {
 		Ok bool `json:"ok"`
 	}
 
-	ac.Kubeclient.RbacV1().ClusterRoles().Create(&rbacv1.ClusterRole{
+	ac.Kubeclient.RbacV1().ClusterRoles().Create(c.Request().Context(), &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.RoleName,
 		},
 		Rules: r.Rules,
-	})
+	}, metav1.CreateOptions{})
 
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
@@ -171,7 +172,7 @@ func CreateRolebinding(c echo.Context) error {
 		Ok bool `json:"ok"`
 	}
 
-	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(&rbacv1.RoleBinding{
+	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(c.Request().Context(), &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.RolebindingName,
 			Namespace: r.Namespace,
@@ -183,7 +184,7 @@ func CreateRolebinding(c echo.Context) error {
 			APIGroup: "rbac.authorization.k8s.io",
 		},
 		Subjects: r.Subjects,
-	})
+	}, metav1.CreateOptions{})
 
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
@@ -205,7 +206,7 @@ func createClusterRolebinding(c echo.Context) error {
 		Ok bool `json:"ok"`
 	}
 
-	ac.Kubeclient.RbacV1().ClusterRoleBindings().Create(&rbacv1.ClusterRoleBinding{
+	ac.Kubeclient.RbacV1().ClusterRoleBindings().Create(c.Request().Context(), &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   r.ClusterRolebindingName,
 			Labels: map[string]string{"generated_for_user": r.Username},
@@ -216,7 +217,7 @@ func createClusterRolebinding(c echo.Context) error {
 			APIGroup: "rbac.authorization.k8s.io",
 		},
 		Subjects: r.Subjects,
-	})
+	}, metav1.CreateOptions{})
 
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
@@ -238,7 +239,7 @@ func deleteClusterRole(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().ClusterRoles().Delete(r.RoleName, nil)
+	ac.Kubeclient.RbacV1().ClusterRoles().Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
@@ -259,7 +260,7 @@ func deleteClusterRolebinding(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(r.RolebindingName, nil)
+	ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
@@ -282,7 +283,7 @@ func deleteRole(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(r.RoleName, nil)
+	ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
@@ -304,7 +305,7 @@ func deleteRolebinding(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(r.RolebindingName, nil)
+	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
 	return c.JSON(http.StatusOK, Response{Ok: true})
 }
 
@@ -323,7 +324,7 @@ func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.Handl
 			return err
 		}
 
-		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username)
+		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username)
 
 		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 	}
