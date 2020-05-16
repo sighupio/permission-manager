@@ -6,24 +6,23 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"encoding/pem"
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
-	"os/user"
-	"path/filepath"
 	"time"
 
 	retry "github.com/avast/retry-go"
 	v1beta1 "k8s.io/api/certificates/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclient "k8s.io/client-go/kubernetes"
+	runtime "sigs.k8s.io/controller-runtime"
 )
 
 // getSignedCertificateForUser generates a K8s API client certificate for the a User with the given username.
 func getSignedCertificateForUser(ctx context.Context, kc k8sclient.Interface, username string, privateKey *rsa.PrivateKey) []byte {
-	var csrName = "CSR_FOR_" + username + time.Now().String()
+	var csrName = fmt.Sprintf("pm-user-%s-%d", username, time.Now().Unix())
 	var certPemBytes []byte
 
 	// make sure to delete the created certificates.k8s.io/v1beta1 CertificateSigningRequest object
@@ -31,7 +30,7 @@ func getSignedCertificateForUser(ctx context.Context, kc k8sclient.Interface, us
 	defer deleteCertificateSigningRequest(ctx, kc, csrName)
 
 	// create the certificates.k8s.io/v1beta1 CertificateSigningRequest object.
-	csrSignerName := "kubernetes.io/kube-apiserver-client-kubelet"
+	csrSignerName := "kubernetes.io/kube-apiserver-client"
 	csr := &v1beta1.CertificateSigningRequest{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: csrName,
@@ -58,7 +57,7 @@ func getSignedCertificateForUser(ctx context.Context, kc k8sclient.Interface, us
 			Conditions: []v1beta1.CertificateSigningRequestCondition{
 				v1beta1.CertificateSigningRequestCondition{
 					Type:    "Approved",
-					Reason:  "New User",
+					Reason:  "Permission Manager - New User",
 					Message: fmt.Sprintf("Approving CSR for user: %s", username),
 				},
 			},
@@ -79,19 +78,20 @@ func getSignedCertificateForUser(ctx context.Context, kc k8sclient.Interface, us
 				return fmt.Errorf("Failed to get approved CSR: %s\n%v", csrName, err)
 			}
 
-			// check if the Certificate fild is set in the status of the CSR
+			// check if Certificate is set in the Status of the CSR
 			cert := res.Status.Certificate
 			if len(cert) > 0 {
 				certPemBytes = res.Status.Certificate
 				return nil
 			}
-			return fmt.Errorf("certificate not yet approved")
+
+			return fmt.Errorf("Certificate status: %s", res.Status.Conditions)
 		},
-		retry.Attempts(10),
+		retry.Attempts(50),
 		retry.Delay(100*time.Millisecond),
 	)
 	if err != nil {
-		log.Print("Failed to retry get approved CSR")
+		log.Printf("Failed to get signed certificate for CSR: %s\n%v", csrName, err)
 		return nil
 	}
 
@@ -144,37 +144,13 @@ func createCSR(username string, privateKey *rsa.PrivateKey) []byte {
 	return pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE REQUEST", Bytes: csrBytes})
 }
 
-func expandHomePath(path string) string {
-	if len(path) == 0 || path[0] != '~' {
-		return path
-	}
-
-	usr, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-	return filepath.Join(usr.HomeDir, path[1:])
-}
-
+// getCaBase64 returns the base64 encoding of the Kubernetes cluster api-server CA
 func getCaBase64() string {
-	ca := ""
-	/* REFACTOR: read and encode base64 from go */
-	if os.Getenv("KUBERNETES_SERVICE_HOST") == "" {
-		fp := expandHomePath(os.Getenv("CA_CRT_PATH"))
-		s := fmt.Sprintf("cat %s | base64 | tr -d '\n'", fp)
-		caBase64, err := exec.Command("sh", "-c", s).Output()
-		if err != nil {
-			panic(err)
-		}
-		ca = string(caBase64)
-	} else {
-		fmt.Println("detected runnig inside cluster")
-		s := "cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt | base64 | tr -d '\n'"
-		caBase64, err := exec.Command("sh", "-c", s).Output()
-		if err != nil {
-			panic(err)
-		}
-		ca = string(caBase64)
+	config, err := runtime.GetConfig()
+	if err != nil {
+		log.Printf("Unable to get kubeconfig.\n%v", err)
+		os.Exit(1)
 	}
-	return ca
+
+	return base64.StdEncoding.EncodeToString(config.CAData)
 }
