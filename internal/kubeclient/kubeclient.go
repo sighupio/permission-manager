@@ -1,59 +1,26 @@
 package kubeclient
 
 import (
-	"flag"
-	"fmt"
+	"log"
 	"os"
-	"path/filepath"
 
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	runtime "sigs.k8s.io/controller-runtime"
 )
-
-func newRestConfig() *rest.Config {
-	var kubeconfig *string
-
-	if home := os.Getenv("HOME"); home != "" {
-		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
-	} else {
-		kubeconfig = flag.String("kubeconfig", "", "absolute path to the kubeconfig file")
-	}
-	flag.Parse()
-	fmt.Printf("kubeconfig path: %s\n", *kubeconfig)
-
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return config
-}
 
 // New returns a kubernetes client already configured
 func New() kubernetes.Interface {
-	var config *rest.Config
-
-	if insideKubernetesCluster() {
-		c, err := rest.InClusterConfig()
-		if err != nil {
-			panic(err.Error())
-		}
-		config = c
-	} else {
-		config = newRestConfig()
+	config, err := runtime.GetConfig()
+	if err != nil {
+		log.Printf("Unable to get kubeconfig.\n%v", err)
+		os.Exit(1)
 	}
 
 	client, err := kubernetes.NewForConfig(config)
-	// kubeclient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err.Error())
+		log.Printf("Unable to create a Kubernetes client from the kubeconfig.\n%v", err)
+		os.Exit(1)
 	}
 
 	return client
-}
-
-func insideKubernetesCluster() bool {
-	/* Control if running inside a kubernetes cluster by checking KUBERNETES_SERVICE_HOST env  */
-	return os.Getenv("KUBERNETES_SERVICE_HOST") != ""
 }
