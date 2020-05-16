@@ -1,0 +1,12 @@
+---
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    image: kindest/node:v1.17.5
+networking:
+  # Use a fixed port for the API server instead of
+  # a random one
+  apiServerAddress: "127.0.0.1"
+  apiServerPort: 61999
