@@ -1,11 +1,14 @@
 package resources
 
 import (
+	"context"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func (r *resourcesService) GetNamespaces() (names []string, err error) {
-	namespaces, err := r.kubeclient.CoreV1().Namespaces().List(metav1.ListOptions{})
+// GetAllNamespaces lists all the Namespaces available in the K8s cluster.
+func (r *resourcesService) GetAllNamespaces(ctx context.Context) (names []string, err error) {
+	namespaces, err := r.kubeclient.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
