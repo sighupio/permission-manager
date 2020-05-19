@@ -41,7 +41,7 @@ steps:
       DYNAMIC_DNS_SERVICE:
         from_secret: dynamic_dns_service
     commands:
-      - apt-get install -y gettext # envsubst
+      - apt-get update && apt-get install -y gettext # envsubst
       - export KUBECONFIG=/shared/kube/kubeconfig-116
       - bats -t tests/setup.sh
       - bats -t tests/create-user.sh
