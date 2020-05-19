@@ -15,7 +15,7 @@ steps:
       path: /app
     commands:
       - apt-get update && apt-get install -y npm
-      - source .envrc
+      - . .envrc
       - make dependencies ui test
     when:
       event:
@@ -42,7 +42,7 @@ steps:
       path: /app
     commands:
       - apt-get update && apt-get install -y npm
-      - source .envrc
+      - . .envrc
       - make dependencies ui build deploy
     when:
       event:
