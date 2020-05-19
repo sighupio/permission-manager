@@ -1,10 +1,82 @@
 ---
 kind: pipeline
-name: release
+name: e2e-kubernetes-1.16
 
 platform:
   os: linux
   arch: amd64
+
+steps:
+  - name: init
+    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+    volumes:
+    - name: shared
+      path: /shared
+    depends_on: [ clone ]
+    settings:
+      action: cluster-116
+      pipeline_id: cluster-116
+      instance_path: /shared
+      aws_default_region:
+        from_secret: aws_region
+      aws_access_key_id:
+        from_secret: aws_access_key_id
+      aws_secret_access_key:
+        from_secret: aws_secret_access_key
+      terraform_tf_states_bucket_name:
+        from_secret: terraform_tf_states_bucket_name
+    when:
+      ref:
+        include:
+          - refs/tags/**
+          - refs/heads/e2e
+
+  - name: e2e
+    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.16.4_3.2.2_2.4.1
+    volumes:
+    - name: shared
+      path: /shared
+    depends_on: [ init ]
+    environment:
+      DYNAMIC_DNS_SERVICE:
+        from_secret: dynamic_dns_service
+    commands:
+      - apt-get install -y gettext # envsubst
+      - export KUBECONFIG=/shared/kube/kubeconfig-116
+      - bats -t tests/setup.sh
+      - bats -t tests/create-user.sh
+    when:
+      ref:
+        include:
+          - refs/tags/**
+          - refs/heads/e2e
+
+  - name: destroy
+    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+    depends_on: [ e2e ]
+    settings:
+      action: destroy
+      pipeline_id: cluster-116
+      aws_default_region:
+        from_secret: aws_region
+      aws_access_key_id:
+        from_secret: aws_access_key_id
+      aws_secret_access_key:
+        from_secret: aws_secret_access_key
+      terraform_tf_states_bucket_name:
+        from_secret: terraform_tf_states_bucket_name
+    when:
+      status:
+      - success
+      - failure
+
+volumes:
+- name: shared
+  temp: {}
+
+---
+kind: pipeline
+name: release
 
 steps:
   - name: unit-test
