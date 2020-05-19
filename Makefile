@@ -41,7 +41,9 @@ endif
 .PHONY: dependencies
 dependencies:
 	@npm install --prefix ./web-client
+	@go get github.com/rakyll/statik
 	@go mod download
+
 
 ## dev-dependencies: Install development helpers
 .PHONY: dev-dependencies
@@ -57,7 +59,7 @@ test-dependencies:
 .PHONY: ui
 ui:
 	@npm run build --prefix ./web-client
-	@~/go/bin/statik -src=./web-client/build
+	@statik -f -src=./web-client/build
 
 ## permission-manager: Build go binary
 permission-manager:
