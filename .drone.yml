@@ -7,43 +7,50 @@ platform:
   arch: amd64
 
 steps:
-  - name: go-tests
+  - name: dependencies
     image: golang:1.14.2
     pull: always
-    volumes:
-    - name: shared
-      path: /app
     commands:
       - apt-get update && apt-get install -y npm
-      - . .envrc
-      - make dependencies ui test
+      # - curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+      # - chmod +x ./kubectl
+      # - mv ./kubectl /bin/kubectl
+      - make dependencies ui
     when:
       event:
         - push
 
----
-kind: pipeline
-name: release
-
-platform:
-  os: linux
-  arch: amd64
-
-volumes:
-- name: shared
-  temp: {}
-
-steps:
-  - name: docker-build
+  - name: unit-test
     image: golang:1.14.2
     pull: always
-    volumes:
-    - name: shared
-      path: /app
     commands:
-      - apt-get update && apt-get install -y npm
-      - . .envrc
-      - make dependencies ui build deploy
+      - make test
     when:
       event:
         - push
+
+  - name: release
+    image: golang:1.14.2
+    pull: always
+    commands:
+      - apt-get update && apt-get install -y npm
+      # - . .envrc
+      - make ui build
+    when:
+      event:
+        - push
+
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: quay_username
+      token:
+        from_secret: quay_token
+      registry: quay.io
+      repo: quay.io/sighup/permission-manager
+      tags:
+        - ${DRONE_TAG}
+    when:
+      event:
+        - tag
