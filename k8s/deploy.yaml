@@ -18,7 +18,7 @@ spec:
       serviceAccountName: permission-manager-service-account
       containers:
         - name: permission-manager
-          image: quay.io/sighup/permission-manager:1.5.0
+          image: quay.io/sighup/permission-manager:1.6.0-dev
           ports:
             - containerPort: 4000
           env:
