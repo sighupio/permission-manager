@@ -80,10 +80,12 @@ test-e2e:
 build:
 	docker build --progress tty $(addprefix -t ,${tags}) .
 
-## release: Push image to the quay repository
+## release: create the tag for the current version and increate the minor
 .PHONY: release
 release: build
-	$(addprefix docker push ,$(addsuffix && ,${tags})):
+	@bumpversion --tag release
+	@bumpversion minor
+
 
 ## run: Local development of the server
 .PHONY: run
