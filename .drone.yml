@@ -1,22 +1,12 @@
 ---
 kind: pipeline
-name: tests
+name: release
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-  - name: dependencies
-    image: golang:1.14.2
-    pull: always
-    commands:
-      - apt-get update && apt-get install -y npm
-      - make dependencies ui
-    when:
-      event:
-        - push
-
   - name: unit-test
     image: golang:1.14.2
     pull: always
@@ -25,6 +15,7 @@ steps:
     when:
       event:
         - push
+        - tag
 
   - name: registry-sha
     image: plugins/docker
@@ -46,8 +37,8 @@ steps:
     settings:
       username:
         from_secret: quay_username
-      token:
-        from_secret: quay_token
+      password:
+        from_secret: quay_password
       registry: quay.io
       repo: quay.io/sighup/permission-manager
       tags:
