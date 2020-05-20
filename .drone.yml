@@ -29,13 +29,17 @@ steps:
       event:
         - push
 
-  - name: release
-    image: golang:1.14.2
-    pull: always
-    commands:
-      - apt-get update && apt-get install -y npm
-      # - . .envrc
-      - make ui build
+  - name: docker
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+      registry: quay.io
+      repo: quay.io/sighup/permission-manager
+      tags:
+        - ${DRONE_COMMIT_SHA}
     when:
       event:
         - push
