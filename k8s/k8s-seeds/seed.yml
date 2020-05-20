@@ -179,7 +179,7 @@ rules:
       - "clusterroles"
       - "rolebindings"
       - "roles"
-    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
+    verbs: [ "get", "list", "create", "update", "delete", "bind", "watch" ]
   # Allow full management of certificates CSR, including their approval
   - apiGroups: [ "certificates.k8s.io" ]
     resources:
