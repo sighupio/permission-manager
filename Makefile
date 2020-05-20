@@ -82,10 +82,9 @@ build:
 
 ## release: create the tag for the current version and increate the minor
 .PHONY: release
-release: build
+release: build branch-master gitclean
 	@bumpversion --tag release
 	@bumpversion minor
-
 
 ## run: Local development of the server
 .PHONY: run
