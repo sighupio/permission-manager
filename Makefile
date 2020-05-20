@@ -1,27 +1,12 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-# variable definition
-
-APP_NAME ?= $(shell basename $$PWD)
-
-APP_VERSION ?= $(shell cat VERSION)
-
-CI_COMMIT_SHA ?= $(shell git rev-parse HEAD)
-
-DOCKER_REGISTRY ?= localhost:5000
-
-container_url = ${DOCKER_REGISTRY}/sighupio/${APP_NAME}
-
-tags =\
-      ${container_url}:${APP_VERSION} \
-      ${container_url}:${CI_COMMIT_SHA}
 
 # Helpers
 
 .PHONY: help
 help: Makefile
-	@printf "\nChoose a command run in ${APP_NAME}:\n"
+	@printf "\nChoose a command run in $(shell basename ${PWD}):\n"
 	@sed -n 's/^##//p' $< | column -t -s ":" |  sed -e 's/^/ /'
 	@echo
 
@@ -75,14 +60,9 @@ test:
 test-e2e:
 	@cd e2e-test && yarn test
 
-## build: Create the docker container
-.PHONY: build
-build:
-	docker build --progress tty $(addprefix -t ,${tags}) .
-
 ## release: create the tag for the current version and increate the minor
 .PHONY: release
-release: build branch-master gitclean
+release: branch-master gitclean
 	@bumpversion --tag release
 	@bumpversion minor
 
