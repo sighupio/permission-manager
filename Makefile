@@ -47,6 +47,7 @@ ui:
 	@statik -f -src=./web-client/build
 
 ## permission-manager: Build go binary
+.PHONY: permission-manager
 permission-manager:
 	@CGO_ENABLED=0 GOOS=linux go build -a -o permission-manager ./cmd/run-server.go
 
@@ -102,6 +103,10 @@ delete-users:
 clean:
 	-@rm -rf permission-manager
 	-@rm -rf statik/*
+
+## wipe:
+.PHONY: wipe
+wipe:
 	-@rm -rf ./web-client/build
 	-@rm -rf ./web-client/node_modules
 	-@rm -rf ./e2e-test/node_modules
