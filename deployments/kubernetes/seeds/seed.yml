@@ -1,3 +1,4 @@
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -18,10 +19,8 @@ rules:
   - apiGroups:
       - "*"
     resources:
-      # - "bindings"
       - "configmaps"
       - "endpoints"
-      # - "limitranges"
       - "persistentvolumeclaims"
       - "pods"
       - "pods/log"
@@ -30,15 +29,7 @@ rules:
       - "replicationcontrollers"
       - "resourcequotas"
       - "secrets"
-      # - "serviceaccounts"
       - "services"
-      # - "controllerrevisions"
-      # - "statefulsets"
-      # - "localsubjectaccessreviews"
-      # - "horizontalpodautoscalers"
-      # - "cronjobs"
-      # - "jobs"
-      # - "leases"
       - "events"
       - "daemonsets"
       - "deployments"
@@ -46,23 +37,8 @@ rules:
       - "ingresses"
       - "networkpolicies"
       - "poddisruptionbudgets"
-      # - "rolebindings"
-      # - "roles"
     verbs:
       - "*"
-# ---
-# apiVersion: rbac.authorization.k8s.io/v1
-# kind: ClusterRole
-# metadata:
-#   name: template-namespaced-resources___consultant
-# rules:
-#   - apiGroups:
-#       - "*"
-#     resources:
-#       - "configmaps"
-#       - "pods"
-#     verbs:
-#       - "*"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -127,62 +103,4 @@ rules:
       - "storageclasses"
       - "volumeattachment"
     verbs: ["*"]
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: permission-manager-service-account-rolebinding
-roleRef:
-  kind: ClusterRole
-  name: permission-manager-cluster-role
-  apiGroup: rbac.authorization.k8s.io
-subjects:
-  - kind: ServiceAccount
-    name: permission-manager-service-account
-    namespace: permission-manager
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: permission-manager-service-account
-  namespace: permission-manager
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: permission-manager-cluster-role
-rules:
-  # Allow full management of all the Permission Manager resources
-  - apiGroups: [ "permissionmanager.user" ]
-    resources:
-      - "*"
-    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
-  # Allow full management of the RBAC resources
-  - apiGroups:
-      - "rbac.authorization.k8s.io"
-    resources:
-      - "clusterrolebindings"
-      - "clusterroles"
-      - "rolebindings"
-      - "roles"
-    verbs: [ "get", "list", "create", "update", "delete", "bind", "watch" ]
-  # Allow full management of certificates CSR, including their approval
-  - apiGroups: [ "certificates.k8s.io" ]
-    resources:
-      - "certificatesigningrequests"
-      - "certificatesigningrequests/approval"
-    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
-  # Support legacy versions, before signerName was added
-  # (see https://github.com/kubernetes/kubernetes/pull/88246)
-  - apiGroups: [ "certificates.k8s.io" ]
-    resources:
-      - "signers"
-    resourceNames:
-      - "kubernetes.io/legacy-unknown"
-      - "kubernetes.io/kube-apiserver-client"
-    verbs: [ "approve" ]
-  # Allow to get and list Namespaces
-  - apiGroups: [ "" ]
-    resources:
-      - "namespaces"
-    verbs: [ "get", "list" ]
+
