@@ -9,8 +9,8 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
+	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
 	retry "github.com/avast/retry-go"
@@ -148,9 +148,13 @@ func createCSR(username string, privateKey *rsa.PrivateKey) []byte {
 func getCaBase64() string {
 	config, err := runtime.GetConfig()
 	if err != nil {
-		log.Printf("Unable to get kubeconfig.\n%v", err)
-		os.Exit(1)
+		log.Fatalf("Unable to get kubeconfig.\n%v", err)
 	}
 
-	return base64.StdEncoding.EncodeToString(config.CAData)
+	CAData, err := ioutil.ReadFile(config.CAFile)
+	if err != nil {
+		log.Fatalf("Unable to read kubeconfig file.\n%v", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(CAData)
 }
