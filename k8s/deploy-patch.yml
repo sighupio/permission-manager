@@ -1,6 +1,0 @@
-- op: replace
-  path: /spec/template/spec/containers/0/env/1/value
-  value: ${CLUSTER_NAME}
-- op: replace
-  path: /spec/template/spec/containers/0/env/2/value
-  value: ${CONTROL_PLANE_ADDRESS}

@@ -1,20 +1,6 @@
-before:
-  hooks:
-    - make dependencies ui
+---
 builds:
-  - main: ./cmd/run-server.go
-    env:
-      - CGO_ENABLED=0
-    flags:
-      - -a
-archives:
-  - replacements:
-      linux: Linux
-    files:
-      - README.md
-      - LICENSE.md
-      - VERSION
-      - k8s/**/*
+  - skip: true
 checksum:
   name_template: 'checksums.txt'
 snapshot:
@@ -25,4 +11,8 @@ changelog:
     exclude:
       - '^docs:'
       - '^test:'
-
+release:
+  extra_files:
+    - glob: deployments/kubernetes/seeds/crd.yml
+    - glob: deployments/kubernetes/seeds/seed.yml
+    - glob: deployments/kubernetes/deploy.yml

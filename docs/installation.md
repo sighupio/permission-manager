@@ -2,40 +2,45 @@
 
 this guide refer to installing the permission manager on a running cluster
 
-## Deploy
+## Requirements
 
-- Edit `k8s/k8s-seeds/auth-secret.yml` to set your password
-- Then apply these manifests
+- Create the Namespace
 
 ```
-kubectl apply -f k8s/k8s-seeds/namespace.yml
-kubectl apply -f k8s/k8s-seeds
+kubectl create namespace permission-manager
+```
+- Create a secret with this content and update acordingly
+
+```
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: permission-manager
+  namespace: permission-manager
+type: Opaque
+stringData:
+  PORT: "4000" # port where server is exposed
+  CLUSTER_NAME: "my-cluster" # name of the cluster to use in the generated kubeconfig file
+  CONTROL_PLANE_ADDRESS: "https://172.17.0.3:6443" # full address of the control plane to use in the generated kubeconfig file
+  BASIC_AUTH_PASSWORD: "changeMe" # password used by basic auth (username is `admin`)
 ```
 
-- Edit `k8s/deploy.yaml` to set environment variables:
+# Deploy
 
-| Env Name              | Description                                                               |
-| --------------------- | ------------------------------------------------------------------------- |
-| PORT                  | port where server is exposed                                              |
-| CLUSTER_NAME          | name of the cluster to use in the generated kubeconfig file               |
-| CONTROL_PLANE_ADDRESS | full address of the control plane to use in the generated kubeconfig file |
-| BASIC_AUTH_PASSWORD   | password used by basic auth (username is `admin`)                         |
-
-- Then apply
+- Then apply:
 ```
-kubectl apply -f k8s/deploy.yaml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.5.0/crd.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.5.0/seed.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.5.0/deploy.yml
 ```
 
 ## Basic auth
 
-the username is `admin` the password is mounted as a secret (see `k8s/deploy.yaml`)
+the username is `admin` the password is mounted as a secret `BASIC_AUTH_PASSWORD`
 
 ## Visit the application
-
-> assuming `k8s/deploy.yaml` file has been used
 
 `kubectl port-forward svc/permission-manager-service 4000 --namespace permission-manager`
 
 the application can now be accessed by http://localhost:4000
-
-
