@@ -234,7 +234,8 @@ steps:
     image: golang:1.14.2
     pull: always
     commands:
-      - make test
+      - apt-get update && apt-get install -y npm
+      - make dependencies ui test
     when:
       event:
         - push
