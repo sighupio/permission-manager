@@ -7,17 +7,17 @@ import (
 )
 
 func TestCreateKubeconfig(t *testing.T) {
-	got := createKubeconfig("My-cluster", "gino", "https://100.200.10.200", "CA_BASE64", "CERTIFICATE_BASE64", "PRIVATE_KEY_BASE64")
+	got := createKubeconfig("My-cluster", "gino", "https://100.200.10.200", "CA_BASE64", "TOKEN")
 
 	want := `---
 apiVersion: v1
 kind: Config
 current-context: gino@My-cluster
 clusters:
-  - name: My-cluster
-    cluster:
-      server: https://100.200.10.200
+  - cluster:
       certificate-authority-data: CA_BASE64
+      server: https://100.200.10.200
+    name: My-cluster
 contexts:
   - context:
       cluster: My-cluster
@@ -26,8 +26,7 @@ contexts:
 users:
   - name: gino
     user:
-      client-certificate-data: CERTIFICATE_BASE64
-      client-key-data: PRIVATE_KEY_BASE64`
+      token: TOKEN`
 
 	assert.Equal(t, want, got)
 }

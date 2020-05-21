@@ -130,9 +130,9 @@ export default function EditUser({ user }) {
             roleName: p.template,
             subjects: [
               {
-                kind: 'User',
+                kind: 'ServiceAccount',
                 name: username,
-                apiGroup: 'rbac.authorization.k8s.io'
+                namespace: 'permission-manager'
               }
             ],
             clusterRolebindingName
@@ -150,9 +150,9 @@ export default function EditUser({ user }) {
               roleKind: 'ClusterRole',
               subjects: [
                 {
-                  kind: 'User',
+                  kind: 'ServiceAccount',
                   name: username,
-                  apiGroup: 'rbac.authorization.k8s.io'
+                  namespace: 'permission-manager'
                 }
               ],
               rolebindingName
@@ -190,9 +190,9 @@ export default function EditUser({ user }) {
         roleName: template,
         subjects: [
           {
-            kind: 'User',
+            kind: 'ServiceAccount',
             name: username,
-            apiGroup: 'rbac.authorization.k8s.io'
+            namespace: 'permission-manager'
           }
         ],
         clusterRolebindingName

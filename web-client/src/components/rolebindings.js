@@ -99,7 +99,7 @@ function NewRoleBindingForm({ fetchData }) {
       roleName,
       subjects: subjects.map(s => ({
         ...s,
-        apiGroup: 'rbac.authorization.k8s.io'
+        namespace: 'permission-manager'
       })),
       roleKind,
       rolebindingName
