@@ -48,7 +48,7 @@ ui:
 
 ## permission-manager: Build go binary
 permission-manager:
-	@CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o permission-manager ./cmd/run-server.go
+	@CGO_ENABLED=0 GOOS=linux go build -a -o permission-manager ./cmd/run-server.go
 
 ## test: Run server unit tests
 .PHONY: test
@@ -60,7 +60,12 @@ test:
 test-e2e:
 	@cd e2e-test && yarn test
 
-## release: create the tag for the current version and increate the minor
+## test-release: Check dist folder and next tag for the release build
+test-release:
+	@goreleaser --snapshot --skip-publish --rm-dist
+	@bumpversion --allow-dirty --dry-run release
+
+## release: Create the tag for the current version and increate the minor
 .PHONY: release
 release: branch-master gitclean
 	@bumpversion --tag release
