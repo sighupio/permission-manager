@@ -1,6 +1,9 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
+AUTH_PASSWORD ?= admin
+
+local-container = permission-manager:$(shell git rev-parse HEAD)
 
 # Helpers
 
@@ -30,11 +33,6 @@ dependencies:
 	@go mod download
 
 
-## dev-dependencies: Install development helpers
-.PHONY: dev-dependencies
-dev-dependencies:
-	@go get -u github.com/JulesGuesnon/Gomon
-
 ## test-dependencies: Install test dependecies
 .PHONY: test-dependencies
 test-dependencies:
@@ -56,47 +54,52 @@ permission-manager:
 test:
 	@go test -v sighupio/permission-manager/...
 
-## test-e2e: Run e2e test over a local port 4000
+## test-e2e: Run e2e test in the kubectl current-context
 .PHONY: test-e2e
 test-e2e:
-	@cd e2e-test && yarn test
+	@bats -t tests/setup.sh && bats -t tests/create-user.sh
+	# @cd e2e-test && yarn test
 
 ## test-release: Check dist folder and next tag for the release build
 test-release:
 	@goreleaser --snapshot --skip-publish --rm-dist
 	@bumpversion --allow-dirty --dry-run --verbose minor
 
-## run: Local development of the server
-.PHONY: run
-run: copy-kind-ca-crt
-	@gomon cmd/run-server.go
+## seed: configure permission-manager
+.PHONY: seed
+seed:
+	-@kubectl create namespace permission-manager
+	@echo -e '---\n\
+	apiVersion: v1\n\
+	kind: Secret\n\
+	metadata:\n\
+	  name: permission-manager\n\
+	  namespace: permission-manager\n\
+	type: Opaque\n\
+	stringData:\n\
+	  PORT: "4000"\n\
+	  CLUSTER_NAME: "${CLUSTER_NAME}"\n\
+	  CONTROL_PLANE_ADDRESS: "${CONTROL_PLANE_ADDRESS}" \n\
+	  BASIC_AUTH_PASSWORD: "${AUTH_PASSWORD}"' | kubectl apply -f -
+	@kubectl apply -f deployments/kubernetes/seeds/crd.yml
+	@kubectl apply -f deployments/kubernetes/seeds/seed.yml
 
-## copy-kind-ca-crt: Extract ca from kind to use it in the server
-.PHONY: copy-kind-ca-crt
-copy-kind-ca-crt:
-	@docker cp kind-control-plane:/etc/kubernetes/pki/ca.crt ~/.kind/ca.crt
-
-## seed-cluster: Install CRD and pods for permission-manager
-.PHONY: seed-cluster
-seed-cluster:
-	@kubectl apply -f k8s/k8s-seeds/namespace.yml
-	@kubectl apply -f k8s/k8s-seeds
+## build: local deployment of the current sha
+build:
+	@docker build . -t ${local-container}
+	@kind load docker-image ${local-container}
 
 ## deploy: Install deployment for permission-manager
 .PHONY: deploy
-deploy:
-	@kubectl apply -f k8s/deploy.yaml
+deploy: 
+	@yq w deployments/kubernetes/deploy.yml -d1  \
+		spec.template.spec.containers.[0].image ${local-container} \
+		| kubectl apply -f -
 
 ## port-forward: Connect port 4000 to pod permission-manager
 .PHONY: port-forward
 port-forward:
-	@kubectl port-forward svc/permission-manager-service 4000 --namespace permission-manager
-
-## delete-users: Remove users from crd
-.PHONY: delete-users
-delete-users:
-	@kubectl delete -f k8s/k8s-seeds/user-crd-definition.yml && \
-		kubectl apply -f k8s/k8s-seeds/user-crd-definition.yml
+	@kubectl port-forward svc/permission-manager 4000 --namespace permission-manager
 
 ## clean: Remove artifacts
 .PHONY: clean
