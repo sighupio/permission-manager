@@ -12,7 +12,7 @@ func TestCreateKubeconfig(t *testing.T) {
 	want := `---
 apiVersion: v1
 kind: Config
-current-context: My-cluster
+current-context: gino@My-cluster
 clusters:
   - name: My-cluster
     cluster:
