@@ -79,9 +79,9 @@ export default function NewUserWizard() {
             roleName: p.template,
             subjects: [
               {
-                kind: 'User',
+                kind: 'ServiceAccount',
                 name: username,
-                apiGroup: 'rbac.authorization.k8s.io'
+                namespace: 'permission-manager'
               }
             ],
             clusterRolebindingName
@@ -96,9 +96,9 @@ export default function NewUserWizard() {
               roleKind: 'ClusterRole',
               subjects: [
                 {
-                  kind: 'User',
+                  kind: 'ServiceAccount',
                   name: username,
-                  apiGroup: 'rbac.authorization.k8s.io'
+                  namespace: 'permission-manager'
                 }
               ],
               rolebindingName
@@ -121,9 +121,9 @@ export default function NewUserWizard() {
           roleName: template,
           subjects: [
             {
-              kind: 'User',
+              kind: 'ServiceAccount',
               name: username,
-              apiGroup: 'rbac.authorization.k8s.io'
+              namespace: 'permission-manager'
             }
           ],
           clusterRolebindingName

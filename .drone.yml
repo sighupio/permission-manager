@@ -6,14 +6,16 @@ platform:
   os: linux
   arch: amd64
 
+clone:
+  disable: true
+
 steps:
-  - name: fetch
-    image: docker:git
+  - name: clone
+    image: alpine/git
     commands:
+      - git clone https://github.com/sighupio/permission-manager .
+      - git checkout $DRONE_COMMIT
       - git fetch --tags
-    when:
-      event:
-        - tag
 
   - name: unit-test
     image: golang:1.14.2

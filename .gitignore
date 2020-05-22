@@ -5,3 +5,5 @@ e2e-test/package-lock.json
 dist
 statik
 test.*
+.DS_Store
+chore.sh

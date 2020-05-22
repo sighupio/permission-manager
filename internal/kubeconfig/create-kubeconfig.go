@@ -2,31 +2,26 @@ package kubeconfig
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 
 	"k8s.io/client-go/kubernetes"
 )
 
 func CreateKubeconfigYAMLForUser(ctx context.Context, kc kubernetes.Interface, clusterName, clusterControlPlaceAddress, username string) (kubeconfigYAML string) {
-	priv, privPem := createRsaPrivateKeyPem()
-	certificatePemBytes := getSignedCertificateForUser(ctx, kc, username, priv)
-	crtBase64 := base64.StdEncoding.EncodeToString(certificatePemBytes)
-	privateKeyBase64 := base64.StdEncoding.EncodeToString(privPem)
-
-	return createKubeconfig(clusterName, username, clusterControlPlaceAddress, getCaBase64(), crtBase64, privateKeyBase64)
+	return createKubeconfig(clusterName, username, clusterControlPlaceAddress, getCaBase64(), getServiceAccountToken(ctx, kc, username))
 }
 
-func createKubeconfig(clusterName, username, clusterControlPlaceAddress, caBasebase64, crtBase64, privateKeyBase64 string) (kubeconfigYAML string) {
+// CreateKubeconfigYAML returns a kubeconfig YAML string
+func createKubeconfig(clusterName, username, clusterControlPlaceAddress, caBasebase64, token string) (kubeconfigYAML string) {
 	certificate_tpl := `---
 apiVersion: v1
 kind: Config
 current-context: %s@%s
 clusters:
-  - name: %s
-    cluster:
-      server: %s
+  - cluster:
       certificate-authority-data: %s
+      server: %s
+    name: %s
 contexts:
   - context:
       cluster: %s
@@ -35,21 +30,19 @@ contexts:
 users:
   - name: %s
     user:
-      client-certificate-data: %s
-      client-key-data: %s`
+      token: %s`
 
 	return fmt.Sprintf(certificate_tpl,
 		username,
 		clusterName,
-		clusterName,
-		clusterControlPlaceAddress,
 		caBasebase64,
+		clusterControlPlaceAddress,
+		clusterName,
 		clusterName,
 		username,
 		username,
 		clusterName,
 		username,
-		crtBase64,
-		privateKeyBase64,
+		token,
 	)
 }
