@@ -41,6 +41,6 @@ the username is `admin` the password is mounted as a secret `BASIC_AUTH_PASSWORD
 
 ## Visit the application
 
-`kubectl port-forward svc/permission-manager-service 4000 --namespace permission-manager`
+`kubectl port-forward svc/permission-manager 4000 --namespace permission-manager`
 
 the application can now be accessed by http://localhost:4000
