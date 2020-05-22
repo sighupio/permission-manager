@@ -63,13 +63,7 @@ test-e2e:
 ## test-release: Check dist folder and next tag for the release build
 test-release:
 	@goreleaser --snapshot --skip-publish --rm-dist
-	@bumpversion --allow-dirty --dry-run release
-
-## release: Create the tag for the current version and increate the minor
-.PHONY: release
-release: branch-master gitclean
-	@bumpversion --tag release
-	@bumpversion minor
+	@bumpversion --allow-dirty --dry-run --verbose minor
 
 ## run: Local development of the server
 .PHONY: run

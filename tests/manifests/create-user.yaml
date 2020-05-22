@@ -18,7 +18,7 @@ spec:
         args: ["curl -s --fail -X POST $(ENDPOINT) -H \"Content-Type: application/json;charset=utf-8\" -H \"Authorization: Basic $(BASIC_AUTH)\" --data '{\"name\":\"test-user\"}'"]
         env:
           - name: ENDPOINT
-            value: http://permission-manager-service.permission-manager.svc.cluster.local:4000/api/create-user
+            value: http://permission-manager.permission-manager.svc.cluster.local:4000/api/create-user
           - name: BASIC_AUTH
             value: YWRtaW46MXYyZDFlMmU2N2RT
       restartPolicy: OnFailure

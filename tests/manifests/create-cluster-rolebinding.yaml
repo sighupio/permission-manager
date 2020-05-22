@@ -18,7 +18,7 @@ spec:
         args: ["curl -s --fail -X POST $(ENDPOINT) -H \"Content-Type: application/json;charset=utf-8\" -H \"Authorization: Basic $(BASIC_AUTH)\" --data '{\"generated_for_user\":\"test-user\",\"roleName\":\"template-cluster-resources___admin\",\"subjects\":[{\"kind\":\"User\",\"name\":\"test-user\",\"apiGroup\":\"rbac.authorization.k8s.io\"}],\"clusterRolebindingName\":\"test-user___template-cluster-resources___admin\"}'"]
         env:
           - name: ENDPOINT
-            value: http://permission-manager-service.permission-manager.svc.cluster.local:4000/api/create-cluster-rolebinding
+            value: http://permission-manager.permission-manager.svc.cluster.local:4000/api/create-cluster-rolebinding
           - name: BASIC_AUTH
             value: YWRtaW46MXYyZDFlMmU2N2RT
       restartPolicy: OnFailure

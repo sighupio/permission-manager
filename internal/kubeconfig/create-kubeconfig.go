@@ -21,7 +21,7 @@ func createKubeconfig(clusterName, username, clusterControlPlaceAddress, caBaseb
 	certificate_tpl := `---
 apiVersion: v1
 kind: Config
-current-context: %s
+current-context: %s@%s
 clusters:
   - name: %s
     cluster:
@@ -39,6 +39,7 @@ users:
       client-key-data: %s`
 
 	return fmt.Sprintf(certificate_tpl,
+		username,
 		clusterName,
 		clusterName,
 		clusterControlPlaceAddress,

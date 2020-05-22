@@ -1,6 +1,80 @@
 ---
 kind: pipeline
+name: release
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: fetch
+    image: docker:git
+    commands:
+      - git fetch --tags
+    when:
+      event:
+        - tag
+
+  - name: unit-test
+    image: golang:1.14.2
+    pull: always
+    commands:
+      - apt-get update && apt-get install -y npm
+      - make dependencies ui test
+    when:
+      event:
+        - push
+        - tag
+
+  - name: registry-sha
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+      registry: quay.io
+      repo: quay.io/sighup/permission-manager
+      tags:
+        - ${DRONE_COMMIT_SHA}
+    when:
+      event:
+        - push
+
+  - name: registry-tag
+    image: plugins/docker
+    settings:
+      username:
+        from_secret: quay_username
+      password:
+        from_secret: quay_password
+      registry: quay.io
+      repo: quay.io/sighup/permission-manager
+      tags:
+        - ${DRONE_TAG}
+    when:
+      event:
+        - tag
+
+  - name: release
+    image: golang
+    environment:
+      GITHUB_TOKEN:
+        from_secret: github_token
+    commands:
+      - git checkout .
+      - git clean -f
+      - curl -sL https://git.io/goreleaser | bash
+    when:
+      event:
+        - tag
+
+---
+kind: pipeline
 name: e2e-kubernetes-1.16
+
+depends_on:
+  - release
 
 platform:
   os: linux
@@ -76,6 +150,9 @@ volumes:
 kind: pipeline
 name: e2e-kubernetes-1.17
 
+depends_on:
+  - release
+
 platform:
   os: linux
   arch: amd64
@@ -146,10 +223,12 @@ volumes:
 - name: shared
   temp: {}
 
-
 ---
 kind: pipeline
 name: e2e-kubernetes-1.18
+
+depends_on:
+  - release
 
 platform:
   os: linux
@@ -220,64 +299,3 @@ steps:
 volumes:
 - name: shared
   temp: {}
-
----
-kind: pipeline
-name: release
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-  - name: unit-test
-    image: golang:1.14.2
-    pull: always
-    commands:
-      - apt-get update && apt-get install -y npm
-      - make dependencies ui test
-    when:
-      event:
-        - push
-        - tag
-
-  - name: registry-sha
-    image: plugins/docker
-    settings:
-      username:
-        from_secret: quay_username
-      password:
-        from_secret: quay_password
-      registry: quay.io
-      repo: quay.io/sighup/permission-manager
-      tags:
-        - ${DRONE_COMMIT_SHA}
-    when:
-      event:
-        - push
-
-  - name: registry-tag
-    image: plugins/docker
-    settings:
-      username:
-        from_secret: quay_username
-      password:
-        from_secret: quay_password
-      registry: quay.io
-      repo: quay.io/sighup/permission-manager
-      tags:
-        - ${DRONE_TAG}
-    when:
-      event:
-        - tag
-
-  - name: release
-    image: golang
-    environment:
-      GITHUB_TOKEN:
-        from_secret: github_token
-    commands:
-      - curl -sL https://git.io/goreleaser | bash
-    when:
-      event:
-        - tag
