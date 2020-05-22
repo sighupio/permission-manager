@@ -6,3 +6,4 @@ dist
 statik
 test.*
 .DS_Store
+chore.sh

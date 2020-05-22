@@ -32,7 +32,7 @@ spec:
       serviceAccountName: permission-manager
       containers:
         - name: permission-manager
-          image: quay.io/sighup/permission-manager:v1.5.1
+          image: quay.io/sighup/permission-manager:v1.6.0
           ports:
             - containerPort: 4000
           envFrom:
@@ -64,6 +64,11 @@ rules:
       - "rolebindings"
       - "roles"
     verbs: [ "get", "list", "create", "update", "delete", "bind", "watch" ]
+  - apiGroups: [""]
+    resources:
+      - "serviceaccounts"
+      - "secrets"
+    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
   # Allow full management of certificates CSR, including their approval
   - apiGroups: [ "certificates.k8s.io" ]
     resources:
