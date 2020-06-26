@@ -7,7 +7,7 @@ import (
 )
 
 func TestCreateKubeconfig(t *testing.T) {
-	got := createKubeconfig("My-cluster", "gino", "https://100.200.10.200", "CA_BASE64", "TOKEN")
+	got := createKubeconfig("My-cluster", "gino", "pangolier", "https://100.200.10.200", "CA_BASE64", "TOKEN")
 
 	want := `---
 apiVersion: v1
@@ -22,6 +22,7 @@ contexts:
   - context:
       cluster: My-cluster
       user: gino
+      namespace: pangolier
     name: gino@My-cluster
 users:
   - name: gino

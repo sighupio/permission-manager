@@ -1,3 +1,4 @@
+.idea
 permission-manager
 e2e-test/data/kubeconfigs
 node_modules

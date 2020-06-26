@@ -311,7 +311,8 @@ func deleteRolebinding(c echo.Context) error {
 
 func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.HandlerFunc {
 	type Request struct {
-		Username string `json:"username"`
+		Username  string `json:"username"`
+		Namespace string `json:"namespace"`
 	}
 	type Response struct {
 		Ok         bool   `json:"ok"`
@@ -324,7 +325,7 @@ func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.Handl
 			return err
 		}
 
-		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username)
+		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username, r.Namespace)
 
 		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 	}
