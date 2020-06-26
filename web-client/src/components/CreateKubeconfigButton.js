@@ -12,7 +12,7 @@ export default function CreateKubeconfigButton({ user }) {
     if (showModal && kubeconfig === '') {
       axios
         .post('/api/create-kubeconfig', {
-          username: user.name
+          username: user.name, namespace: "default"
         })
         .then(({ data }) => {
           setKubeconfig(data.kubeconfig)
