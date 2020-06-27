@@ -36,7 +36,7 @@ export default function CreateKubeconfigButton({ user }) {
 
   useEffect(() => {
     // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed
-    if (showModal && (kubeconfig === '' || !kubeconfig.includes(chosenNamespace))) {
+    if (showModal && (kubeconfig === '' || !kubeconfig.includes("namespace: " + chosenNamespace))) {
       axios
         .post('/api/create-kubeconfig', {
           username: user.name, namespace: chosenNamespace
