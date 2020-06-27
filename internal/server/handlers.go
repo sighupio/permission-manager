@@ -325,6 +325,12 @@ func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.Handl
 			return err
 		}
 
+		//required to make the API backward-compatible. Initially the API had only the username parameter
+		//this allows gradual migration of clients/scrips/e2e-tests that assume the request has only username parameter
+		if r.Namespace == "" {
+			r.Namespace = "default"
+		}
+
 		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username, r.Namespace)
 
 		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
