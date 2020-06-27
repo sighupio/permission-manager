@@ -1,14 +1,15 @@
-import { useRbac } from '../hooks/useRbac'
-import { useUsers } from '../hooks/useUsers'
-import React, { useState, useEffect, useCallback } from 'react'
+import {useRbac} from '../hooks/useRbac'
+import {useUsers} from '../hooks/useUsers'
+import React, {useCallback, useEffect, useState} from 'react'
 import uuid from 'uuid'
 import axios from 'axios'
 import ClusterAccessRadio from './ClusterAccessRadio'
-import { templateClusterResourceRolePrefix } from '../constants'
+import {templateClusterResourceRolePrefix} from '../constants'
 import Templates from './Templates'
-import { FullScreenLoader } from './Loader'
+import {FullScreenLoader} from './Loader'
 import Summary from './Summary'
-import { useHistory } from 'react-router-dom'
+import {useHistory} from 'react-router-dom'
+import {extractUsersRoles} from "../services/role";
 
 export default function EditUser({ user }) {
   const [showLoader, setShowLoader] = useState(false)
@@ -21,57 +22,14 @@ export default function EditUser({ user }) {
     refreshRbacData()
   }, [refreshRbacData])
 
-  const rbs = (roleBindings || []).filter(rb => {
-    return rb.metadata.name.startsWith(username)
-  })
-
-  const crbs = (clusterRoleBindings || []).filter(crb => {
-    return crb.metadata.name.startsWith(username)
-  })
-
-  const pairs = [...rbs, ...crbs]
-    .filter(
-      crb => !crb.metadata.name.includes(templateClusterResourceRolePrefix)
-    )
-    .map(v => {
-      const name = v.metadata.name
-      const template = v.roleRef.name
-      const namespace = v.metadata.namespace || 'ALL_NAMESPACES'
-      return { template, namespace, name }
-    })
-
-  const xxx = pairs.reduce((acc, item) => {
-    const has = acc.find(x => x.template === item.template)
-
-    if (has) {
-      if (has.namespaces !== 'ALL_NAMESPACES') {
-        if (item.namespace === 'ALL_NAMESPACES') {
-          has.namespaces = 'ALL_NAMESPACES'
-        } else {
-          has.namespaces.push(item.namespace)
-        }
-      }
-    } else {
-      acc.push({
-        id: uuid.v4(),
-        namespaces:
-          item.namespace === 'ALL_NAMESPACES'
-            ? 'ALL_NAMESPACES'
-            : [item.namespace],
-        template: item.template
-      })
-    }
-
-    return acc
-  }, [])
-
+  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings,clusterRoleBindings, username);
   const [clusterAccess, setClusterAccess] = useState('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState(null)
+  const [pairItems, setPairItems] = useState(extractedPairItems)
 
-  const [pairItems, setPairItems] = useState(xxx)
   useEffect(() => {
     if (pairItems.length === 0) {
-      setPairItems(xxx)
+      setPairItems(extractedPairItems)
 
       const ca = crbs.find(crb =>
         crb.metadata.name.includes(templateClusterResourceRolePrefix)
@@ -92,7 +50,7 @@ export default function EditUser({ user }) {
         }
       }
     }
-  }, [crbs, initialClusterAccess, pairItems.length, xxx])
+  }, [crbs, initialClusterAccess, pairItems.length, extractedPairItems])
 
   async function handleUserDeletion() {
     setShowLoader(true)
