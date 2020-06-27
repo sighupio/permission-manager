@@ -2,23 +2,56 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { Dialog } from '@reach/dialog'
 import Editor from 'react-simple-code-editor'
+import {useRbac} from "../hooks/useRbac";
+import {extractUsersRoles} from "../services/role";
+
+// we extract the valid kubeconfig namespace values
+function getValidNamespaces(roleBindings, clusterRoleBindings, user) {
+    const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);
+
+    const uniqueNamespaces = extractedPairItems.length === 0 ? [] : [...new Set(extractedPairItems.map(i => i.namespaces).flat(1))];
+
+    // we remove the invalid namespaces from the array
+    const validNamespaces = uniqueNamespaces.filter(i => i !== "ALL_NAMESPACES");
+
+    //a) If no elements are present we add the default namespace to the extracted namespaces. This is done to ensure backwards compatibility
+    //   in the application logic and avoid crashes in the case no namespace is present.
+    //   Default namespace ___SHOULD___ be already used implicitly by kubeconfig if the namespace is not defined
+    //   (that would mean it isn't a breaking change)
+    if (validNamespaces.length === 0) {
+        validNamespaces.push("default");
+    }
+    return validNamespaces;
+}
 
 export default function CreateKubeconfigButton({ user }) {
   const [showModal, setShowModal] = useState(false)
   const [kubeconfig, setKubeconfig] = useState('')
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
+  const { clusterRoleBindings, roleBindings } = useRbac()
+  const validNamespaces = getValidNamespaces(roleBindings, clusterRoleBindings, user);
+
+  //b) we generate an array of unique namespaces.
+  const [chosenNamespace, setChosenNamespace] = useState(validNamespaces[0]);
 
   useEffect(() => {
-    if (showModal && kubeconfig === '') {
+    // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed
+    if (showModal && (kubeconfig === '' || !kubeconfig.includes(chosenNamespace))) {
       axios
         .post('/api/create-kubeconfig', {
-          username: user.name, namespace: "default"
+          username: user.name, namespace: chosenNamespace
         })
         .then(({ data }) => {
           setKubeconfig(data.kubeconfig)
         })
     }
-  }, [kubeconfig, showModal, user.name])
+
+    // needed for properly refresh the state if the user has selected a namespace that doesn't exist anymore
+    if(!validNamespaces.find(n => n === chosenNamespace)) {
+        setChosenNamespace(validNamespaces[0])
+    }
+
+  }, [kubeconfig, showModal, user.name, chosenNamespace, validNamespaces])
 
   return (
     <span>
@@ -88,6 +121,21 @@ export default function CreateKubeconfigButton({ user }) {
       >
         show kubeconfig for {user.name}
       </button>
+      <select
+            defaultValue={chosenNamespace}
+            onChange={e => setChosenNamespace(e.target.value)}
+            style= {{
+                marginLeft: "5%"
+            }}
+          >
+            {validNamespaces.map((ns) => {
+              return (
+                  <option key={ns} value={ns}>
+                    {ns}
+                  </option>
+              )
+            })}
+      </select>
     </span>
   )
 }
