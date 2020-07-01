@@ -5,7 +5,13 @@ import Editor from 'react-simple-code-editor'
 import {useRbac} from "../hooks/useRbac";
 import {extractUsersRoles} from "../services/role";
 
-// we extract the valid kubeconfig namespace values
+/**
+ * Extracts the valid kubeconfig namespace values
+ * @param {array} roleBindings
+ * @param {array} clusterRoleBindings
+ * @param {object} user
+ * @returns {*[]}
+ */
 function getValidNamespaces(roleBindings, clusterRoleBindings, user) {
     const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);
 
@@ -14,10 +20,7 @@ function getValidNamespaces(roleBindings, clusterRoleBindings, user) {
     // we remove the invalid namespaces from the array
     const validNamespaces = uniqueNamespaces.filter(i => i !== "ALL_NAMESPACES");
 
-    //a) If no elements are present we add the default namespace to the extracted namespaces. This is done to ensure backwards compatibility
-    //   in the application logic and avoid crashes in the case no namespace is present.
-    //   Default namespace ___SHOULD___ be already used implicitly by kubeconfig if the namespace is not defined
-    //   (that would mean it isn't a breaking change)
+    //a) If no elements are present we add the default namespace to the extracted namespaces.
     if (validNamespaces.length === 0) {
         validNamespaces.push("default");
     }
