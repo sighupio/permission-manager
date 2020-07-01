@@ -1,7 +1,12 @@
 import {templateClusterResourceRolePrefix} from "../constants";
 import uuid from "uuid";
 
-// A function that encapsulates the common logic to extract the roles of a given user
+/**
+ * A function that encapsulates the common logic to extract the roles of a given user
+ * @param {array} roleBindings
+ * @param {array} clusterRoleBindings
+ * @param {string} username the name of the user
+ */
 export function extractUsersRoles(roleBindings, clusterRoleBindings, username) {
     const rbs = (roleBindings || []).filter(rb => {
         return rb.metadata.name.startsWith(username)

@@ -325,8 +325,7 @@ func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.Handl
 			return err
 		}
 
-		//required to make the API backward-compatible. Initially the API had only the username parameter
-		//this allows gradual migration of clients/scrips/e2e-tests that assume the request has only username parameter
+		// if no namespace is set we set the value "default"
 		if r.Namespace == "" {
 			r.Namespace = "default"
 		}
