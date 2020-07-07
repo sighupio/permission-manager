@@ -6,15 +6,11 @@ platform:
   os: linux
   arch: amd64
 
-clone:
-  disable: true
 
 steps:
-  - name: clone
-    image: alpine/git
+  - name: fetch
+    image: docker:git
     commands:
-      - git clone https://github.com/sighupio/permission-manager .
-      - git checkout $DRONE_COMMIT
       - git fetch --tags
 
   - name: unit-test
@@ -64,8 +60,6 @@ steps:
       GITHUB_TOKEN:
         from_secret: github_token
     commands:
-      - git checkout .
-      - git clean -f
       - curl -sL https://git.io/goreleaser | bash
     when:
       event:
