@@ -10,8 +10,8 @@ load "./lib/helper"
         kubectl create namespace permission-manager
 
         current_context=$(kubectl config view -o json | jq -r '.["current-context"]')
-        export CLUSTER_NAME=$(kubectl config view -o json | jq -r '.contexts[] | select( .name | "${current_context}") | .context.cluster')
-        export CONTROL_PLANE_ADDRESS=$(kubectl config view -o json | jq -r '.clusters[] | select( .name | "${CLUSTER_NAME}") | .cluster.server')
+        export CLUSTER_NAME=$(kubectl config view -o json | jq -r ".contexts[] | select( .name == \"${current_context}\") | .context.cluster")
+        export CONTROL_PLANE_ADDRESS=$(kubectl config view -o json | jq -r ".clusters[] | select( .name == \"${CLUSTER_NAME}\") | .cluster.server")
         { cat <<-EOF
 		---
 		apiVersion: v1
