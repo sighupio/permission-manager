@@ -11,7 +11,7 @@ import NewUser from './views/NewUser'
 import Advanced from './views/Advanced'
 import EditUser from './views/EditUser'
 
-export default function App() {
+export default function App () {
   return (
     <BrowserRouter>
       <RbacProvider>
@@ -30,10 +30,10 @@ export default function App() {
 
             <div style={{ flexGrow: 1, backgroundColor: '#edf2f7' }}>
               <Switch>
-                <Route path="/advanced" exact component={Advanced} />
-                <Route path="/new-user" exact component={NewUser} />
-                <Route path="/users/:username" exact component={EditUser} />
-                <Route path="/" exact component={Home} />
+                <Route path='/advanced' exact component={Advanced} />
+                <Route path='/new-user' exact component={NewUser} />
+                <Route path='/users/:username' exact component={EditUser} />
+                <Route path='/' exact component={Home} />
               </Switch>
             </div>
 
