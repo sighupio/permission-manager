@@ -4,4 +4,4 @@ module.exports = {
   },
   variants: {},
   plugins: []
-};
+}

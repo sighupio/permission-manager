@@ -5,7 +5,7 @@ import RoleBindings from '../components/rolebindings'
 import ClusterRoleBindings from '../components/cluster-rolebindings'
 import Users from '../components/users'
 
-export default function Advanced() {
+export default function Advanced () {
   return (
     <div>
       <div style={{ display: 'flex' }}>
