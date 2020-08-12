@@ -26,7 +26,7 @@ export const RESOURCE_TYPES_NAMESPACED = [
   'networkpolicies',
   'poddisruptionbudgets',
   'rolebindings',
-  'roles',
+  'roles'
 ]
 export const RESOURCE_TYPES_NON_NAMESPACED = [
   'componentstatuses',
@@ -50,7 +50,7 @@ export const RESOURCE_TYPES_NON_NAMESPACED = [
   'csidrivers',
   'csinodes',
   'storageclasses',
-  'volumeattachment',
+  'volumeattachment'
 ]
 
 export const VERBS = [
@@ -60,7 +60,7 @@ export const VERBS = [
   'create',
   'update',
   'patch',
-  'delete',
+  'delete'
 ]
 
 export const templateNamespacedResourceRolePrefix =
