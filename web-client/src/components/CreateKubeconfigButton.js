@@ -15,6 +15,7 @@ import { extractUsersRoles } from '../services/role'
 function getValidNamespaces (roleBindings, clusterRoleBindings, user) {
   const { extractedPairItems } = extractUsersRoles(roleBindings, clusterRoleBindings, user.name)
 
+  // @ts-ignore
   const uniqueNamespaces = extractedPairItems.length === 0 ? [] : [...new Set(extractedPairItems.map(i => i.namespaces).flat(1))]
 
   // we remove the invalid namespaces from the array
