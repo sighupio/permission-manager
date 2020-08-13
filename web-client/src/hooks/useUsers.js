@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext, createContext } from 'react'
 import axios from 'axios'
 
-function useUsersFromApi() {
+function useUsersFromApi () {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
   const [loaded, setLoaded] = useState(false)
 
-  function fetchUsers() {
+  function fetchUsers () {
     setLoading(true)
     axios.get('/api/list-users').then(res => {
       setLoading(false)
@@ -19,13 +19,13 @@ function useUsersFromApi() {
     fetchUsers()
   }, [])
 
-  function addUser({ name }) {
+  function addUser ({ name }) {
     axios.post('/api/create-user', { name }).then(res => {
       fetchUsers()
     })
   }
 
-  function removeUser({ id }) {
+  function removeUser ({ id }) {
     axios.post('/api/delete-user', { id }).then(res => {
       fetchUsers()
     })
@@ -51,6 +51,6 @@ export const UsersProvider = ({ children }) => {
   )
 }
 
-export function useUsers() {
+export function useUsers () {
   return useContext(UsersContext)
 }

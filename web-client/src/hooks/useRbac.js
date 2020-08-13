@@ -7,7 +7,7 @@ import React, {
 } from 'react'
 import axios from 'axios'
 
-function useRbacFromApi() {
+function useRbacFromApi () {
   const [data, setData] = useState({
     roleBindings: null,
     roles: null,
@@ -15,7 +15,7 @@ function useRbacFromApi() {
     clusterRoles: null
   })
 
-  const fetchData = useCallback(async function fetchData() {
+  const fetchData = useCallback(async function fetchData () {
     const { data } = await axios.get('/api/rbac')
     setData(data)
   }, [])
@@ -43,6 +43,6 @@ export const RbacProvider = props => {
   )
 }
 
-export function useRbac() {
+export function useRbac () {
   return useContext(RbacContext)
 }

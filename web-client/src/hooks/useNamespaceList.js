@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
 
-export function useNamespaceList() {
+export function useNamespaceList () {
   const [namespaceList, setNamespaceList] = useState([])
   useEffect(() => {
     let unmounted = false
 
     axios.get('/api/list-namespace').then(res => {
-      if (!unmounted)
+      if (!unmounted) {
         setNamespaceList(
           res.data.namespaces.map(ns => {
-            /* to temporary handle api refactoring  */
+          /* to temporary handle api refactoring  */
             return {
               metadata: {
                 name: ns
@@ -18,6 +18,7 @@ export function useNamespaceList() {
             }
           })
         )
+      }
     })
 
     return () => {
