@@ -37,7 +37,7 @@ export default () => {
   )
 }
 
-function NewRoleForm({ refreshRbacData }) {
+function NewRoleForm ({ refreshRbacData }) {
   const [namespace, setNamespace] = useState('default')
   const [roleName, setRoleName] = useState('')
   const [namespaceList, setNamespaceList] = useState([])
@@ -49,7 +49,7 @@ function NewRoleForm({ refreshRbacData }) {
     })
   }, [])
 
-  async function onSubmit(e) {
+  async function onSubmit (e) {
     e.preventDefault()
     await axios.post('/api/create-role', {
       namespace,
@@ -97,7 +97,7 @@ function NewRoleForm({ refreshRbacData }) {
         <label>
           role name
           <input
-            type="text"
+            type='text'
             required
             value={roleName}
             onChange={e => setRoleName(e.target.value)}
@@ -123,15 +123,15 @@ function NewRoleForm({ refreshRbacData }) {
       </div>
       <h3>rules</h3>
       <RulesList rules={rules} setRules={setRules} />
-      <button type="submit">submit</button>
+      <button type='submit'>submit</button>
     </form>
   )
 }
 
-function Role({ role: r, refreshRbacData }) {
+function Role ({ role: r, refreshRbacData }) {
   const [showRules, setShowRules] = useState(false)
 
-  async function deleteRole(e) {
+  async function deleteRole (e) {
     await axios.post('/api/delete-role', {
       roleName: r.metadata.name,
       namespace: r.metadata.namespace
@@ -159,7 +159,7 @@ function Role({ role: r, refreshRbacData }) {
   )
 }
 
-function RulesList({ rules, setRules }) {
+function RulesList ({ rules, setRules }) {
   const addRule = s => setRules(state => [...state, s])
   const removeRule = id => setRules(state => state.filter(sub => sub.id !== id))
   const updateRule = useCallback(
@@ -183,7 +183,7 @@ function RulesList({ rules, setRules }) {
         return (
           <div key={r.id}>
             <RuleItem id={r.id} updateRule={updateRule} />
-            <button onClick={() => removeRule(r.id)} type="button">
+            <button onClick={() => removeRule(r.id)} type='button'>
               delete
             </button>
             <hr />
@@ -193,7 +193,7 @@ function RulesList({ rules, setRules }) {
 
       <div style={{ marginTop: 20 }}>
         <button
-          type="button"
+          type='button'
           onClick={() => addRule({ resources: [], verbs: [], id: uuid.v4() })}
         >
           new
@@ -203,7 +203,7 @@ function RulesList({ rules, setRules }) {
   )
 }
 
-function RuleItem({ id, updateRule }) {
+function RuleItem ({ id, updateRule }) {
   const [verbs, setVerbs] = useState([])
   const [allverbs, setAllVerbs] = useState(false)
   const [resources, setResources] = useState([])
@@ -224,7 +224,7 @@ function RuleItem({ id, updateRule }) {
                 <li key={resource}>
                   <label>
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       onChange={e => {
                         if (e.target.checked) {
                           setResources([...resources, resource])
@@ -246,7 +246,7 @@ function RuleItem({ id, updateRule }) {
                 <li key={resource}>
                   <label>
                     <input
-                      type="checkbox"
+                      type='checkbox'
                       onChange={e => {
                         if (e.target.checked) {
                           setResources([...resources, resource])
@@ -269,7 +269,7 @@ function RuleItem({ id, updateRule }) {
         <div style={{ paddingLeft: 20 }}>
           <label style={{ marginRight: 20 }}>
             <input
-              type="checkbox"
+              type='checkbox'
               checked={allverbs}
               onChange={e => {
                 if (e.target.checked) {
@@ -288,7 +288,7 @@ function RuleItem({ id, updateRule }) {
               <label style={{ marginRight: 20 }} key={verb}>
                 <input
                   checked={verbs.includes(verb)}
-                  type="checkbox"
+                  type='checkbox'
                   onChange={e => {
                     if (e.target.checked) {
                       setVerbs([...verbs, verb])

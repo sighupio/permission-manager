@@ -2,11 +2,11 @@ import React from 'react'
 import { useNamespaceList } from '../hooks/useNamespaceList'
 import Select from 'react-select'
 
-export default function NamespaceMultiSelect({
+export default function NamespaceMultiSelect ({
   onSelect,
   value,
   disabled,
-  placeholder,
+  placeholder
 }) {
   const { namespaceList } = useNamespaceList()
 

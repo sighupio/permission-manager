@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import NamespaceMultiSelect from './NamespaceMultiSelect'
 import TemplateSelect from './TemplateSelect'
 
-export default function TemplatePairSelect({ onSave, initialValues }) {
+export default function TemplatePairSelect ({ onSave, initialValues }) {
   const [namespaces, setNamespaces] = useState(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState(
     initialValues.namespaces === 'ALL_NAMESPACES' ? true : null
@@ -31,8 +31,8 @@ export default function TemplatePairSelect({ onSave, initialValues }) {
 
   return (
     <div style={{ display: 'flex' }}>
-      <div style={{ flex: 3 }} data-testid="template-select">
-        <div className="block uppercase tracking-wide text-gray-700 text-xs  mb-2">
+      <div style={{ flex: 3 }} data-testid='template-select'>
+        <div className='block uppercase tracking-wide text-gray-700 text-xs  mb-2'>
           template
         </div>
         <TemplateSelect
@@ -40,9 +40,9 @@ export default function TemplatePairSelect({ onSave, initialValues }) {
           initialValue={initialValues.template}
         />
       </div>
-      <div style={{ marginLeft: 20, flex: 3 }} data-testid="namespaces-select">
-        <div className="block uppercase tracking-wide text-gray-700 text-xs  mb-2">
-          <span className="text-red-400 pr-1">*</span>
+      <div style={{ marginLeft: 20, flex: 3 }} data-testid='namespaces-select'>
+        <div className='block uppercase tracking-wide text-gray-700 text-xs  mb-2'>
+          <span className='text-red-400 pr-1'>*</span>
           namespaces
         </div>
 
@@ -54,14 +54,14 @@ export default function TemplatePairSelect({ onSave, initialValues }) {
             setNamespaces(ns)
           }}
         />
-        <div className="mt-2">
-          <label className="block uppercase tracking-wide text-gray-700 text-xs mb-2">
+        <div className='mt-2'>
+          <label className='block uppercase tracking-wide text-gray-700 text-xs mb-2'>
             <input
-              type="checkbox"
+              type='checkbox'
               checked={!!allNamespace}
               onChange={e => setAllNamespaces(e.target.checked)}
             />
-            <span className="ml-2">all Namespaces</span>
+            <span className='ml-2'>all Namespaces</span>
           </label>
         </div>
       </div>

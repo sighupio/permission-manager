@@ -16,8 +16,8 @@ export default () => {
 
   const crbs = hideSystemCusterRoleBindings
     ? clusterRoleBindings.filter(c => {
-        return !c.roleRef.name.startsWith('system:')
-      })
+      return !c.roleRef.name.startsWith('system:')
+    })
     : clusterRoleBindings
 
   return (
@@ -33,11 +33,10 @@ export default () => {
               hide system clusterRoleBindings (role name starting with
               "system:")
               <input
-                type="checkbox"
+                type='checkbox'
                 checked={hideSystemCusterRoleBindings}
                 onChange={e =>
-                  setHideSystemCusterRoleBindings(e.target.checked)
-                }
+                  setHideSystemCusterRoleBindings(e.target.checked)}
               />
             </label>
           </div>
@@ -56,10 +55,10 @@ export default () => {
   )
 }
 
-function RoleBinding({ rolebinding: rb, fetchData }) {
+function RoleBinding ({ rolebinding: rb, fetchData }) {
   const [, setShowMore] = useState(false)
 
-  async function deleteRoleBinding(e) {
+  async function deleteRoleBinding (e) {
     await axios.post('/api/delete-cluster-rolebinding', {
       rolebindingName: rb.metadata.name,
       namespace: rb.metadata.namespace
@@ -98,12 +97,12 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
   )
 }
 
-function NewClusterRoleBindingForm({ fetchData }) {
+function NewClusterRoleBindingForm ({ fetchData }) {
   const [roleName, setRoleName] = useState('')
   const [subjects, setSubjects] = useState([])
   const [clusterRolebindingName, setClusterRolebindingName] = useState('')
 
-  async function onSubmit(e) {
+  async function onSubmit (e) {
     e.preventDefault()
     await axios.post('/api/create-cluster-rolebinding', {
       roleName,
@@ -126,7 +125,7 @@ function NewClusterRoleBindingForm({ fetchData }) {
         <label>
           cluster rolebinding name
           <input
-            type="text"
+            type='text'
             required
             value={clusterRolebindingName}
             onChange={e => setClusterRolebindingName(e.target.value)}
@@ -141,15 +140,15 @@ function NewClusterRoleBindingForm({ fetchData }) {
         <SubjectList
           subjects={subjects}
           setSubjects={setSubjects}
-        ></SubjectList>
+        />
       </div>
 
-      <button type="submit">submit</button>
+      <button type='submit'>submit</button>
     </form>
   )
 }
 
-function SubjectList({ subjects, setSubjects }) {
+function SubjectList ({ subjects, setSubjects }) {
   const addSubject = s => setSubjects(state => [...state, s])
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
@@ -174,7 +173,7 @@ function SubjectList({ subjects, setSubjects }) {
         return (
           <div key={s.id}>
             <SubjectItem id={s.id} updateSubject={updateSubject} />
-            <button onClick={() => removeSubject(s.id)} type="button">
+            <button onClick={() => removeSubject(s.id)} type='button'>
               delete
             </button>
             <hr />
@@ -184,10 +183,9 @@ function SubjectList({ subjects, setSubjects }) {
 
       <div style={{ marginTop: 20 }}>
         <button
-          type="button"
+          type='button'
           onClick={() =>
-            addSubject({ kind: 'User', name: users[0].name, id: uuid.v4() })
-          }
+            addSubject({ kind: 'User', name: users[0].name, id: uuid.v4() })}
         >
           new
         </button>
@@ -196,7 +194,7 @@ function SubjectList({ subjects, setSubjects }) {
   )
 }
 
-function SubjectItem({ id, updateSubject }) {
+function SubjectItem ({ id, updateSubject }) {
   const [kind, setKind] = useState('User')
   const [subjectName, setSubjectName] = useState('')
   const { users } = useUsers()
@@ -215,7 +213,7 @@ function SubjectItem({ id, updateSubject }) {
         Kind:
         <label>
           <input
-            type="radio"
+            type='radio'
             checked={kind === 'User'}
             onChange={e => {
               if (e.target.checked) {
@@ -240,7 +238,6 @@ function SubjectItem({ id, updateSubject }) {
                 </option>
               )
             })}
-            )}
           </select>
         </label>
       </div>

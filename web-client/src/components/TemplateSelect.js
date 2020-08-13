@@ -4,7 +4,7 @@ import { templateNamespacedResourceRolePrefix } from '../constants'
 import Select, { components } from 'react-select'
 import TemplateInfo from './TemplateInfo'
 
-export default function TemplateSelect({ onSelect, initialValue }) {
+export default function TemplateSelect ({ onSelect, initialValue }) {
   const { clusterRoles } = useRbac()
   const templateNames = (clusterRoles || [])
     .map(s => s.metadata.name)
@@ -23,7 +23,7 @@ export default function TemplateSelect({ onSelect, initialValue }) {
 
   const Option = props => {
     return (
-      <div className="flex">
+      <div className='flex'>
         <components.Option {...props} />
         <ShowTemplateInfo
           label={props.data.label}
@@ -39,26 +39,26 @@ export default function TemplateSelect({ onSelect, initialValue }) {
     <Select
       value={{
         label: selected.replace(templateNamespacedResourceRolePrefix, ''),
-        value: selected,
+        value: selected
       }}
       components={{ Option }}
       onChange={e => setSelected(e.value)}
       options={templateNames.map(t => {
         return {
           label: t.replace(templateNamespacedResourceRolePrefix, ''),
-          value: t,
+          value: t
         }
       })}
-    ></Select>
+    />
   )
 }
 
-function ShowTemplateInfo({ label, rules }) {
+function ShowTemplateInfo ({ label, rules }) {
   const [coordinates, setCoordinates] = useState(null)
   return (
     <div>
       <div
-        className="p-2 cursor-default"
+        className='p-2 cursor-default'
         onMouseEnter={e => {
           setCoordinates({ top: e.clientY - 250, left: e.clientX + 30 })
         }}
@@ -68,16 +68,16 @@ function ShowTemplateInfo({ label, rules }) {
       </div>
       {coordinates !== null ? (
         <div
-          className="fixed z-10 border rounded shadow-2xl py-4 px-4 bg-gray-100"
+          className='fixed z-10 border rounded shadow-2xl py-4 px-4 bg-gray-100'
           style={{ top: coordinates.top, left: coordinates.left }}
         >
-          <h2 className="text-md text-gray-700 font-bold mb-2 uppercase">
+          <h2 className='text-md text-gray-700 font-bold mb-2 uppercase'>
             {label}
           </h2>
           <TemplateInfo
             hideNamespaceCol
             ruleSets={[{ rules, namespaces: [] }]}
-          ></TemplateInfo>
+          />
         </div>
       ) : null}
     </div>

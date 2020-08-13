@@ -2,7 +2,7 @@ import React from 'react'
 import { useRbac } from '../hooks/useRbac'
 import TemplateInfo from './TemplateInfo'
 
-export default function Summary({ pairItems }) {
+export default function Summary ({ pairItems }) {
   const { clusterRoles } = useRbac()
 
   if (!clusterRoles) {
@@ -47,9 +47,9 @@ export default function Summary({ pairItems }) {
     .filter(x => x.namespaces.length > 0)
 
   return (
-    <div data-testid="summary">
-      <h3 className="text-xl mb-2">Summary</h3>
-      <div className="border rounded py-4 px-4 bg-gray-100 inline-block">
+    <div data-testid='summary'>
+      <h3 className='text-xl mb-2'>Summary</h3>
+      <div className='border rounded py-4 px-4 bg-gray-100 inline-block'>
         <TemplateInfo ruleSets={ruleSets} />
       </div>
     </div>

@@ -35,10 +35,10 @@ export default () => {
   )
 }
 
-function RoleBinding({ rolebinding: rb, fetchData }) {
+function RoleBinding ({ rolebinding: rb, fetchData }) {
   const [, setShowMore] = useState(false)
 
-  async function deleteRoleBinding(e) {
+  async function deleteRoleBinding (e) {
     await axios.post('/api/delete-rolebinding', {
       rolebindingName: rb.metadata.name,
       namespace: rb.metadata.namespace
@@ -77,7 +77,7 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
   )
 }
 
-function NewRoleBindingForm({ fetchData }) {
+function NewRoleBindingForm ({ fetchData }) {
   const [namespace, setNamespace] = useState('default')
   const [roleName, setRoleName] = useState('')
   const [subjects, setSubjects] = useState([])
@@ -85,14 +85,14 @@ function NewRoleBindingForm({ fetchData }) {
   const [rolebindingName, setRolebindingName] = useState('')
   const { namespaceList } = useNamespaceList()
 
-  function resetForm() {
+  function resetForm () {
     setRoleName('')
     setRolebindingName('')
     setNamespace('default')
     setSubjects([])
   }
 
-  async function onSubmit(e) {
+  async function onSubmit (e) {
     e.preventDefault()
     await axios.post('/api/create-rolebinding', {
       namespace,
@@ -118,7 +118,7 @@ function NewRoleBindingForm({ fetchData }) {
         <label>
           rolebinding name
           <input
-            type="text"
+            type='text'
             required
             value={rolebindingName}
             onChange={e => setRolebindingName(e.target.value)}
@@ -149,7 +149,7 @@ function NewRoleBindingForm({ fetchData }) {
         <div>
           <label>
             <input
-              type="radio"
+              type='radio'
               checked={roleKind === 'Role'}
               onChange={e => {
                 if (e.target.checked) {
@@ -163,7 +163,7 @@ function NewRoleBindingForm({ fetchData }) {
         <div>
           <label>
             <input
-              type="radio"
+              type='radio'
               checked={roleKind === 'ClusterRole'}
               onChange={e => {
                 if (e.target.checked) {
@@ -187,15 +187,15 @@ function NewRoleBindingForm({ fetchData }) {
         <SubjectList
           subjects={subjects}
           setSubjects={setSubjects}
-        ></SubjectList>
+        />
       </div>
 
-      <button type="submit">submit</button>
+      <button type='submit'>submit</button>
     </form>
   )
 }
 
-function SubjectList({ subjects, setSubjects }) {
+function SubjectList ({ subjects, setSubjects }) {
   const addSubject = s => setSubjects(state => [...state, s])
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
@@ -219,7 +219,7 @@ function SubjectList({ subjects, setSubjects }) {
         return (
           <div key={s.id}>
             <SubjectItem id={s.id} updateSubject={updateSubject} />
-            <button onClick={() => removeSubject(s.id)} type="button">
+            <button onClick={() => removeSubject(s.id)} type='button'>
               delete
             </button>
             <hr />
@@ -229,10 +229,9 @@ function SubjectList({ subjects, setSubjects }) {
 
       <div style={{ marginTop: 20 }}>
         <button
-          type="button"
+          type='button'
           onClick={() =>
-            addSubject({ kind: 'User', name: users[0].name, id: uuid.v4() })
-          }
+            addSubject({ kind: 'User', name: users[0].name, id: uuid.v4() })}
         >
           new
         </button>
@@ -241,7 +240,7 @@ function SubjectList({ subjects, setSubjects }) {
   )
 }
 
-function SubjectItem({ id, updateSubject }) {
+function SubjectItem ({ id, updateSubject }) {
   const [kind, setKind] = useState('User')
   const [subjectName, setSubjectName] = useState('')
   const { users } = useUsers()
@@ -260,7 +259,7 @@ function SubjectItem({ id, updateSubject }) {
         Kind:
         <label>
           <input
-            type="radio"
+            type='radio'
             checked={kind === 'User'}
             onChange={e => {
               if (e.target.checked) {

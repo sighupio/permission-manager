@@ -1,28 +1,28 @@
 import React from 'react'
 import { templateNamespacedResourceRolePrefix } from '../constants'
 
-export default function TemplateInfo({ ruleSets, hideNamespaceCol }) {
+export default function TemplateInfo ({ ruleSets, hideNamespaceCol }) {
   return (
-    <fieldset disabled={true}>
-      <table className="text-left">
+    <fieldset disabled>
+      <table className='text-left'>
         <colgroup>
-          <col width="160" />
-          <col width="60" />
-          <col width="60" />
+          <col width='160' />
+          <col width='60' />
+          <col width='60' />
           {hideNamespaceCol ? null : <col />}
         </colgroup>
 
-        <thead className="text-gray-700 text-xs uppercase">
+        <thead className='text-gray-700 text-xs uppercase'>
           <tr>
-            <th className="px-3">resource</th>
-            <th className="px-3">read</th>
-            <th className="px-3">write</th>
-            {hideNamespaceCol ? null : <th className="px-3">namespaces</th>}
+            <th className='px-3'>resource</th>
+            <th className='px-3'>read</th>
+            <th className='px-3'>write</th>
+            {hideNamespaceCol ? null : <th className='px-3'>namespaces</th>}
           </tr>
         </thead>
 
-        <tbody className="text-gray-700 text-xs">
-          <tr className="bg-gray-200 h-2" />
+        <tbody className='text-gray-700 text-xs'>
+          <tr className='bg-gray-200 h-2' />
           {ruleSets.map(({ rules, namespaces }, index) => {
             return rules.map((rule, index) => {
               return (
@@ -39,19 +39,19 @@ export default function TemplateInfo({ ruleSets, hideNamespaceCol }) {
                           i % 2 === 0 ? 'bg-gray-200' : 'bg-gray-100'
                         }`}
                       >
-                        <td className="py-0 px-3">
-                          <div className="flex items-center">
+                        <td className='py-0 px-3'>
+                          <div className='flex items-center'>
                             {res.replace(
                               templateNamespacedResourceRolePrefix,
-                              '',
+                              ''
                             )}
                           </div>
                         </td>
-                        <td className="py-0 px-3">
-                          <div className="flex items-center justify-center">
-                            <label className="my-1 mx-0 block uppercase tracking-wide text-gray-700 text-xs mb-2">
+                        <td className='py-0 px-3'>
+                          <div className='flex items-center justify-center'>
+                            <label className='my-1 mx-0 block uppercase tracking-wide text-gray-700 text-xs mb-2'>
                               <input
-                                type="checkbox"
+                                type='checkbox'
                                 checked={r}
                                 onChange={() => {}}
                               />
@@ -59,11 +59,11 @@ export default function TemplateInfo({ ruleSets, hideNamespaceCol }) {
                           </div>
                         </td>
 
-                        <td className="py-0 px-3">
-                          <div className="flex items-center justify-center">
-                            <label className="my-1 mx-0 block uppercase tracking-wide text-gray-700 text-xs mb-2">
+                        <td className='py-0 px-3'>
+                          <div className='flex items-center justify-center'>
+                            <label className='my-1 mx-0 block uppercase tracking-wide text-gray-700 text-xs mb-2'>
                               <input
-                                type="checkbox"
+                                type='checkbox'
                                 checked={rw}
                                 onChange={() => {}}
                               />
@@ -72,8 +72,8 @@ export default function TemplateInfo({ ruleSets, hideNamespaceCol }) {
                         </td>
 
                         {hideNamespaceCol ? null : (
-                          <td className="py-0 px-3">
-                            <div className="flex items-center justify-center">
+                          <td className='py-0 px-3'>
+                            <div className='flex items-center justify-center'>
                               {namespaces.length > 0
                                 ? namespaces.join(', ')
                                 : namespaces[0]}

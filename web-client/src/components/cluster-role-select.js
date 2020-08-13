@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRbac } from '../hooks/useRbac'
 
-export function ClusterRoleSelect({ onSelected }) {
+export function ClusterRoleSelect ({ onSelected }) {
   const [hideSystemClusterRoles, setHideSystemClusterRoles] = useState(true)
   const { refreshRbacData, clusterRoles } = useRbac()
 
@@ -48,13 +48,13 @@ export function ClusterRoleSelect({ onSelected }) {
               hide system clusterRoles (role name starting with "system:")
             </small>
             <input
-              type="checkbox"
+              type='checkbox'
               checked={hideSystemClusterRoles}
               onChange={e => setHideSystemClusterRoles(e.target.checked)}
             />
           </label>
         </div>
-        <button type="button" onClick={refreshRbacData}>
+        <button type='button' onClick={refreshRbacData}>
           refresh cluster roles
         </button>
       </label>

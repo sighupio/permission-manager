@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useUsers } from '../hooks/useUsers'
 import CreateKubeconfigButton from './CreateKubeconfigButton'
 
-export default function Users() {
+export default function Users () {
   const { users, addUser, removeUser } = useUsers()
   return (
     <div>
@@ -49,7 +49,7 @@ export default function Users() {
   )
 }
 
-function NewUserForm({ onSubmit }) {
+function NewUserForm ({ onSubmit }) {
   const [name, setName] = useState('')
 
   return (
@@ -67,10 +67,10 @@ function NewUserForm({ onSubmit }) {
           required
           value={name}
           onChange={e => setName(e.target.value)}
-        ></input>
+        />
       </label>
 
-      <button type="submit">submit</button>
+      <button type='submit'>submit</button>
     </form>
   )
 }

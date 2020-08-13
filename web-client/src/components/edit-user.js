@@ -1,17 +1,17 @@
-import {useRbac} from '../hooks/useRbac'
-import {useUsers} from '../hooks/useUsers'
-import React, {useCallback, useEffect, useState} from 'react'
+import { useRbac } from '../hooks/useRbac'
+import { useUsers } from '../hooks/useUsers'
+import React, { useCallback, useEffect, useState } from 'react'
 import uuid from 'uuid'
 import axios from 'axios'
 import ClusterAccessRadio from './ClusterAccessRadio'
-import {templateClusterResourceRolePrefix} from '../constants'
+import { templateClusterResourceRolePrefix } from '../constants'
 import Templates from './Templates'
-import {FullScreenLoader} from './Loader'
+import { FullScreenLoader } from './Loader'
 import Summary from './Summary'
-import {useHistory} from 'react-router-dom'
-import {extractUsersRoles} from "../services/role";
+import { useHistory } from 'react-router-dom'
+import { extractUsersRoles } from '../services/role'
 
-export default function EditUser({ user }) {
+export default function EditUser ({ user }) {
   const [showLoader, setShowLoader] = useState(false)
   const username = user.name
   const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()
@@ -22,7 +22,7 @@ export default function EditUser({ user }) {
     refreshRbacData()
   }, [refreshRbacData])
 
-  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings,clusterRoleBindings, username);
+  const { rbs, crbs, extractedPairItems } = extractUsersRoles(roleBindings, clusterRoleBindings, username)
   const [clusterAccess, setClusterAccess] = useState('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState(null)
   const [pairItems, setPairItems] = useState(extractedPairItems)
@@ -52,7 +52,7 @@ export default function EditUser({ user }) {
     }
   }, [crbs, initialClusterAccess, pairItems.length, extractedPairItems])
 
-  async function handleUserDeletion() {
+  async function handleUserDeletion () {
     setShowLoader(true)
     await deleteUserResources()
     await axios.post('/api/delete-user', {
@@ -60,7 +60,7 @@ export default function EditUser({ user }) {
     })
   }
 
-  async function deleteUserResources() {
+  async function deleteUserResources () {
     for await (const p of rbs) {
       await axios.post('/api/delete-rolebinding', {
         rolebindingName: p.metadata.name,
@@ -74,7 +74,7 @@ export default function EditUser({ user }) {
       })
     }
   }
-  async function handleSubmit(e) {
+  async function handleSubmit (e) {
     await deleteUserResources()
     const consumed = []
 
@@ -191,15 +191,15 @@ export default function EditUser({ user }) {
     <div>
       {showLoader && <FullScreenLoader />}
 
-      <div className="flex content-between items-center mb-4">
-        <h2 className="text-3xl text-gray-800">
-          User: <span data-testid="username-heading">{username}</span>
+      <div className='flex content-between items-center mb-4'>
+        <h2 className='text-3xl text-gray-800'>
+          User: <span data-testid='username-heading'>{username}</span>
         </h2>
         <div>
           <button
             tabIndex={-1}
-            type="button"
-            className="bg-transparent hover:bg-red-600 text-gray-700 hover:text-gray-100 py-1 px-2 rounded hover:shadow ml-2 text-xs"
+            type='button'
+            className='bg-transparent hover:bg-red-600 text-gray-700 hover:text-gray-100 py-1 px-2 rounded hover:shadow ml-2 text-xs'
             onClick={() => {
               const confirmed = window.confirm(
                 `Confirm deletion of User ${username}`
@@ -225,7 +225,7 @@ export default function EditUser({ user }) {
           handleSubmit(e)
         }}
       >
-        <div className="mb-6">
+        <div className='mb-6'>
           <Templates
             pairItems={pairItems}
             savePair={savePair}
@@ -239,14 +239,14 @@ export default function EditUser({ user }) {
           setClusterAccess={setClusterAccess}
         />
 
-        <hr className="my-6" />
+        <hr className='my-6' />
 
         <button
           className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
             saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
           }`}
           disabled={saveButtonDisabled}
-          type="submit"
+          type='submit'
         >
           save
         </button>
@@ -254,8 +254,8 @@ export default function EditUser({ user }) {
 
       {pairItems.length > 0 && pairItems.some(p => p.namespaces.length > 0) ? (
         <>
-          <div className="mt-12 mb-4" />
-          <Summary pairItems={pairItems}></Summary>
+          <div className='mt-12 mb-4' />
+          <Summary pairItems={pairItems} />
         </>
       ) : null}
     </div>

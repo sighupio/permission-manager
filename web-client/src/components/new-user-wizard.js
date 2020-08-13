@@ -10,7 +10,7 @@ import { FullScreenLoader } from './Loader'
 import Summary from './Summary'
 import { useUsers } from '../hooks/useUsers'
 
-export default function NewUserWizard() {
+export default function NewUserWizard () {
   const history = useHistory()
 
   const [username, setUsername] = useState('')
@@ -31,7 +31,7 @@ export default function NewUserWizard() {
       )
     ) {
       setUsernameError(
-        `user can only contain lowercase letters, dots and dashes and numbers`
+        'user can only contain lowercase letters, dots and dashes and numbers'
       )
       return false
     } else if (users.map(u => u.name).includes(username)) {
@@ -44,7 +44,7 @@ export default function NewUserWizard() {
   }, [username, users])
 
   useEffect(
-    function validateUsernameOnChange() {
+    function validateUsernameOnChange () {
       validateUsername()
     },
     [username.length, validateUsername]
@@ -55,7 +55,7 @@ export default function NewUserWizard() {
     usernameError !== null ||
     pairItems.some(p => p.namespaces.length === 0)
 
-  async function handleSubmit(e) {
+  async function handleSubmit (e) {
     e.preventDefault()
 
     if (!formTouched) {
@@ -162,7 +162,7 @@ export default function NewUserWizard() {
   return (
     <div>
       {showLoader && <FullScreenLoader />}
-      <h2 className="text-3xl mb-4 text-gray-800">New User</h2>
+      <h2 className='text-3xl mb-4 text-gray-800'>New User</h2>
       <form
         onSubmit={e => {
           e.preventDefault()
@@ -171,18 +171,18 @@ export default function NewUserWizard() {
         }}
       >
         <div>
-          <div className="mb-6">
-            <label className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
-              <span className="text-red-400 pr-1">*</span>
+          <div className='mb-6'>
+            <label className='block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2'>
+              <span className='text-red-400 pr-1'>*</span>
               Username
               <input
                 autoFocus
-                placeholder="Jane Doe"
+                placeholder='Jane Doe'
                 className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${
                   usernameError && formTouched ? 'border-red-500' : ''
                 }`}
                 required
-                type="text"
+                type='text'
                 value={username}
                 onChange={e => {
                   if (!formTouched) {
@@ -194,11 +194,11 @@ export default function NewUserWizard() {
             </label>
 
             {usernameError && formTouched ? (
-              <p className="text-red-500 text-xs italic">{usernameError}</p>
+              <p className='text-red-500 text-xs italic'>{usernameError}</p>
             ) : null}
           </div>
 
-          <div className="mb-6">
+          <div className='mb-6'>
             <Templates
               pairItems={pairItems}
               savePair={savePair}
@@ -212,13 +212,13 @@ export default function NewUserWizard() {
             setClusterAccess={setClusterAccess}
           />
 
-          <hr className="my-6" />
+          <hr className='my-6' />
           <button
             className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
               saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
             }`}
             disabled={saveButtonDisabled}
-            type="submit"
+            type='submit'
           >
             save
           </button>
@@ -227,8 +227,8 @@ export default function NewUserWizard() {
 
       {pairItems.length > 0 && pairItems.some(p => p.namespaces.length > 0) ? (
         <>
-          <div className="mt-12 mb-4" />
-          <Summary pairItems={pairItems}></Summary>
+          <div className='mt-12 mb-4' />
+          <Summary pairItems={pairItems} />
         </>
       ) : null}
     </div>

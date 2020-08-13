@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRbac } from '../hooks/useRbac'
 
-export function RoleSelect({ onSelected }) {
+export function RoleSelect ({ onSelected }) {
   const { refreshRbacData, roles } = useRbac()
   const [roleName, setRoleName] = useState('')
 
@@ -30,7 +30,7 @@ export function RoleSelect({ onSelected }) {
             )
           })}
         </select>
-        <button type="button" onClick={refreshRbacData}>
+        <button type='button' onClick={refreshRbacData}>
           refresh roles
         </button>
       </label>
