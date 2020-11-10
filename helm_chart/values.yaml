@@ -50,7 +50,7 @@ ingress:
  # tls:  
  #   - secretName: permission-tls
  #     hosts:
- #       - permission.orli.ikn.to 
+ #       - domain.com 
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
