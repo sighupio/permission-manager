@@ -9,4 +9,4 @@ roleRef:
 subjects:
   - kind: ServiceAccount
     name: {{ include "permission-manager.serviceAccountName" . }}
-    namespace: {{ .Values.config.namespace }} 
+    namespace: {{ .Release.Namespace }} 

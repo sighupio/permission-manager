@@ -77,7 +77,6 @@ tolerations: []
 
 affinity: {}
 config: 
-  clusterName: 
+  clusterName: "" 
   controlePlaneAddress: "" 
   basicAuthPassword: RrXwZSBdTXhQL6 
-  namespace: permission-manager

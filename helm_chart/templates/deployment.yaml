@@ -35,7 +35,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           envFrom:
             - secretRef:
-                name: permission-manager 
+                name: {{ include "permission-manager.fullname" . }} 
           ports:
             - name: http
               containerPort: 4000 
