@@ -99,7 +99,7 @@ deploy:
 ## port-forward: Connect port 4000 to pod permission-manager
 .PHONY: port-forward
 port-forward:
-	@kubectl port-forward svc/permission-manager-service 4000 --namespace permission-manager
+	@kubectl port-forward svc/permission-manager 4000 --namespace permission-manager
 
 ## clean: Remove artifacts
 .PHONY: clean
