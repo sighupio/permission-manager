@@ -1,0 +1,47 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "permission-manager.serviceAccountName" . }} 
+  labels:
+    {{- include "permission-manager.labels" . | nindent 4 }}
+rules:
+  # Allow full management of all the Permission Manager resources
+  - apiGroups: [ "permissionmanager.user" ]
+    resources:
+      - "*"
+    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
+  # Allow full management of the RBAC resources
+  - apiGroups:
+      - "rbac.authorization.k8s.io"
+    resources:
+      - "clusterrolebindings"
+      - "clusterroles"
+      - "rolebindings"
+      - "roles"
+    verbs: [ "get", "list", "create", "update", "delete", "bind", "watch" ]
+  - apiGroups: [""]
+    resources:
+      - "serviceaccounts"
+      - "secrets"
+    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
+  # Allow full management of certificates CSR, including their approval
+  - apiGroups: [ "certificates.k8s.io" ]
+    resources:
+      - "certificatesigningrequests"
+      - "certificatesigningrequests/approval"
+    verbs: [ "get", "list", "create", "update", "delete", "watch" ]
+  # Support legacy versions, before signerName was added
+  # (see https://github.com/kubernetes/kubernetes/pull/88246)
+  - apiGroups: [ "certificates.k8s.io" ]
+    resources:
+      - "signers"
+    resourceNames:
+      - "kubernetes.io/legacy-unknown"
+      - "kubernetes.io/kube-apiserver-client"
+    verbs: [ "approve" ]
+  # Allow to get and list Namespaces
+  - apiGroups: [ "" ]
+    resources:
+      - "namespaces"
+    verbs: [ "get", "list" ]
+
