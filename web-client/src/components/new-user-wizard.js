@@ -1,45 +1,45 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React, {useState, useEffect, useCallback} from 'react'
 import {httpClient} from '../services/httpClient'
 import uuid from 'uuid'
-import { useHistory } from 'react-router-dom'
-import { templateClusterResourceRolePrefix } from '../constants'
+import {useHistory} from 'react-router-dom'
+import {templateClusterResourceRolePrefix} from '../constants'
 import ClusterAccessRadio from './ClusterAccessRadio'
 import Templates from './Templates'
-import { FullScreenLoader } from './Loader'
+import {FullScreenLoader} from './Loader'
 import Summary from './Summary'
-import { useUsers } from '../hooks/useUsers'
+import {useUsers} from '../hooks/useUsers'
 
 export default function NewUserWizard() {
   const history = useHistory()
 
   const [username, setUsername] = useState('')
   const [usernameError, setUsernameError] = useState(null)
-  const [pairItems, setPairItems] = useState([])
+  const [templates, setTemplates] = useState([])
   const [clusterAccess, setClusterAccess] = useState('none')
   const [formTouched, setFormTouched] = useState(false)
   const [showLoader, setShowLoader] = useState(false)
-  const { users } = useUsers()
+  const {users} = useUsers()
 
   const validateUsername = useCallback(() => {
     if (username.length < 3) {
       setUsernameError('Required to be at least 3 characters long')
       return false
-    } else if (
-      !username.match(
-        /^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)$/
-      )
-    ) {
-      setUsernameError(
-        `user can only contain lowercase letters, dots and dashes and numbers`
-      )
+    }
+
+    if (
+      !username.match(/^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)$/)) {
+      setUsernameError(`user can only contain lowercase letters, dots and dashes and numbers`)
       return false
-    } else if (users.map(u => u.name).includes(username)) {
+    }
+
+    if (users.map(u => u.name).includes(username)) {
       setUsernameError(`user ${username} already exists`)
       return false
-    } else {
-      setUsernameError(null)
-      return true
     }
+
+    setUsernameError(null)
+    return true
+
   }, [username, users])
 
   useEffect(
@@ -50,9 +50,9 @@ export default function NewUserWizard() {
   )
 
   const saveButtonDisabled =
-    pairItems.length === 0 ||
+    templates.length === 0 ||
     usernameError !== null ||
-    pairItems.some(p => p.namespaces.length === 0)
+    templates.some(p => p.namespaces.length === 0)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -67,9 +67,9 @@ export default function NewUserWizard() {
     }
 
     try {
-      await httpClient.post('/api/create-user', { name: username })
+      await httpClient.post('/api/create-user', {name: username})
 
-      for await (const p of pairItems) {
+      for await (const p of templates) {
         if (p.namespaces === 'ALL_NAMESPACES') {
           const clusterRolebindingName =
             username + '___' + p.template + '___all_namespaces'
@@ -136,7 +136,7 @@ export default function NewUserWizard() {
   }
 
   const savePair = useCallback(p => {
-    setPairItems(state => {
+    setTemplates(state => {
       if (state.find(x => x.id === p.id)) {
         return state.map(x => {
           if (x.id === p.id) {
@@ -151,8 +151,8 @@ export default function NewUserWizard() {
   }, [])
 
   const addEmptyPair = useCallback(() => {
-    setPairItems(state => {
-      return [...state, { id: uuid.v4(), namespaces: [], template: '' }]
+    setTemplates(state => {
+      return [...state, {id: uuid.v4(), namespaces: [], template: ''}]
     })
   }, [])
 
@@ -160,7 +160,7 @@ export default function NewUserWizard() {
 
   return (
     <div>
-      {showLoader && <FullScreenLoader />}
+      {showLoader && <FullScreenLoader/>}
       <h2 className="text-3xl mb-4 text-gray-800">New User</h2>
       <form
         onSubmit={e => {
@@ -199,9 +199,9 @@ export default function NewUserWizard() {
 
           <div className="mb-6">
             <Templates
-              pairItems={pairItems}
+              pairItems={templates}
               savePair={savePair}
-              setPairItems={setPairItems}
+              setPairItems={setTemplates}
               addEmptyPair={addEmptyPair}
             />
           </div>
@@ -211,7 +211,7 @@ export default function NewUserWizard() {
             setClusterAccess={setClusterAccess}
           />
 
-          <hr className="my-6" />
+          <hr className="my-6"/>
           <button
             className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
               saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
@@ -224,10 +224,10 @@ export default function NewUserWizard() {
         </div>
       </form>
 
-      {pairItems.length > 0 && pairItems.some(p => p.namespaces.length > 0) ? (
+      {templates.length > 0 && templates.some(p => p.namespaces.length > 0) ? (
         <>
-          <div className="mt-12 mb-4" />
-          <Summary pairItems={pairItems}></Summary>
+          <div className="mt-12 mb-4"/>
+          <Summary pairItems={templates}></Summary>
         </>
       ) : null}
     </div>
