@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import axios from 'axios'
+import {httpClient} from '../services/httpClient'
 import JSONPretty from 'react-json-pretty'
 import {
   RESOURCE_TYPES_NAMESPACED,
@@ -44,14 +44,14 @@ function NewRoleForm({ refreshRbacData }) {
 
   const [rules, setRules] = useState([])
   useEffect(() => {
-    axios.get('/api/list-namespace').then(res => {
+    httpClient.get('/api/list-namespace').then(res => {
       setNamespaceList(res.data.namespaces)
     })
   }, [])
 
   async function onSubmit(e) {
     e.preventDefault()
-    await axios.post('/api/create-role', {
+    await httpClient.post('/api/create-role', {
       namespace,
       roleName,
       rules: rules.map(r => {
@@ -132,7 +132,7 @@ function Role({ role: r, refreshRbacData }) {
   const [showRules, setShowRules] = useState(false)
 
   async function deleteRole(e) {
-    await axios.post('/api/delete-role', {
+    await httpClient.post('/api/delete-role', {
       roleName: r.metadata.name,
       namespace: r.metadata.namespace
     })

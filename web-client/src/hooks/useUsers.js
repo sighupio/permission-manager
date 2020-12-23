@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from 'react'
-import axios from 'axios'
+import {httpClient} from '../services/httpClient'
 
 function useUsersFromApi() {
   const [users, setUsers] = useState([])
@@ -8,7 +8,7 @@ function useUsersFromApi() {
 
   function fetchUsers() {
     setLoading(true)
-    axios.get('/api/list-users').then(res => {
+    httpClient.get('/api/list-users').then(res => {
       setLoading(false)
       setLoaded(true)
       setUsers(res.data)
@@ -20,13 +20,13 @@ function useUsersFromApi() {
   }, [])
 
   function addUser({ name }) {
-    axios.post('/api/create-user', { name }).then(res => {
+    httpClient.post('/api/create-user', { name }).then(res => {
       fetchUsers()
     })
   }
 
   function removeUser({ id }) {
-    axios.post('/api/delete-user', { id }).then(res => {
+    httpClient.post('/api/delete-user', { id }).then(res => {
       fetchUsers()
     })
   }

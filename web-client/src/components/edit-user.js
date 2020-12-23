@@ -2,7 +2,6 @@ import {useRbac} from '../hooks/useRbac'
 import {useUsers} from '../hooks/useUsers'
 import React, {useCallback, useEffect, useState} from 'react'
 import uuid from 'uuid'
-import axios from 'axios'
 import ClusterAccessRadio from './ClusterAccessRadio'
 import {templateClusterResourceRolePrefix} from '../constants'
 import Templates from './Templates'
@@ -10,6 +9,7 @@ import {FullScreenLoader} from './Loader'
 import Summary from './Summary'
 import {useHistory} from 'react-router-dom'
 import {extractUsersRoles} from "../services/role";
+import {httpClient} from '../services/httpClient'
 
 export default function EditUser({ user }) {
   const [showLoader, setShowLoader] = useState(false)
@@ -55,21 +55,21 @@ export default function EditUser({ user }) {
   async function handleUserDeletion() {
     setShowLoader(true)
     await deleteUserResources()
-    await axios.post('/api/delete-user', {
+    await httpClient.post('/api/delete-user', {
       username
     })
   }
 
   async function deleteUserResources() {
     for await (const p of rbs) {
-      await axios.post('/api/delete-rolebinding', {
+      await httpClient.post('/api/delete-rolebinding', {
         rolebindingName: p.metadata.name,
         namespace: p.metadata.namespace
       })
     }
 
     for await (const p of crbs) {
-      await axios.post('/api/delete-cluster-rolebinding', {
+      await httpClient.post('/api/delete-cluster-rolebinding', {
         rolebindingName: p.metadata.name
       })
     }
@@ -84,7 +84,7 @@ export default function EditUser({ user }) {
           username + '___' + p.template + 'all_namespaces'
 
         if (!consumed.includes(clusterRolebindingName)) {
-          await axios.post('/api/create-cluster-rolebinding', {
+          await httpClient.post('/api/create-cluster-rolebinding', {
             roleName: p.template,
             subjects: [
               {
@@ -101,7 +101,7 @@ export default function EditUser({ user }) {
         for await (const n of p.namespaces) {
           const rolebindingName = username + '___' + p.template + '___' + n
           if (!consumed.includes(rolebindingName)) {
-            await axios.post('/api/create-rolebinding', {
+            await httpClient.post('/api/create-rolebinding', {
               roleName: p.template,
               generated_for_user: username,
               namespace: n,
@@ -129,7 +129,7 @@ export default function EditUser({ user }) {
     //   if (initialClusterAccess === 'write') {
     //     rolebindingName = username + '___' + templateClusterResourceRolePrefix + 'admin'
     //   }
-    //   await axios.post('/api/delete-cluster-rolebinding', {
+    //   await httpClient.post('/api/delete-cluster-rolebinding', {
     //     rolebindingName: rolebindingName,
     //   })
     // }
@@ -143,7 +143,7 @@ export default function EditUser({ user }) {
         template = templateClusterResourceRolePrefix + 'admin'
       }
       const clusterRolebindingName = username + '___' + template
-      await axios.post('/api/create-cluster-rolebinding', {
+      await httpClient.post('/api/create-cluster-rolebinding', {
         generated_for_user: username,
         roleName: template,
         subjects: [

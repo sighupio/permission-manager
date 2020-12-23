@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react'
-
+import {httpClient} from '../services/httpClient'
 import uuid from 'uuid'
-import axios from 'axios'
 import { useHistory } from 'react-router-dom'
 import { templateClusterResourceRolePrefix } from '../constants'
 import ClusterAccessRadio from './ClusterAccessRadio'
@@ -68,13 +67,13 @@ export default function NewUserWizard() {
     }
 
     try {
-      await axios.post('/api/create-user', { name: username })
+      await httpClient.post('/api/create-user', { name: username })
 
       for await (const p of pairItems) {
         if (p.namespaces === 'ALL_NAMESPACES') {
           const clusterRolebindingName =
             username + '___' + p.template + '___all_namespaces'
-          await axios.post('/api/create-cluster-rolebinding', {
+          await httpClient.post('/api/create-cluster-rolebinding', {
             generated_for_user: username,
             roleName: p.template,
             subjects: [
@@ -89,7 +88,7 @@ export default function NewUserWizard() {
         } else {
           for await (const n of p.namespaces) {
             const rolebindingName = username + '___' + p.template + '___' + n
-            await axios.post('/api/create-rolebinding', {
+            await httpClient.post('/api/create-rolebinding', {
               generated_for_user: username,
               roleName: p.template,
               namespace: n,
@@ -116,7 +115,7 @@ export default function NewUserWizard() {
           template = templateClusterResourceRolePrefix + 'admin'
         }
         const clusterRolebindingName = username + '___' + template
-        await axios.post('/api/create-cluster-rolebinding', {
+        await httpClient.post('/api/create-cluster-rolebinding', {
           generated_for_user: username,
           roleName: template,
           subjects: [

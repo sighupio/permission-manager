@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import axios from 'axios'
+import {httpClient} from '../services/httpClient'
 import JSONPretty from 'react-json-pretty'
 import {
   RESOURCE_TYPES_NAMESPACED,
@@ -61,7 +61,7 @@ function NewRoleForm({ refreshRbacData }) {
 
   async function onSubmit(e) {
     e.preventDefault()
-    await axios.post('/api/create-cluster-role', {
+    await httpClient.post('/api/create-cluster-role', {
       roleName,
       rules: rules.map(r => {
         const o = {
@@ -125,7 +125,7 @@ function Role({ role: r, refreshRbacData }) {
   const [showRules, setShowRules] = useState(false)
 
   async function deleteRole(e) {
-    await axios.post('/api/delete-cluster-role', {
+    await httpClient.post('/api/delete-cluster-role', {
       roleName: r.metadata.name
     })
     refreshRbacData()
