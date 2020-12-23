@@ -8,6 +8,7 @@ import React, {
 import {httpClient} from '../services/httpClient'
 
 function useRbacFromApi() {
+  // this should be the same data that returns from the /api/rbac endpoint
   const [data, setData] = useState({
     roleBindings: null,
     roles: null,
@@ -17,6 +18,7 @@ function useRbacFromApi() {
 
   const fetchData = useCallback(async function fetchData() {
     const { data } = await httpClient.get('/api/rbac')
+    //sets the data with the response
     setData(data)
   }, [])
 
