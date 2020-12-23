@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import axios from 'axios'
+import {httpClient} from '../services/httpClient'
 import uuid from 'uuid'
 import { useRbac } from '../hooks/useRbac'
 import { useNamespaceList } from '../hooks/useNamespaceList'
@@ -39,7 +39,7 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
   const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
-    await axios.post('/api/delete-rolebinding', {
+    await httpClient.post('/api/delete-rolebinding', {
       rolebindingName: rb.metadata.name,
       namespace: rb.metadata.namespace
     })
@@ -94,7 +94,7 @@ function NewRoleBindingForm({ fetchData }) {
 
   async function onSubmit(e) {
     e.preventDefault()
-    await axios.post('/api/create-rolebinding', {
+    await httpClient.post('/api/create-rolebinding', {
       namespace,
       roleName,
       subjects: subjects.map(s => ({

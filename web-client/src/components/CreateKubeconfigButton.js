@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import {httpClient} from '../services/httpClient'
 import { Dialog } from '@reach/dialog'
 import Editor from 'react-simple-code-editor'
 import {useRbac} from "../hooks/useRbac";
@@ -40,7 +40,7 @@ export default function CreateKubeconfigButton({ user }) {
   useEffect(() => {
     // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed
     if (showModal && (kubeconfig === '' || !kubeconfig.includes("namespace: " + chosenNamespace))) {
-      axios
+      httpClient
         .post('/api/create-kubeconfig', {
           username: user.name, namespace: chosenNamespace
         })

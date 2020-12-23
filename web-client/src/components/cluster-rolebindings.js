@@ -2,8 +2,8 @@ import React, { useCallback, useState, useEffect } from 'react'
 import uuid from 'uuid'
 import { useRbac } from '../hooks/useRbac'
 import { useUsers } from '../hooks/useUsers'
-import axios from 'axios'
 import { ClusterRoleSelect } from './cluster-role-select'
+import {httpClient} from '../services/httpClient'
 
 export default () => {
   const { refreshRbacData, clusterRoleBindings } = useRbac()
@@ -60,7 +60,7 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
   const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
-    await axios.post('/api/delete-cluster-rolebinding', {
+    await httpClient.post('/api/delete-cluster-rolebinding', {
       rolebindingName: rb.metadata.name,
       namespace: rb.metadata.namespace
     })
@@ -105,7 +105,7 @@ function NewClusterRoleBindingForm({ fetchData }) {
 
   async function onSubmit(e) {
     e.preventDefault()
-    await axios.post('/api/create-cluster-rolebinding', {
+    await httpClient.post('/api/create-cluster-rolebinding', {
       roleName,
       subjects: subjects.map(s => ({
         ...s,

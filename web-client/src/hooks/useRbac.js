@@ -5,7 +5,7 @@ import React, {
   createContext,
   useCallback
 } from 'react'
-import axios from 'axios'
+import {httpClient} from '../services/httpClient'
 
 function useRbacFromApi() {
   const [data, setData] = useState({
@@ -16,7 +16,7 @@ function useRbacFromApi() {
   })
 
   const fetchData = useCallback(async function fetchData() {
-    const { data } = await axios.get('/api/rbac')
+    const { data } = await httpClient.get('/api/rbac')
     setData(data)
   }, [])
 
