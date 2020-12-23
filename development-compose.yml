@@ -1,0 +1,36 @@
+version: "3.4"
+services:
+  frontend:
+    build:
+      dockerfile: development-frontend.dockerfile
+      context: .
+    volumes:
+      - ./:/app
+    entrypoint: ["sleep", "3000000000"]
+    environment:
+      REACT_APP_BACKEND_URL: "http://backend:4000"
+    ports:
+      - "5000:3000"
+    networks:
+     - development
+
+  backend:
+    environment:
+      IS_LOCAL_DEVELOPMENT: "true"
+      CLUSTER_NAME: ${CLUSTER_NAME}
+      CONTROL_PLANE_ADDRESS: ${CONTROL_PLANE_ADDRESS}
+      BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD}
+      PORT: 4000
+    build:
+      dockerfile: development-backend.dockerfile
+      context: .
+      args:
+        KUBECONFIG_PATH: ".kubeconfig"
+    volumes:
+      - ./:/app
+    networks:
+      - development
+
+networks:
+  development:
+    driver: bridge
