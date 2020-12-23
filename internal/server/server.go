@@ -11,7 +11,7 @@ import (
 
 	"sighupio/permission-manager/internal/config"
 	"sighupio/permission-manager/internal/resources"
-	_ "sighupio/permission-manager/statik"
+	//_ "sighupio/permission-manager/statik"
 
 	"github.com/rakyll/statik/fs"
 	"k8s.io/client-go/kubernetes"
@@ -72,14 +72,17 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 	api.POST("/create-kubeconfig", createKubeconfig(cfg.ClusterName, cfg.ClusterControlPlaceAddress))
 
-	statikFS, err := fs.New()
-	if err != nil {
-		e.Logger.Fatal(err)
-	}
+	// we don't serve the react application in local development.
+	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
+		statikFS, err := fs.New()
+		if err != nil {
+			e.Logger.Fatal(err)
+		}
 
-	spaHandler := http.FileServer(statikFS)
-	/* allow every call to unknown paths to return index.html, this necessary when refreshing the browser at an url that is not backed by a real file but only a client route*/
-	e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
+		spaHandler := http.FileServer(statikFS)
+		/* allow every call to unknown paths to return index.html, this necessary when refreshing the browser at an url that is not backed by a real file but only a client route*/
+		e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
+	}
 
 	return e
 }
