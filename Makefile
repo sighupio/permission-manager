@@ -1,7 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 
-AUTH_PASSWORD ?= admin
+BASIC_AUTH_PASSWORD ?= admin
 
 local-container = permission-manager:$(shell git rev-parse HEAD)
 
@@ -80,7 +80,7 @@ seed:
 	  PORT: "4000"\n\
 	  CLUSTER_NAME: "${CLUSTER_NAME}"\n\
 	  CONTROL_PLANE_ADDRESS: "${CONTROL_PLANE_ADDRESS}" \n\
-	  BASIC_AUTH_PASSWORD: "${AUTH_PASSWORD}"' | kubectl apply -f -
+	  BASIC_AUTH_PASSWORD: "${BASIC_AUTH_PASSWORD}"' | kubectl apply -f -
 	@kubectl apply -f deployments/kubernetes/seeds/crd.yml
 	@kubectl apply -f deployments/kubernetes/seeds/seed.yml
 

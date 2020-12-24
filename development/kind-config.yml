@@ -1,0 +1,11 @@
+#kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+kubeadmConfigPatchesJSON6902:
+  - group: kubeadm.k8s.io
+    version: v1beta2
+    kind: ClusterConfiguration
+    patch: |
+      - op: add
+        path: /apiServer/certSANs/-
+        value: host.docker.internal

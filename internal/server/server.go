@@ -32,12 +32,16 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 		log.Fatal("BASIC_AUTH_PASSWORD env cannot be empty")
 	}
 
-	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-		if username == "admin" && password == basicAuthPassword {
-			return true, nil
-		}
-		return false, nil
-	}))
+	//workaround to avoid breaking changes in production. We disable auth in local development
+	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
+		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+			if username == "admin" && password == basicAuthPassword {
+				return true, nil
+			}
+			return false, nil
+		}))
+	}
+
 
 	/* to deprecate, this is not tyesafe, see server.listUsers as a reference to how create new handlers */
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
@@ -72,7 +76,7 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 	api.POST("/create-kubeconfig", createKubeconfig(cfg.ClusterName, cfg.ClusterControlPlaceAddress))
 
-	// we don't serve the react application in local development.
+	//workaround to avoid breaking changes in production. We disable the react bundle in local testing
 	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
 		statikFS, err := fs.New()
 		if err != nil {

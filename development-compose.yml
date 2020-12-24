@@ -1,16 +1,16 @@
 version: "3.4"
 services:
   frontend:
+    entrypoint: /frontend.sh
     build:
-      dockerfile: development-frontend.dockerfile
+      dockerfile: development/frontend.dockerfile
       context: .
     volumes:
       - ./:/app
-    entrypoint: ["sleep", "3000000000"]
     environment:
-      REACT_APP_BACKEND_URL: "http://backend:4000"
+      REACT_APP_BACKEND_URL: "http://localhost:4002"
     ports:
-      - "5000:3000"
+      - "4001:3000"
     networks:
      - development
 
@@ -20,14 +20,17 @@ services:
       CLUSTER_NAME: ${CLUSTER_NAME}
       CONTROL_PLANE_ADDRESS: ${CONTROL_PLANE_ADDRESS}
       BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD}
-      PORT: 4000
+      PORT: 4005
+    ports:
+    - "4002:4005"
     build:
-      dockerfile: development-backend.dockerfile
+      dockerfile: development/backend.dockerfile
       context: .
       args:
         KUBECONFIG_PATH: ".kubeconfig"
     volumes:
       - ./:/app
+      - ./.kubeconfig:/root/.kube/config
     networks:
       - development
 
