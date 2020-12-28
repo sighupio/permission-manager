@@ -7,3 +7,5 @@ test.*
 .DS_Store
 chore.sh
 .kubeconfig
+.kubeconfig-backend
+tmp
