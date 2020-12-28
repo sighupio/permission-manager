@@ -1,6 +1,5 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
-
 BASIC_AUTH_PASSWORD ?= admin
 
 local-container = permission-manager:$(shell git rev-parse HEAD)
@@ -28,7 +27,7 @@ endif
 ## dependencies: Install node packages for the ui
 .PHONY: dependencies
 dependencies:
-	@npm install --prefix ./web-client
+	@yarn --cwd ./web-client install
 	@go get github.com/rakyll/statik
 	@go mod download
 
@@ -36,12 +35,12 @@ dependencies:
 ## test-dependencies: Install test dependecies
 .PHONY: test-dependencies
 test-dependencies:
-	@npm install --prefix ./e2e-test
+	@yarn --cwd ./e2e-test install
 
 ## ui: Build ui and statify it
 .PHONY: ui
 ui:
-	@npm run build --prefix ./web-client
+	@yarn --cwd ./web-client build
 	@statik -f -src=./web-client/build
 
 ## permission-manager: Build go binary

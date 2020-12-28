@@ -11,7 +11,7 @@ import (
 
 	"sighupio/permission-manager/internal/config"
 	"sighupio/permission-manager/internal/resources"
-	//_ "sighupio/permission-manager/statik"
+	_ "sighupio/permission-manager/statik"
 
 	"github.com/rakyll/statik/fs"
 	"k8s.io/client-go/kubernetes"

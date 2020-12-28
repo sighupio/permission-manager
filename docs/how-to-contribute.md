@@ -49,10 +49,10 @@ To create a local kind cluster, run the `make kind-cluster` command.
 
 #### TL;DR
 ```
-kind create cluster
+kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
 source .envrc
-make seed build deploy port-forward &
-
+make seed build deploy 
+make port-forward &
 ```
 #### Step explanation
 
