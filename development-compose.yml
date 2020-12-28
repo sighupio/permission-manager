@@ -26,11 +26,9 @@ services:
     build:
       dockerfile: development/backend.dockerfile
       context: .
-      args:
-        KUBECONFIG_PATH: ".kubeconfig"
     volumes:
       - ./:/app
-      - ./.kubeconfig:/root/.kube/config
+      - ./.kubeconfig-backend:/root/.kube/config
     networks:
       - development
 

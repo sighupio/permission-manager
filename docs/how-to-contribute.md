@@ -23,13 +23,14 @@ Note that in a future version of the software, the current naming convention wil
 
 - go (developed on v1.14)
 - nodejs (developed on v13.1.0)
-- [kind](https://github.com/kubernetes-sigs/kind)
+- [kind](https://github.com/kubernetes-sigs/kind) (v0.9.0)
 
 Required packages
 
 - make 4.1
 - golang 1.14.2
 - npm 6.14.4
+- yarn 1.22.10
 - yq 3.3.0
 - kubectl 1.16.6
 - curl 7.58.0
@@ -76,6 +77,12 @@ npm start
 
 The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000, e.g. with `make kind`.
 In order to authenticate with the server, use the development credentials: `admin:admin`.
+
+## Local Development
+
+```shell script
+
+```
 
 ## Testing
 
