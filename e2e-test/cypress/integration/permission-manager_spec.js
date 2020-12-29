@@ -6,8 +6,10 @@ it("Create use and save kubeconfig YAML to disk", function() {
   const templateName = "developer";
   const username = `test-user-${templateName}-${Date.now()}`;
 
+
   /* INDEX PAGE */
-  cy.visit("http://admin:secret@localhost:4000");
+  //todo hardcoded password coming from the tests folder
+  cy.visit("http://admin:1v2d1e2e67dS@localhost:4000");
 
   cy.contains(/create new user/i).click();
 

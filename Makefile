@@ -24,12 +24,12 @@ endif
 
 # Local Development
 
-.PHONY: start-development
-start-development:
+.PHONY: development-start
+development-start:
 	@./development/dev-start.sh
 
-.PHONY: down-development
-down-development:
+.PHONY: development-down
+development-down:
 	@./development/dev-down.sh
 
 # Targets
@@ -67,7 +67,12 @@ test:
 .PHONY: test-e2e
 test-e2e:
 	@bats -t tests/setup.sh && bats -t tests/create-user.sh
-	# @cd e2e-test && yarn test
+	@cd e2e-test && yarn install && yarn test
+## todo source .envrc after cluster creation
+test-e2e-local:
+	@bats -t tests/setup.sh && bats -t tests/create-user.sh
+	@make port-forward &
+	@cd e2e-test && yarn install && yarn test
 
 ## test-release: Check dist folder and next tag for the release build
 test-release:

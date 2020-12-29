@@ -1,7 +1,6 @@
 #!/usr/bin/env bats
 
 load "./lib/helper"
-
 @test "[SETUP] Deploy Permission manager Requirements" {
     info
     deploy(){
@@ -11,6 +10,7 @@ load "./lib/helper"
 
         current_context=$(kubectl config view -o json | jq -r '.["current-context"]')
         export CLUSTER_NAME=$(kubectl config view -o json | jq -r '.contexts[] | select( .name | "${current_context}") | .context.cluster')
+        # todo remove hardcoded password. It is used as base46 in the manifests
         export CONTROL_PLANE_ADDRESS=$(kubectl config view -o json | jq -r '.clusters[] | select( .name | "${CLUSTER_NAME}") | .cluster.server')
         { cat <<-EOF
 		---
