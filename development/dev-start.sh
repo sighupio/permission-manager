@@ -11,5 +11,7 @@ sed -i.bak 's/127.0.0.1/host.docker.internal/g' .kubeconfig-backend && rm -f .ku
 # now that there is the .kubeconfig we can evaluate the .envrc
 source .envrc
 
+make seed
+
 # we spin up the containers
 docker-compose -f development-compose.yml up -d
