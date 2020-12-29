@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-cd ../
-
 kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
 
 cp .kubeconfig .kubeconfig-backend

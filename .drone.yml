@@ -21,7 +21,8 @@ steps:
     image: golang:1.14.2
     pull: always
     commands:
-      - apt-get update && apt-get install -y npm
+      - apt-get update && apt-get install -y npm=5.8.0+ds6-4+deb10u2
+      - npm install -g yarn@1.22.10
       - make dependencies ui test
     when:
       event:

@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-cd ../
-
 kind delete cluster
 
 rm .kubeconfig .kubeconfig-backend
