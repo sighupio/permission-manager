@@ -78,12 +78,6 @@ npm start
 The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000, e.g. with `make kind`.
 In order to authenticate with the server, use the development credentials: `admin:admin`.
 
-## Local Development
-
-```shell script
-
-```
-
 ## Testing
 
 ### Permission Manager server Unit Tests
