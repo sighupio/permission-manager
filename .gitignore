@@ -9,3 +9,4 @@ chore.sh
 .kubeconfig
 .kubeconfig-backend
 tmp
+.kubeconfig-backend.bak

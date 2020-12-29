@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- docker and docker-compose that supports version 3.4 manifests
+- docker v20.10
 - kind v0.9.0
 - yarn v1.22.10
 - make v4.1
