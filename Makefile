@@ -22,6 +22,16 @@ ifndef GIT_UNCLEAN
 	$(if $(shell git status -s), $(error Git is tainted:: $(shell git status -s) ***),)
 endif
 
+# Local Development
+
+.PHONY: start-development
+start-development:
+	@./development/dev-start.sh
+
+.PHONY: down-development
+down-development:
+	@./development/dev-down.sh
+
 # Targets
 
 ## dependencies: Install node packages for the ui

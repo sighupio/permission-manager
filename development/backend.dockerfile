@@ -8,5 +8,5 @@ COPY ./go.mod go.sum ./
 
 RUN go mod download
 
-ENTRYPOINT air -c air.toml
+ENTRYPOINT air -c ./development/air.toml
 

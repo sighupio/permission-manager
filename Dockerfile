@@ -1,3 +1,4 @@
+# this docker file is used for the release
 FROM golang:1.14 as builder
 
 WORKDIR /app
