@@ -99,8 +99,8 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
 }
 
 function NewClusterRoleBindingForm({ fetchData }) {
-  const [roleName, setRoleName] = useState('')
-  const [subjects, setSubjects] = useState([])
+  const [roleName, setRoleName] = useState<string>('')
+  const [subjects, setSubjects] = useState<object[]>([])
   const [clusterRolebindingName, setClusterRolebindingName] = useState('')
 
   async function onSubmit(e) {
@@ -141,7 +141,7 @@ function NewClusterRoleBindingForm({ fetchData }) {
         <SubjectList
           subjects={subjects}
           setSubjects={setSubjects}
-        ></SubjectList>
+        />
       </div>
 
       <button type="submit">submit</button>
@@ -197,8 +197,8 @@ function SubjectList({ subjects, setSubjects }) {
 }
 
 function SubjectItem({ id, updateSubject }) {
-  const [kind, setKind] = useState('User')
-  const [subjectName, setSubjectName] = useState('')
+  const [kind, setKind] = useState<string>('User')
+  const [subjectName, setSubjectName] = useState<string>('')
   const { users } = useUsers()
 
   useEffect(() => {

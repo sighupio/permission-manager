@@ -1,12 +1,28 @@
-import React, { useState, useEffect, useContext, createContext } from 'react'
+import React, {useState, useEffect, useContext, createContext} from 'react'
 import {httpClient} from '../services/httpClient'
+import {User} from "../types";
 
-function useUsersFromApi() {
+interface UserProvider {
+  readonly users: User[];
+  
+  addUser({name}: { name: string }): void;
+  
+  removeUser({id}: { id: string }): void;
+  
+  refreshUsers(): void;
+  
+  readonly loading: boolean;
+  
+  readonly loaded: boolean;
+}
+
+
+function useUsersFromApi(): UserProvider {
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
   const [loaded, setLoaded] = useState(false)
-
-  function fetchUsers() {
+  
+  function fetchUsers(): void {
     setLoading(true)
     httpClient.get('/api/list-users').then(res => {
       setLoading(false)
@@ -14,23 +30,23 @@ function useUsersFromApi() {
       setUsers(res.data)
     })
   }
-
+  
   useEffect(() => {
     fetchUsers()
   }, [])
-
-  function addUser({ name }) {
-    httpClient.post('/api/create-user', { name }).then(res => {
+  
+  function addUser({name}: { name: string }): void {
+    httpClient.post('/api/create-user', {name}).then(res => {
       fetchUsers()
     })
   }
-
-  function removeUser({ id }) {
-    httpClient.post('/api/delete-user', { id }).then(res => {
+  
+  function removeUser({id}: { id: string }): void {
+    httpClient.post('/api/delete-user', {id}).then(res => {
       fetchUsers()
     })
   }
-
+  
   return {
     users,
     addUser,
@@ -43,7 +59,7 @@ function useUsersFromApi() {
 
 const UsersContext = createContext(null)
 
-export const UsersProvider = ({ children }) => {
+export const UsersProvider = ({children}) => {
   return (
     <UsersContext.Provider value={useUsersFromApi()}>
       {children}
@@ -51,6 +67,7 @@ export const UsersProvider = ({ children }) => {
   )
 }
 
-export function useUsers() {
+
+export function useUsers(): UserProvider {
   return useContext(UsersContext)
 }

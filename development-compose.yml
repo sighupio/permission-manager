@@ -1,7 +1,6 @@
 version: "3.4"
 services:
   frontend:
-    entrypoint: ["sleep", "10000000"]
     build:
       dockerfile: development/frontend.dockerfile
       context: .
