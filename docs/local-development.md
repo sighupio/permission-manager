@@ -16,7 +16,6 @@
 
 ```shell script
 make development-start
-```shell script
 ```
 
 Please note that the frontend container will install node_modules after the boot, so it could take some time to spin completely
