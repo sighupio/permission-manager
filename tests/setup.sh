@@ -27,7 +27,6 @@ load "./lib/helper"
 		  BASIC_AUTH_PASSWORD: "1v2d1e2e67dS" # password used by basic auth (username is `admin`)
 		EOF
         } | kubectl apply -f -
-        # todo it uses static version manifests?
         kubectl apply -f deployments/kubernetes/seeds/crd.yml
         kubectl apply -f deployments/kubernetes/seeds/seed.yml
 
@@ -42,6 +41,7 @@ load "./lib/helper"
     info
 
     deploy(){
+        # todo it uses static version manifests?
         kubectl apply -f deployments/kubernetes/deploy.yml
         kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
     }
