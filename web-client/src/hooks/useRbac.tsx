@@ -8,10 +8,6 @@ import React, {
 import {httpClient} from '../services/httpClient'
 
 interface Metadata {
-  /**
-   * not present in global resources
-   */
-  namespace?: string
   annotations: { [key: string]: string }
   creationTimestamp: string
   labels: { [key: string]: string }
@@ -20,6 +16,10 @@ interface Metadata {
   resourceVersion: string
   selfLink: string
   uid: string
+}
+
+interface MetadataLocalResource extends Metadata {
+  namespace: string
 }
 
 export interface RoleRef {
@@ -63,12 +63,12 @@ export interface ClusterRole {
 }
 
 export interface Roles {
-  metadata: Metadata
+  metadata: MetadataLocalResource
   rules: Role[]
 }
 
 export interface RoleBinding {
-  metadata: Metadata
+  metadata: MetadataLocalResource
   roleRef: RoleRef
   subjects: Subject[]
 }
