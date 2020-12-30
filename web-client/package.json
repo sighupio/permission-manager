@@ -39,24 +39,25 @@
     ]
   },
   "devDependencies": {
+    "@reach/dialog": "^0.2.9",
     "@types/bluebird": "^3.5.27",
-    "@types/node": "^12.6.9",
+    "@types/jest": "^26.0.19",
+    "@types/node": "^14.14.16",
     "@types/prettier": "^1.18.1",
     "@types/prettyjson": "^0.0.29",
-    "@types/react": "^16.9.17",
-    "@types/react-dom": "^16.9.4",
-    "@types/uuid": "^3.4.6",
-    "@types/validator": "^10.11.2",
-    "prettier": "^1.19.1",
-    "@reach/dialog": "^0.2.9",
     "@types/reach__dialog": "^0.1.0",
+    "@types/react": "^17.0.0",
+    "@types/react-dom": "^17.0.0",
     "@types/react-router": "^5.1.2",
     "@types/react-router-dom": "^5.1.0",
     "@types/react-select": "^3.0.4",
-    "typescript": "3.2.1",
+    "@types/uuid": "^3.4.6",
+    "@types/validator": "^10.11.2",
+    "fibers": "3.1.0",
     "node-sass": "4.0.0",
+    "prettier": "^1.19.1",
     "sass": "1.3.0",
-    "fibers": "3.1.0"
+    "typescript": "^3.9.7"
   },
   "proxy": "http://localhost:4000"
 }

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react'
 import NamespaceMultiSelect from './NamespaceMultiSelect'
 import TemplateSelect from './TemplateSelect'
 
-export default function TemplatePairSelect({ onSave, initialValues }) {
+//todo why index is used in Templates.tsx?
+export default function TemplatePairSelect({ onSave, initialValues }: {index?: any, onSave?: any, initialValues?: any}) {
   const [namespaces, setNamespaces] = useState(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState(
     initialValues.namespaces === 'ALL_NAMESPACES' ? true : null

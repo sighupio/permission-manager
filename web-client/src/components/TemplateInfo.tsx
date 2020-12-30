@@ -1,7 +1,7 @@
 import React from 'react'
 import { templateNamespacedResourceRolePrefix } from '../constants'
 
-export default function TemplateInfo({ ruleSets, hideNamespaceCol }) {
+export default function TemplateInfo({ ruleSets, hideNamespaceCol }: {ruleSets?: any, hideNamespaceCol?: any}) {
   return (
     <fieldset disabled={true}>
       <table className="text-left">

@@ -240,7 +240,7 @@ function SubjectItem({ id, updateSubject }) {
                 </option>
               )
             })}
-            )}
+
           </select>
         </label>
       </div>

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 
 export default function NamespaceSelect({ onSelect }) {
   const { namespaceList } = useNamespaceList()
-  const [selected, setSelected] = useState()
+  const [selected, setSelected] = useState<string>()
 
   useEffect(() => {
     if (namespaceList.length > 0 && !selected) {

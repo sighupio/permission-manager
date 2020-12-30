@@ -1,7 +1,7 @@
 version: "3.4"
 services:
   frontend:
-    entrypoint: /frontend.sh
+    entrypoint: ["sleep", "10000000"]
     build:
       dockerfile: development/frontend.dockerfile
       context: .
