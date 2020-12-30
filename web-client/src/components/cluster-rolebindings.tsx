@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react'
 import uuid from 'uuid'
-import { useRbac } from '../hooks/useRbac'
+import {ClusterRoleBinding, RoleBinding as RoleBindingType, useRbac} from '../hooks/useRbac'
 import { useUsers } from '../hooks/useUsers'
 import { ClusterRoleSelect } from './cluster-role-select'
 import {httpClient} from '../services/httpClient'
@@ -56,7 +56,7 @@ export default () => {
   )
 }
 
-function RoleBinding({ rolebinding: rb, fetchData }) {
+function RoleBinding({ rolebinding: rb, fetchData }: {rolebinding: RoleBindingType | ClusterRoleBinding, fetchData}) {
   const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
