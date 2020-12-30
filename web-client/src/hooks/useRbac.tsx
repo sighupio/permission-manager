@@ -8,7 +8,10 @@ import React, {
 import {httpClient} from '../services/httpClient'
 
 interface Metadata {
-  namespace: string
+  /**
+   * not present in global resources
+   */
+  namespace?: string
   annotations: { [key: string]: string }
   creationTimestamp: string
   labels: { [key: string]: string }
