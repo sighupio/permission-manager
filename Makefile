@@ -68,11 +68,14 @@ test:
 test-e2e:
 	@bats -t tests/setup.sh && bats -t tests/create-user.sh
 	@cd e2e-test && yarn install && yarn test
-## todo source .envrc after cluster creation
-test-e2e-local:
-	@bats -t tests/setup.sh && bats -t tests/create-user.sh
-	@make port-forward &
-	@cd e2e-test && yarn install && yarn test
+
+.PHONY: test-e2e-local-up
+test-e2e-local-up:
+	@./development/e2e-start.sh
+
+.PHONY: test-e2e-local-down
+test-e2e-local-down:
+	@./development/e2e-down.sh
 
 ## test-release: Check dist folder and next tag for the release build
 test-release:
