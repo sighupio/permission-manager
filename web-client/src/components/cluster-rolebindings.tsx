@@ -1,33 +1,33 @@
-import React, { useCallback, useState, useEffect } from 'react'
+import React, {useCallback, useState, useEffect} from 'react'
 import uuid from 'uuid'
 import {ClusterRoleBinding, RoleBinding as RoleBindingType, useRbac} from '../hooks/useRbac'
-import { useUsers } from '../hooks/useUsers'
-import { ClusterRoleSelect } from './cluster-role-select'
+import {useUsers} from '../hooks/useUsers'
+import {ClusterRoleSelect} from './cluster-role-select'
 import {httpClient} from '../services/httpClient'
 
 export default () => {
-  const { refreshRbacData, clusterRoleBindings } = useRbac()
+  const {refreshRbacData, clusterRoleBindings} = useRbac()
   const [
     hideSystemCusterRoleBindings,
     setHideSystemCusterRoleBindings
   ] = useState(true)
-
+  
   if (!clusterRoleBindings) return <div>no data</div>
-
+  
   const crbs = hideSystemCusterRoleBindings
     ? clusterRoleBindings.filter(c => {
-        return !c.roleRef.name.startsWith('system:')
-      })
+      return !c.roleRef.name.startsWith('system:')
+    })
     : clusterRoleBindings
-
+  
   return (
     <div>
-      <div style={{ display: 'flex' }}>
+      <div style={{display: 'flex'}}>
         <div>
-          <h1 style={{ padding: 20, margin: 30, background: 'aqua' }}>
+          <h1 style={{padding: 20, margin: 30, background: 'aqua'}}>
             cluster rolebindings
           </h1>
-          <NewClusterRoleBindingForm fetchData={refreshRbacData} />
+          <NewClusterRoleBindingForm fetchData={refreshRbacData}/>
           <div>
             <label>
               hide system clusterRoleBindings (role name starting with
@@ -56,27 +56,37 @@ export default () => {
   )
 }
 
-function RoleBinding({ rolebinding: rb, fetchData }: {rolebinding: RoleBindingType | ClusterRoleBinding, fetchData}) {
+function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingType | ClusterRoleBinding, fetchData }) {
   const [, setShowMore] = useState(false)
-
+  
   async function deleteRoleBinding(e) {
+    // we check if its a rolebinding
+    if ("namespace" in rb.metadata) {
+      await httpClient.post('/api/delete-rolebinding', {
+        rolebindingName: rb.metadata.name,
+        namespace: rb.metadata.namespace
+      })
+      fetchData()
+      return
+    }
+    //cluster role binding case
     await httpClient.post('/api/delete-cluster-rolebinding', {
       rolebindingName: rb.metadata.name,
-      namespace: rb.metadata.namespace
     })
+    
     fetchData()
   }
-
+  
   return (
     <div
       onMouseEnter={() => setShowMore(true)}
       onMouseLeave={() => setShowMore(false)}
-      style={{ padding: 20, margin: 30, background: 'aqua' }}
+      style={{padding: 20, margin: 30, background: 'aqua'}}
     >
       <button onClick={deleteRoleBinding}>delete</button>
-
+      
       <div>name: {rb.metadata.name}</div>
-      <div>namespace: {rb.metadata.namespace}</div>
+      <div>namespace: {rb.metadata['namespace'] ?? "global"}</div>
       <div>
         <div>role: {rb.roleRef.name}</div>
         <div>
@@ -84,7 +94,7 @@ function RoleBinding({ rolebinding: rb, fetchData }: {rolebinding: RoleBindingTy
           {(rb.subjects || []).map(s => {
             return (
               <div key={s.name + s.kind}>
-                <div style={{ paddingLeft: 10 }}>
+                <div style={{paddingLeft: 10}}>
                   name: {s.name} ({s.kind})
                 </div>
               </div>
@@ -98,11 +108,11 @@ function RoleBinding({ rolebinding: rb, fetchData }: {rolebinding: RoleBindingTy
   )
 }
 
-function NewClusterRoleBindingForm({ fetchData }) {
+function NewClusterRoleBindingForm({fetchData}) {
   const [roleName, setRoleName] = useState<string>('')
   const [subjects, setSubjects] = useState<object[]>([])
   const [clusterRolebindingName, setClusterRolebindingName] = useState('')
-
+  
   async function onSubmit(e) {
     e.preventDefault()
     await httpClient.post('/api/create-cluster-rolebinding', {
@@ -115,11 +125,11 @@ function NewClusterRoleBindingForm({ fetchData }) {
     })
     fetchData()
   }
-
+  
   return (
     <form
       onSubmit={onSubmit}
-      style={{ padding: 20, margin: 30, background: 'aqua' }}
+      style={{padding: 20, margin: 30, background: 'aqua'}}
     >
       <h1>new cluster rolebinding</h1>
       <div>
@@ -133,9 +143,9 @@ function NewClusterRoleBindingForm({ fetchData }) {
           />
         </label>
       </div>
-
-      <ClusterRoleSelect onSelected={cr => setRoleName(cr.metadata.name)} />
-
+      
+      <ClusterRoleSelect onSelected={cr => setRoleName(cr.metadata.name)}/>
+      
       <div>
         <h2>subjects</h2>
         <SubjectList
@@ -143,50 +153,50 @@ function NewClusterRoleBindingForm({ fetchData }) {
           setSubjects={setSubjects}
         />
       </div>
-
+      
       <button type="submit">submit</button>
     </form>
   )
 }
 
-function SubjectList({ subjects, setSubjects }) {
+function SubjectList({subjects, setSubjects}) {
   const addSubject = s => setSubjects(state => [...state, s])
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
-
+  
   const updateSubject = useCallback(s => {
     setSubjects(state => {
       return state.map(sub => {
         if (s.id === sub.id) {
           return s
         }
-
+        
         return sub
       })
     })
   }, [setSubjects])
-
-  const { users } = useUsers()
-
+  
+  const {users} = useUsers()
+  
   return (
-    <div style={{ padding: 10, margin: '20px 0', background: 'orange' }}>
+    <div style={{padding: 10, margin: '20px 0', background: 'orange'}}>
       {subjects.map(s => {
         return (
           <div key={s.id}>
-            <SubjectItem id={s.id} updateSubject={updateSubject} />
+            <SubjectItem id={s.id} updateSubject={updateSubject}/>
             <button onClick={() => removeSubject(s.id)} type="button">
               delete
             </button>
-            <hr />
+            <hr/>
           </div>
         )
       })}
-
-      <div style={{ marginTop: 20 }}>
+      
+      <div style={{marginTop: 20}}>
         <button
           type="button"
           onClick={() =>
-            addSubject({ kind: 'User', name: users[0].name, id: uuid.v4() })
+            addSubject({kind: 'User', name: users[0].name, id: uuid.v4()})
           }
         >
           new
@@ -196,19 +206,19 @@ function SubjectList({ subjects, setSubjects }) {
   )
 }
 
-function SubjectItem({ id, updateSubject }) {
+function SubjectItem({id, updateSubject}) {
   const [kind, setKind] = useState<string>('User')
   const [subjectName, setSubjectName] = useState<string>('')
-  const { users } = useUsers()
-
+  const {users} = useUsers()
+  
   useEffect(() => {
     setSubjectName(users[0].name)
   }, [kind, users])
-
+  
   useEffect(() => {
-    updateSubject({ id, kind, name: subjectName })
+    updateSubject({id, kind, name: subjectName})
   }, [id, kind, subjectName, updateSubject])
-
+  
   return (
     <div>
       <div>
@@ -240,7 +250,7 @@ function SubjectItem({ id, updateSubject }) {
                 </option>
               )
             })}
-
+          
           </select>
         </label>
       </div>

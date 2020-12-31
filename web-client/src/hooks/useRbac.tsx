@@ -8,6 +8,7 @@ import React, {
 import {httpClient} from '../services/httpClient'
 
 interface Metadata {
+
   annotations: { [key: string]: string }
   creationTimestamp: string
   labels: { [key: string]: string }
@@ -18,7 +19,7 @@ interface Metadata {
   uid: string
 }
 
-interface MetadataLocalResource extends Metadata {
+interface MetadataNamespacedResource extends Metadata {
   namespace: string
 }
 
@@ -63,12 +64,12 @@ export interface ClusterRole {
 }
 
 export interface Roles {
-  metadata: MetadataLocalResource
+  metadata: MetadataNamespacedResource
   rules: Role[]
 }
 
 export interface RoleBinding {
-  metadata: MetadataLocalResource
+  metadata: MetadataNamespacedResource
   roleRef: RoleRef
   subjects: Subject[]
 }
@@ -81,7 +82,7 @@ export interface RbacProvider {
   
   /**
    * requests the RbacProvider data again
-   * @type RbacProvider
+   * @see RbacProvider
    */
   refreshRbacData(): void
 }

@@ -2,18 +2,15 @@ import React, {useState, useEffect} from 'react'
 import {httpClient} from '../services/httpClient'
 import {Dialog} from '@reach/dialog'
 import Editor from 'react-simple-code-editor'
-import {useRbac} from "../hooks/useRbac";
+import {ClusterRoleBinding, RoleBinding, useRbac} from "../hooks/useRbac";
 import {extractUsersRoles} from "../services/role";
 import {User} from "../types";
+import {Cluster} from "cluster";
 
 /**
  * Extracts the valid kubeconfig namespace values
- * @param {array} roleBindings
- * @param {array} clusterRoleBindings
- * @param {object} user
- * @returns {*[]}
  */
-function getValidNamespaces(roleBindings, clusterRoleBindings, user) {
+function getValidNamespaces(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], user: User): string[] {
   const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);
   
   const uniqueNamespaces = extractedPairItems.length === 0 ? [] : [...new Set(extractedPairItems.map(i => i.namespaces).flat(1))];
@@ -30,14 +27,14 @@ function getValidNamespaces(roleBindings, clusterRoleBindings, user) {
 
 export default function CreateKubeconfigButton({user}: { user: User }) {
 
-  const [showModal, setShowModal] = useState(false)
-  const [kubeconfig, setKubeconfig] = useState('')
-  const [copied, setCopied] = useState(false);
+  const [showModal, setShowModal] = useState<boolean>(false)
+  const [kubeconfig, setKubeconfig] = useState<string>('')
+  const [copied, setCopied] = useState<boolean>(false);
   const {clusterRoleBindings, roleBindings} = useRbac()
   const validNamespaces = getValidNamespaces(roleBindings, clusterRoleBindings, user);
   
   //b) we generate an array of unique namespaces.
-  const [chosenNamespace, setChosenNamespace] = useState(validNamespaces[0]);
+  const [chosenNamespace, setChosenNamespace] = useState<string>(validNamespaces[0]);
   
   useEffect(() => {
     // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed

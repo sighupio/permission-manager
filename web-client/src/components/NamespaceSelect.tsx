@@ -1,4 +1,4 @@
-import { useNamespaceList } from '../hooks/useNamespaceList'
+import {Namespace, useNamespaceList} from '../hooks/useNamespaceList'
 import React, { useState, useEffect } from 'react'
 
 export default function NamespaceSelect({ onSelect }) {
@@ -7,7 +7,7 @@ export default function NamespaceSelect({ onSelect }) {
 
   useEffect(() => {
     if (namespaceList.length > 0 && !selected) {
-      setSelected(namespaceList[0])
+      setSelected(namespaceList[0].metadata.name)
     }
   }, [namespaceList, selected])
 
