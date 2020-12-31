@@ -3,7 +3,7 @@ import Roles from '../components/roles'
 import ClusterRoles from '../components/cluster-roles'
 import RoleBindings from '../components/rolebindings'
 import ClusterRoleBindings from '../components/cluster-rolebindings'
-import Users from '../components/users'
+import Users from '../../components/users'
 
 export default function Advanced() {
   return (

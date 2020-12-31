@@ -1,25 +1,28 @@
 import React from 'react'
-import { useNamespaceList } from '../hooks/useNamespaceList'
+import {useNamespaceList} from '../hooks/useNamespaceList'
 import Select from 'react-select'
 
-export default function NamespaceMultiSelect({
-  onSelect,
-  value,
-  disabled,
-  placeholder,
-}) {
-  const { namespaceList } = useNamespaceList()
+interface NamespaceMultiSelectArguments {
+  onSelect(n: string[]),
+  
+  value: string[],
+  disabled: boolean,
+  placeholder: string
+}
 
+export default function NamespaceMultiSelect({onSelect, value, disabled, placeholder}: NamespaceMultiSelectArguments) {
+  const {namespaceList} = useNamespaceList()
+  
   const options = namespaceList
     .filter(ns => !ns.metadata.name.startsWith('kube'))
     .map(ns => {
-      return { value: ns.metadata.name, label: ns.metadata.name }
+      return {value: ns.metadata.name, label: ns.metadata.name}
     })
-
+  
   return (
     <Select
       value={value.map(ns => {
-        return { value: ns, label: ns }
+        return {value: ns, label: ns}
       })}
       closeMenuOnSelect={false}
       isMulti

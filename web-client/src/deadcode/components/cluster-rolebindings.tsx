@@ -1,9 +1,9 @@
 import React, {useCallback, useState, useEffect} from 'react'
 import uuid from 'uuid'
-import {ClusterRoleBinding, RoleBinding as RoleBindingType, useRbac} from '../hooks/useRbac'
-import {useUsers} from '../hooks/useUsers'
+import {ClusterRoleBinding, RoleBinding as RoleBindingType, Subject, useRbac} from '../../hooks/useRbac'
+import {useUsers} from '../../hooks/useUsers'
 import {ClusterRoleSelect} from './cluster-role-select'
-import {httpClient} from '../services/httpClient'
+import {httpClient} from '../../services/httpClient'
 
 export default () => {
   const {refreshRbacData, clusterRoleBindings} = useRbac()
@@ -110,7 +110,7 @@ function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingTyp
 
 function NewClusterRoleBindingForm({fetchData}) {
   const [roleName, setRoleName] = useState<string>('')
-  const [subjects, setSubjects] = useState<object[]>([])
+  const [subjects, setSubjects] = useState<Subject[]>([])
   const [clusterRolebindingName, setClusterRolebindingName] = useState('')
   
   async function onSubmit(e) {
@@ -159,8 +159,10 @@ function NewClusterRoleBindingForm({fetchData}) {
   )
 }
 
-function SubjectList({subjects, setSubjects}) {
+function SubjectList({subjects, setSubjects}: {subjects: Subject[], setSubjects(state: any): void}) {
+ 
   const addSubject = s => setSubjects(state => [...state, s])
+ 
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
   
@@ -182,9 +184,9 @@ function SubjectList({subjects, setSubjects}) {
     <div style={{padding: 10, margin: '20px 0', background: 'orange'}}>
       {subjects.map(s => {
         return (
-          <div key={s.id}>
-            <SubjectItem id={s.id} updateSubject={updateSubject}/>
-            <button onClick={() => removeSubject(s.id)} type="button">
+          <div key={s.name}>
+            <SubjectItem id={s.name} updateSubject={updateSubject}/>
+            <button onClick={() => removeSubject(s.name)} type="button">
               delete
             </button>
             <hr/>

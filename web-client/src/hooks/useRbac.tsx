@@ -33,6 +33,7 @@ export interface Subject {
   kind: string,
   apiGroup: string
   name: string
+  namespace:string
 }
 
 export interface Rule {

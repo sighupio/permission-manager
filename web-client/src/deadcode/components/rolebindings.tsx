@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useCallback } from 'react'
-import {httpClient} from '../services/httpClient'
+import {httpClient} from '../../services/httpClient'
 import uuid from 'uuid'
-import { useRbac } from '../hooks/useRbac'
-import { useNamespaceList } from '../hooks/useNamespaceList'
-import { useUsers } from '../hooks/useUsers'
-import { RoleSelect } from './role-select'
+import {RoleBinding as RoleBindingType, Subject, useRbac} from '../../hooks/useRbac'
+import { useNamespaceList } from '../../hooks/useNamespaceList'
+import { useUsers } from '../../hooks/useUsers'
+import { RoleSelect } from '../../components/role-select'
 import { ClusterRoleSelect } from './cluster-role-select'
 
 export default () => {
@@ -35,7 +35,7 @@ export default () => {
   )
 }
 
-function RoleBinding({ rolebinding: rb, fetchData }) {
+function RoleBinding({ rolebinding: rb, fetchData } : {rolebinding: RoleBindingType, fetchData(): void}) {
   const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
@@ -77,12 +77,12 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
   )
 }
 
-function NewRoleBindingForm({ fetchData }) {
-  const [namespace, setNamespace] = useState('default')
-  const [roleName, setRoleName] = useState('')
-  const [subjects, setSubjects] = useState([])
-  const [roleKind, setRoleKind] = useState('Role')
-  const [rolebindingName, setRolebindingName] = useState('')
+function NewRoleBindingForm({ fetchData }: {fetchData(): void}) {
+  const [namespace, setNamespace] = useState<string>('default')
+  const [roleName, setRoleName] = useState<string>('')
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [roleKind, setRoleKind] = useState<string>('Role')
+  const [rolebindingName, setRolebindingName] = useState<string>('')
   const { namespaceList } = useNamespaceList()
 
   function resetForm() {

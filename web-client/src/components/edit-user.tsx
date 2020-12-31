@@ -10,8 +10,9 @@ import Summary from './Summary'
 import {useHistory} from 'react-router-dom'
 import {extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
+import {User} from "../types";
 
-export default function EditUser({ user }) {
+export default function EditUser({ user }: {user: User}) {
   const [showLoader, setShowLoader] = useState(false)
   const username = user.name
   const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()

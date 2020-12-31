@@ -5,7 +5,6 @@ import Editor from 'react-simple-code-editor'
 import {ClusterRoleBinding, RoleBinding, useRbac} from "../hooks/useRbac";
 import {extractUsersRoles} from "../services/role";
 import {User} from "../types";
-import {Cluster} from "cluster";
 
 /**
  * Extracts the valid kubeconfig namespace values

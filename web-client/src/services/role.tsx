@@ -2,7 +2,7 @@ import {templateClusterResourceRolePrefix} from "../constants";
 import uuid from "uuid";
 import {ClusterRoleBinding, RoleBinding} from "../hooks/useRbac";
 
-export type AggregatedRoleBindings = RoleBinding | ClusterRoleBinding
+type MixedRoleBindings = RoleBinding | ClusterRoleBinding
 
 
 interface NormalizedRoleBinding {
@@ -58,7 +58,7 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
       crb => !crb.metadata.name.includes(templateClusterResourceRolePrefix)
     )
     .map(v => {
-      const mixedRoleBinding: AggregatedRoleBindings = v
+      const mixedRoleBinding: MixedRoleBindings = v
       const name = mixedRoleBinding.metadata.name
       const template = mixedRoleBinding.roleRef.name
       const namespace = mixedRoleBinding.metadata['namespace'] || 'ALL_NAMESPACES'

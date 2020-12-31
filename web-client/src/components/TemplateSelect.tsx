@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { useRbac } from '../hooks/useRbac'
+import {Rule, useRbac} from '../hooks/useRbac'
 import { templateNamespacedResourceRolePrefix } from '../constants'
 import Select, { components } from 'react-select'
 import TemplateInfo from './TemplateInfo'
 
-export default function TemplateSelect({ onSelect, initialValue }) {
+interface TemplateSelectParameters {
+  onSelect(t: string): void,
+  initialValue: string
+}
+export default function TemplateSelect({ onSelect, initialValue }: TemplateSelectParameters) {
   const { clusterRoles } = useRbac()
   const templateNames = (clusterRoles || [])
     .map(s => s.metadata.name)
@@ -49,11 +53,15 @@ export default function TemplateSelect({ onSelect, initialValue }) {
           value: t,
         }
       })}
-    ></Select>
+    />
   )
 }
+interface ShowTemplateInfoParameters {
+  label: string
+  rules: Rule[]
+}
 
-function ShowTemplateInfo({ label, rules }) {
+function ShowTemplateInfo({ label, rules }: ShowTemplateInfoParameters) {
   const [coordinates, setCoordinates] = useState(null)
   return (
     <div>
@@ -77,7 +85,7 @@ function ShowTemplateInfo({ label, rules }) {
           <TemplateInfo
             hideNamespaceCol
             ruleSets={[{ rules, namespaces: [] }]}
-          ></TemplateInfo>
+          />
         </div>
       ) : null}
     </div>

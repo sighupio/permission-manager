@@ -1,27 +1,34 @@
-import React, { useState, useEffect } from 'react'
+import React, {useState, useEffect} from 'react'
 import NamespaceMultiSelect from './NamespaceMultiSelect'
 import TemplateSelect from './TemplateSelect'
+import {AggregatedRoleBinding} from "../services/role";
+
+interface TempaltePairSelectParameters {
+  index?: number;
+  
+  onSave(aggregatedRoleBinding: AggregatedRoleBinding): void;
+  
+  initialValues: AggregatedRoleBinding;
+}
 
 //todo why index is used in Templates.tsx?
-export default function TemplatePairSelect({ onSave, initialValues }: {index?: any, onSave?: any, initialValues?: any}) {
-  const [namespaces, setNamespaces] = useState(initialValues.namespaces || [])
-  const [allNamespace, setAllNamespaces] = useState(
-    initialValues.namespaces === 'ALL_NAMESPACES' ? true : null
-  )
+export default function TemplatePairSelect({onSave, initialValues}: TempaltePairSelectParameters) {
+  const [namespaces, setNamespaces] = useState<string[] | 'ALL_NAMESPACES'>(initialValues.namespaces || [])
+  const [allNamespace, setAllNamespaces] = useState<boolean>(initialValues.namespaces === 'ALL_NAMESPACES' ? true : null)
   const [template, setTemplate] = useState(initialValues.template)
-
+  
   useEffect(() => {
     if (allNamespace === null) {
       return
     }
-
+    
     if (allNamespace) {
       setNamespaces('ALL_NAMESPACES')
     } else {
       setNamespaces([])
     }
   }, [allNamespace])
-
+  
   useEffect(() => {
     onSave({
       id: initialValues.id,
@@ -29,10 +36,10 @@ export default function TemplatePairSelect({ onSave, initialValues }: {index?: a
       template
     })
   }, [initialValues.id, namespaces, onSave, template])
-
+  
   return (
-    <div style={{ display: 'flex' }}>
-      <div style={{ flex: 3 }} data-testid="template-select">
+    <div style={{display: 'flex'}}>
+      <div style={{flex: 3}} data-testid="template-select">
         <div className="block uppercase tracking-wide text-gray-700 text-xs  mb-2">
           template
         </div>
@@ -41,12 +48,12 @@ export default function TemplatePairSelect({ onSave, initialValues }: {index?: a
           initialValue={initialValues.template}
         />
       </div>
-      <div style={{ marginLeft: 20, flex: 3 }} data-testid="namespaces-select">
+      <div style={{marginLeft: 20, flex: 3}} data-testid="namespaces-select">
         <div className="block uppercase tracking-wide text-gray-700 text-xs  mb-2">
           <span className="text-red-400 pr-1">*</span>
           namespaces
         </div>
-
+        
         <NamespaceMultiSelect
           value={Array.isArray(namespaces) ? namespaces : []}
           placeholder={allNamespace ? 'all' : 'my-namespace'}

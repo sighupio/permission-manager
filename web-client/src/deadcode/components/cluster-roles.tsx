@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {httpClient} from '../services/httpClient'
+import {httpClient} from '../../services/httpClient'
 import JSONPretty from 'react-json-pretty'
 import {
   RESOURCE_TYPES_NAMESPACED,
   RESOURCE_TYPES_NON_NAMESPACED,
   VERBS
-} from '../constants'
-import { useRbac } from '../hooks/useRbac'
+} from '../../constants'
+import { useRbac } from '../../hooks/useRbac'
 import uuid from 'uuid'
 
 export default () => {
