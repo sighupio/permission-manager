@@ -8,7 +8,7 @@ import React, {
 import {httpClient} from '../services/httpClient'
 
 interface Metadata {
-
+  
   annotations: { [key: string]: string }
   creationTimestamp: string
   labels: { [key: string]: string }
@@ -33,7 +33,7 @@ export interface Subject {
   kind: string,
   apiGroup: string
   name: string
-  namespace:string
+  namespace?: string
 }
 
 export interface Rule {
