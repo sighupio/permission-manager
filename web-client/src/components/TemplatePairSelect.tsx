@@ -3,7 +3,7 @@ import NamespaceMultiSelect from './NamespaceMultiSelect'
 import TemplateSelect from './TemplateSelect'
 import {AggregatedRoleBinding} from "../services/role";
 
-interface TempaltePairSelectParameters {
+interface TemplatePairSelectParameters {
   index?: number;
   
   onSave(aggregatedRoleBinding: AggregatedRoleBinding): void;
@@ -12,7 +12,7 @@ interface TempaltePairSelectParameters {
 }
 
 //todo why index is used in Templates.tsx?
-export default function TemplatePairSelect({onSave, initialValues}: TempaltePairSelectParameters) {
+export default function TemplatePairSelect({onSave, initialValues}: TemplatePairSelectParameters) {
   const [namespaces, setNamespaces] = useState<string[] | 'ALL_NAMESPACES'>(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState<boolean>(initialValues.namespaces === 'ALL_NAMESPACES' ? true : null)
   const [template, setTemplate] = useState(initialValues.template)

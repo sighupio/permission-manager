@@ -3,8 +3,15 @@ import {useNamespaceList} from '../hooks/useNamespaceList'
 import Select from 'react-select'
 
 interface NamespaceMultiSelectArguments {
+  /**
+   * set namespaces
+   * @param n
+   */
   onSelect(n: string[]),
   
+  /**
+   * namespaces
+   */
   value: string[],
   disabled: boolean,
   placeholder: string

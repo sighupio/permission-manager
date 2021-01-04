@@ -5,7 +5,11 @@ import Select, { components } from 'react-select'
 import TemplateInfo from './TemplateInfo'
 
 interface TemplateSelectParameters {
-  onSelect(t: string): void,
+  /**
+   * set template
+   * @param template
+   */
+  onSelect(template: string): void,
   initialValue: string
 }
 export default function TemplateSelect({ onSelect, initialValue }: TemplateSelectParameters) {

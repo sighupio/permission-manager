@@ -65,7 +65,6 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
       return {template, namespace, name}
     })
   
-  //todo try to understand
   const extractedPairItems: AggregatedRoleBinding[] = normalizedRoleBindings.reduce((acc, item) => {
     const has = acc.find(x => x.template === item.template)
     

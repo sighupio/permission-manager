@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  createContext,
-  useCallback
-} from 'react'
+import React, {createContext, useCallback, useContext, useEffect, useState} from 'react'
 import {httpClient} from '../services/httpClient'
 
 interface Metadata {
@@ -42,11 +36,9 @@ export interface Rule {
   verbs: string[]
 }
 
-export interface Role {
-  apiGroups: string[]
+export interface RuleWithResourceNames extends Rule{
   resourceNames: string[]
-  resources: string[]
-  verbs: string[]
+
 }
 
 export interface ClusterRoleBinding {
@@ -64,9 +56,9 @@ export interface ClusterRole {
   rules: Rule[]
 }
 
-export interface Roles {
+export interface Role {
   metadata: MetadataNamespacedResource
-  rules: Role[]
+  rules: RuleWithResourceNames[]
 }
 
 export interface RoleBinding {
@@ -76,7 +68,7 @@ export interface RoleBinding {
 }
 
 export interface RbacProvider {
-  roles: Roles[] | null
+  roles: Role[] | null
   roleBindings: RoleBinding[] | null
   clusterRoles: ClusterRole[] | null
   clusterRoleBindings: ClusterRoleBinding[] | null
@@ -87,6 +79,8 @@ export interface RbacProvider {
    */
   refreshRbacData(): void
 }
+
+
 
 function useRbacFromApi(): RbacProvider {
   // this should be the same data that returns from the /api/rbac endpoint

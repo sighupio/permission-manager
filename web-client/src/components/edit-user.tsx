@@ -12,7 +12,11 @@ import {extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
 
-export default function EditUser({ user }: {user: User}) {
+interface EditUserParameters {
+  user: User;
+}
+
+export default function EditUser({ user }: EditUserParameters) {
   const [showLoader, setShowLoader] = useState(false)
   const username = user.name
   const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()

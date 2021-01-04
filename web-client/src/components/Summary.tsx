@@ -1,5 +1,5 @@
 import React from 'react'
-import { useRbac } from '../hooks/useRbac'
+import {useRbac} from '../hooks/useRbac'
 import TemplateInfo from './TemplateInfo'
 import {AggregatedRoleBinding} from "../services/role";
 import {RuleSet} from "./types";
@@ -25,7 +25,6 @@ export default function Summary({ pairItems }: SummaryParameters) {
       }, [])
 
       const ruleset = {
-        //todo ruleset includes template?
         template: p.template,
         rules,
         namespaces: p.namespaces === 'ALL_NAMESPACES' ? ['all'] : p.namespaces

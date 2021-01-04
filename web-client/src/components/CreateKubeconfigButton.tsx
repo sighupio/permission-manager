@@ -24,7 +24,11 @@ function getValidNamespaces(roleBindings: RoleBinding[], clusterRoleBindings: Cl
   return validNamespaces;
 }
 
-export default function CreateKubeconfigButton({user}: { user: User }) {
+interface CreateKubeconfigButtonParameters {
+  user: User;
+}
+
+export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonParameters) {
 
   const [showModal, setShowModal] = useState<boolean>(false)
   const [kubeconfig, setKubeconfig] = useState<string>('')

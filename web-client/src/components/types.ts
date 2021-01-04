@@ -1,9 +1,11 @@
 import {Rule} from "../hooks/useRbac";
 
+/**
+ * a type used by Summary. It normalizes ALL_NAMESPACES string to ['all']
+ * @function Summary
+ */
 export interface RuleSet {
-  /**
-   * //todo understand why sometime is present, other times no.
-   */
+  
   template?: string
   rules: Rule[],
   /**
