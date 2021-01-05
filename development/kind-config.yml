@@ -9,3 +9,8 @@ kubeadmConfigPatchesJSON6902:
       - op: add
         path: /apiServer/certSANs/-
         value: host.docker.internal
+      - op: add
+        path: /apiServer/certSANs/-
+        value: kind-control-plane
+
+
