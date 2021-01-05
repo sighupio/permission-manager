@@ -86,18 +86,7 @@ test-release:
 .PHONY: seed
 seed:
 	-@kubectl create namespace permission-manager
-	@echo -e '---\n\
-	apiVersion: v1\n\
-	kind: Secret\n\
-	metadata:\n\
-	  name: permission-manager\n\
-	  namespace: permission-manager\n\
-	type: Opaque\n\
-	stringData:\n\
-	  PORT: "4000"\n\
-	  CLUSTER_NAME: "${CLUSTER_NAME}"\n\
-	  CONTROL_PLANE_ADDRESS: "${CONTROL_PLANE_ADDRESS}" \n\
-	  BASIC_AUTH_PASSWORD: "${BASIC_AUTH_PASSWORD}"' | kubectl apply -f -
+	@cat ./development/manifests/permission-manager-secret.yml | envsubst | kubectl apply -f -
 	@kubectl apply -f deployments/kubernetes/seeds/crd.yml
 	@kubectl apply -f deployments/kubernetes/seeds/seed.yml
 
