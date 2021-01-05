@@ -11,7 +11,7 @@ services:
     ports:
       - "4001:3000"
     networks:
-     - development
+     - kind
 
   backend:
     environment:
@@ -29,8 +29,8 @@ services:
       - ./:/app
       - ./.kubeconfig-backend:/root/.kube/config
     networks:
-      - development
+      - kind
 
 networks:
-  development:
-    driver: bridge
+  kind:
+    external: true
