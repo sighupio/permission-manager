@@ -7,7 +7,9 @@ kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubec
 cp .kubeconfig .kubeconfig-backend
 # containers reach the host on the 'host.docker.internal' dns instead of 127.0.0.1
 # this line is needed for cross compatibility between osx and unix
-sed -i.bak 's/127.0.0.1/host.docker.internal/g' .kubeconfig-backend && rm -f .kubeconfig-backend.bak
+#sed -i.bak 's/127.0.0.1/host.docker.internal/g' .kubeconfig-backend && rm -f .kubeconfig-backend.bak
+sed -i.bak "s/server: $PARTITION_COLUMN.*/server: https:\/\/kind-control-plane:6443/" .kubeconfig-backend && rm -f .kubeconfig-backend.bak
+
 # now that there is the .kubeconfig we can evaluate the .envrc
 source .envrc
 
