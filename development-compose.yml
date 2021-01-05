@@ -1,7 +1,6 @@
 version: "3.4"
 services:
   frontend:
-    entrypoint: /frontend.sh
     build:
       dockerfile: development/frontend.dockerfile
       context: .
