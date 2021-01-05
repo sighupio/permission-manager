@@ -21,22 +21,16 @@ Note that in a future version of the software, the current naming convention wil
 
 ### Requirements
 
-- go (developed on v1.14)
 - nodejs (developed on v13.1.0)
 - [kind](https://github.com/kubernetes-sigs/kind) (v0.9.0)
-
-Required packages
-
 - make 4.1
-- golang 1.14.2
+- go 1.14.2
 - npm 6.14.4
 - yarn 1.22.10
 - yq 3.3.0
 - kubectl 1.16.6
 - curl 7.58.0
-
-Optional packages
-- direnv (you must load manually perform make .envrc steps)
+- bats
 
 
 ### Setup a local development cluster
@@ -46,19 +40,40 @@ The easiest way to create a local Kubernetes cluster is to use [kind](https://gi
 
 To create a local kind cluster, run the `make kind-cluster` command. 
 
-### Develop the Permission Manager server
+### Approach A: Local development
 
+#### Limitations
+
+- backend doesn't serve react bundle
+- backend doesn't support basic auth 
+
+#### How to start
+
+```shell script
+make development-up
+```
+
+Please note that the frontend container will install node_modules after the boot, so it could take some time to spin completely
+
+#### Teardown
+
+```shell script
+make development-down
+```
+
+### Approach B: Build Docker Image and deploy it on kind
+ 
 #### TL;DR
 ```
 kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
-source .envrc
+source .env-cluster
 make seed build deploy 
 make port-forward &
 ```
 #### Step explanation
 
 - The `kind create cluster` command can be used to quickly bootstrap a local Kubernetes cluster.
-- If you don't have `direnv` you should load the env variables to be used in the following commands.
+- Load the environment variables with `source .env-cluster`
 - Then you should load permission-manager by running `make seed`. It will take information for your current context.
 - You must create a container image with local code wit `make build`. It will push it to kind with the commit_sha.
 - Once it's in kind you update the deploy.yml with the image tag and publish it in k8s with `make deploy` command.

@@ -3,7 +3,7 @@ set -e
 
 kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
 
-source .envrc
+source .env-cluster
 
 bats -t tests/setup.sh && bats -t tests/create-user.sh
 
