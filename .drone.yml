@@ -118,7 +118,8 @@ steps:
         from_secret: dynamic_dns_service
     commands:
       - apt-get update && apt-get install -y gettext # envsubst
-      - export KUBECONFIG=/shared/kube/kubeconfig-116
+#      - export KUBECONFIG=/shared/kube/kubeconfig-116
+      - cp /shared/kube/kubeconfig-116 .kubeconfig
       - bats -t tests/setup.sh
       - bats -t tests/create-user.sh
     when:
@@ -195,7 +196,8 @@ steps:
         from_secret: dynamic_dns_service
     commands:
       - apt-get update && apt-get install -y gettext # envsubst
-      - export KUBECONFIG=/shared/kube/kubeconfig-117
+#      - export KUBECONFIG=/shared/kube/kubeconfig-117
+      - cp /shared/kube/kubeconfig-117 .kubeconfig
       - bats -t tests/setup.sh
       - bats -t tests/create-user.sh
     when:
@@ -272,7 +274,8 @@ steps:
         from_secret: dynamic_dns_service
     commands:
       - apt-get update && apt-get install -y gettext # envsubst
-      - export KUBECONFIG=/shared/kube/kubeconfig-118
+#      - export KUBECONFIG=/shared/kube/kubeconfig-118
+      - cp /shared/kube/kubeconfig-118 .kubeconfig
       - bats -t tests/setup.sh
       - bats -t tests/create-user.sh
     when:
