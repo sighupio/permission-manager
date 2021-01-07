@@ -24,9 +24,9 @@ endif
 
 # Local Development
 
-.PHONY: development-start
-development-start:
-	@./development/dev-start.sh
+.PHONY: development-up
+development-up:
+	@./development/dev-up.sh
 
 .PHONY: development-down
 development-down:
@@ -71,7 +71,7 @@ test-e2e:
 
 .PHONY: test-e2e-local-up
 test-e2e-local-up:
-	@./development/e2e-start.sh
+	@./development/e2e-up.sh
 
 .PHONY: test-e2e-local-down
 test-e2e-local-down:

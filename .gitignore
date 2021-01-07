@@ -10,3 +10,4 @@ chore.sh
 .kubeconfig-backend
 tmp
 .kubeconfig-backend.bak
+.envrc
