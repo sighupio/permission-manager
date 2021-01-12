@@ -105,7 +105,7 @@ In order to run the server unit tests run `make test`.
 Make sure to run the server on the default port, http://localhost:4000, in order for them to work properly.
 
 The tests creates a user and save a kubeconfig file to disk at e2e-test/data/kubeconfig/[username-template-timestamp]
-Use `make e2e` to run them
+Use `make test-e2e-local` to run them once you are done with the cypress tests run `make test-e2e-local-down`
 
 ![e2e](./assets/e2e.gif)
 
