@@ -7,7 +7,7 @@ import {extractUsersRoles} from "../services/role";
 import {User} from "../types";
 
 /**
- * Extracts the valid kubeconfig namespace values
+ * getValidNamespaces extracts the valid kubeconfig namespace values
  */
 function getValidNamespaces(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], user: User): string[] {
   const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);

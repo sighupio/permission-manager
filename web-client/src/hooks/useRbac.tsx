@@ -1,6 +1,9 @@
 import React, {createContext, useCallback, useContext, useEffect, useState} from 'react'
 import {httpClient} from '../services/httpClient'
 
+/**
+ * Kubernetes metadata fields.
+ */
 interface Metadata {
   
   annotations: { [key: string]: string }
@@ -13,6 +16,10 @@ interface Metadata {
   uid: string
 }
 
+/**
+ * Metadata for a namespaced resource
+ * @see Metadata
+ */
 interface MetadataNamespacedResource extends Metadata {
   namespace: string
 }
@@ -67,6 +74,9 @@ export interface RoleBinding {
   subjects: Subject[]
 }
 
+/**
+ * RbacProvider allow the client to load the Rbac data from kubernetes
+ */
 export interface RbacProvider {
   roles: Role[] | null
   roleBindings: RoleBinding[] | null
@@ -75,7 +85,6 @@ export interface RbacProvider {
   
   /**
    * requests the RbacProvider data again
-   * @see RbacProvider
    */
   refreshRbacData(): void
 }

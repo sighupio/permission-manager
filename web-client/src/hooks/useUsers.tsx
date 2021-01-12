@@ -2,17 +2,41 @@ import React, {useState, useEffect, useContext, createContext} from 'react'
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
 
+/**
+ * UserProvider allows the client to load/add/delete/get kubernetes users
+ */
 interface UserProvider {
+  
+  /**
+   * users obtained from refreshUsers
+   */
   readonly users: User[];
   
+  /**
+   * adds an user
+   * @param name
+   */
   addUser({name}: { name: string }): void;
   
+  /**
+   * removes an user
+   * @param id
+   */
   removeUser({id}: { id: string }): void;
   
+  /**
+   * fetches users again from the backend
+   */
   refreshUsers(): void;
   
+  /**
+   * if a fetchRequest is in progress
+   */
   readonly loading: boolean;
   
+  /**
+   * if a fetchRequest has been completed
+   */
   readonly loaded: boolean;
 }
 
@@ -67,7 +91,9 @@ export const UsersProvider = ({children}) => {
   )
 }
 
-
+/**
+ * gets the UserProvider instance
+ */
 export function useUsers(): UserProvider {
   return useContext(UsersContext)
 }

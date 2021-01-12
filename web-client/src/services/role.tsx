@@ -39,7 +39,7 @@ export interface ExtractedUserRoles {
 }
 
 /**
- *  A function that encapsulates the common logic to extract the roles of a given user
+ * extractUsersRoles encapsulates the common logic needed to extract the roles of a given user
  * @param roleBindings
  * @param clusterRoleBindings
  * @param username

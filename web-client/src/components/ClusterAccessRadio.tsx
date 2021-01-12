@@ -2,7 +2,7 @@ import React from 'react'
 
 interface ClusterAccessRadioParameters {
   clusterAccess: string,
-  setClusterAccess(v: string): void
+  setClusterAccess(clusterAccess: string): void
 }
 
 export default function ClusterAccessRadio({clusterAccess, setClusterAccess}: ClusterAccessRadioParameters) {

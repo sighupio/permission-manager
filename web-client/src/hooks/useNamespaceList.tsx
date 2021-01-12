@@ -7,6 +7,9 @@ export interface Namespace {
   };
 }
 
+/**
+ * NamespaceProvider allows the client to load the list of namespaces from kubernetes
+ */
 export interface NamespaceProvider {
   namespaceList: Namespace[]
 }
