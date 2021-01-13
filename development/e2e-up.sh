@@ -5,7 +5,9 @@ kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubec
 
 source .env-cluster
 
-bats -t tests/setup.sh && bats -t tests/create-user.sh
+bats -t tests/setup.sh
+
+bats -t tests/create-user.sh
 
 sleep 5
 
