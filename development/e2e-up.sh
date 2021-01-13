@@ -5,7 +5,11 @@ kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubec
 
 source .env-cluster
 
-bats -t tests/setup.sh && bats -t tests/create-user.sh
+export IS_LOCAL=TRUE
+
+bats -t tests/setup.sh
+
+bats -t tests/create-user.sh
 
 sleep 5
 

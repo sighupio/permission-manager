@@ -25,9 +25,11 @@ load "./lib/helper"
     info
 
     deploy(){
-        # todo it uses static version manifests?
-        kubectl apply -f deployments/kubernetes/deploy.yml
-        kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
+      # we build the permission image from the current data and run the tests against it
+      make build
+      make deploy
+      kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
+
     }
 
     run deploy
