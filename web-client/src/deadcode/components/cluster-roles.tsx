@@ -11,7 +11,7 @@ import uuid from 'uuid'
 
 export default () => {
   const { clusterRoles, refreshRbacData } = useRbac()
-  const [hideSystemCusterRoles, setHideSystemCusterRoles] = useState(true)
+  const [hideSystemCusterRoles, setHideSystemCusterRoles] = useState<boolean>(true)
 
   if (!clusterRoles) return <div>no data</div>
 

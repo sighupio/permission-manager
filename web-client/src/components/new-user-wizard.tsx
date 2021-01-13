@@ -9,9 +9,10 @@ import {FullScreenLoader} from './Loader'
 import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
 import {AggregatedRoleBinding} from "../services/role";
+import {ClusterAccess} from "./types";
 
 
-export interface AggregateRoleBindingManager {
+export interface AggregatedRoleBindingManager {
   savePair(aggregatedRoleBinding: AggregatedRoleBinding): void
   setPairItems(aggregatedRoleBindings: AggregatedRoleBinding[]): void
   addEmptyPair(): void
@@ -23,7 +24,7 @@ export default function NewUserWizard() {
   const [username, setUsername] = useState<string>('')
   const [usernameError, setUsernameError] = useState<string | null>(null)
   const [templates, setTemplates] = useState<AggregatedRoleBinding[]>([])
-  const [clusterAccess, setClusterAccess] = useState<string>('none')
+  const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [formTouched, setFormTouched] = useState<boolean>(false)
   const [showLoader, setShowLoader] = useState<boolean>(false)
   const {users} = useUsers()

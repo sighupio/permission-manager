@@ -5,7 +5,7 @@ import {AggregatedRoleBinding} from "../services/role";
 import {RuleSet} from "./types";
 
 interface SummaryParameters {
-  pairItems: AggregatedRoleBinding[];
+  readonly pairItems: AggregatedRoleBinding[];
 }
 
 export default function Summary({ pairItems }: SummaryParameters) {

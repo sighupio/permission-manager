@@ -6,14 +6,14 @@ import {httpClient} from '../services/httpClient'
  */
 interface Metadata {
   
-  annotations: { [key: string]: string }
-  creationTimestamp: string
-  labels: { [key: string]: string }
-  managedFields: object[]
-  name: string
-  resourceVersion: string
-  selfLink: string
-  uid: string
+  readonly annotations: { [key: string]: string }
+  readonly creationTimestamp: string
+  readonly labels: { [key: string]: string }
+  readonly managedFields: object[]
+  readonly name: string
+  readonly resourceVersion: string
+  readonly selfLink: string
+  readonly uid: string
 }
 
 /**
@@ -21,74 +21,73 @@ interface Metadata {
  * @see Metadata
  */
 interface MetadataNamespacedResource extends Metadata {
-  namespace: string
+  readonly namespace: string
 }
 
 export interface RoleRef {
-  apiGroup: string
-  kind: string
-  name: string
+  readonly apiGroup: string
+  readonly kind: string
+  readonly name: string
 }
 
 export interface Subject {
-  kind: string,
-  apiGroup: string
-  name: string
-  namespace?: string
+  readonly kind: string,
+  readonly apiGroup: string
+  readonly name: string
+  readonly namespace?: string
 }
 
 export interface Rule {
-  apiGroups: string[]
-  resources: string[]
-  verbs: string[]
+  readonly apiGroups: string[]
+  readonly resources: string[]
+  readonly verbs: string[]
 }
 
-export interface RuleWithResourceNames extends Rule{
-  resourceNames: string[]
-
+export interface RuleWithResourceNames extends Rule {
+  readonly  resourceNames: string[]
+  
 }
 
 export interface ClusterRoleBinding {
-  metadata: Metadata
-  roleRef: RoleRef
-  subjects: Subject[]
+  readonly metadata: Metadata
+  readonly roleRef: RoleRef
+  readonly subjects: Subject[]
 }
 
 
 export interface ClusterRole {
-  aggregationRule?: {
-    clusterRoleSelectors: {}[]
+  readonly aggregationRule?: {
+    readonly clusterRoleSelectors: {}[]
   }
-  metadata: Metadata
-  rules: Rule[]
+  readonly metadata: Metadata
+  readonly rules: Rule[]
 }
 
 export interface Role {
-  metadata: MetadataNamespacedResource
-  rules: RuleWithResourceNames[]
+  readonly metadata: MetadataNamespacedResource
+  readonly rules: RuleWithResourceNames[]
 }
 
 export interface RoleBinding {
-  metadata: MetadataNamespacedResource
-  roleRef: RoleRef
-  subjects: Subject[]
+  readonly metadata: MetadataNamespacedResource
+  readonly roleRef: RoleRef
+  readonly subjects: Subject[]
 }
 
 /**
  * RbacProvider allow the client to load the Rbac data from kubernetes
  */
 export interface RbacProvider {
-  roles: Role[] | null
-  roleBindings: RoleBinding[] | null
-  clusterRoles: ClusterRole[] | null
-  clusterRoleBindings: ClusterRoleBinding[] | null
+  readonly roles: Role[] | null
+  readonly roleBindings: RoleBinding[] | null
+  readonly clusterRoles: ClusterRole[] | null
+  readonly clusterRoleBindings: ClusterRoleBinding[] | null
   
   /**
    * requests the RbacProvider data again
    */
   refreshRbacData(): void
 }
-
 
 
 function useRbacFromApi(): RbacProvider {

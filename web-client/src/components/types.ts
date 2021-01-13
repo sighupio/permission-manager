@@ -1,15 +1,20 @@
 import {Rule} from "../hooks/useRbac";
+import {AggregatedRoleBinding} from "../services/role";
 
-/**
- * a type used by Summary. It normalizes ALL_NAMESPACES string to ['all']
- * @function Summary
- */
 export interface RuleSet {
   
-  template?: string
-  rules: Rule[],
+  readonly template?: string
+  readonly rules: Rule[],
   /**
-   * it is always a namespace. ALL_NAMESPACES is converted to ['all']
+   * ALL_NAMESPACES (from TemplatePair) is converted to ['all']
+   * @see AggregatedRoleBinding
    */
-  namespaces: string[]
+  readonly namespaces: string[]
 }
+
+/**
+ * NONE = no cluster wide access
+ * READ = can read all resources
+ * WRITE = can read/write all resources
+ */
+export type ClusterAccess = "none" | "read" | "write" | null

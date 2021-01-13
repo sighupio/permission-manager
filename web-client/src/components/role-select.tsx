@@ -3,7 +3,7 @@ import {Role, useRbac} from '../hooks/useRbac'
 
 interface RoleSelectParameters {
   /**
-   * gives a role to select
+   * sets a role
    * @param callback
    */
   onSelected(callback: Role): void

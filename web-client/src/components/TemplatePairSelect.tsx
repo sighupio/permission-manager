@@ -1,19 +1,19 @@
 import React, {useState, useEffect} from 'react'
 import NamespaceMultiSelect from './NamespaceMultiSelect'
 import TemplateSelect from './TemplateSelect'
-import {AggregatedRoleBinding} from "../services/role";
+import {AggregatedRoleBinding, AggregatedRoleBindingNamespace} from "../services/role";
 
 interface TemplatePairSelectParameters {
-  index?: number;
+  readonly index?: number;
   
   onSave(aggregatedRoleBinding: AggregatedRoleBinding): void;
   
-  initialValues: AggregatedRoleBinding;
+  readonly initialValues: AggregatedRoleBinding;
 }
 
 //todo why index is used in Templates.tsx?
 export default function TemplatePairSelect({onSave, initialValues}: TemplatePairSelectParameters) {
-  const [namespaces, setNamespaces] = useState<string[] | 'ALL_NAMESPACES'>(initialValues.namespaces || [])
+  const [namespaces, setNamespaces] = useState<AggregatedRoleBindingNamespace>(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState<boolean>(initialValues.namespaces === 'ALL_NAMESPACES' ? true : null)
   const [template, setTemplate] = useState(initialValues.template)
   

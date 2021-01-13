@@ -6,10 +6,15 @@ type MixedRoleBindings = RoleBinding | ClusterRoleBinding
 
 
 interface NormalizedRoleBinding {
-  template: string;
-  namespace: string | 'ALL_NAMESPACES';
-  name: string;
+  readonly template: string;
+  readonly namespace: string | 'ALL_NAMESPACES';
+  readonly name: string;
 }
+
+/**
+ * contains a list of the namespace or 'ALL_NAMESPACES'
+ */
+export type AggregatedRoleBindingNamespace = string[] | "ALL_NAMESPACES"
 
 /**
  * normalized rolebindings. This is required because clusterRoleBindings do not have namespace
@@ -20,22 +25,20 @@ export interface AggregatedRoleBinding {
   /**
    * uuid v4
    */
-  id: string,
-  /**
-   * contains a list of the namespace or 'ALL_NAMESPACES'
-   */
-  namespaces: string[] | 'ALL_NAMESPACES'
+  readonly id: string,
+  
+  readonly namespaces: AggregatedRoleBindingNamespace
   /**
    * example: template-namespaced-resources___developer
    */
-  template: string
+  readonly template: string
 }
 
 
 export interface ExtractedUserRoles {
-  rbs: RoleBinding[],
-  crbs: ClusterRoleBinding[],
-  extractedPairItems: AggregatedRoleBinding[]
+  readonly rbs: RoleBinding[],
+  readonly crbs: ClusterRoleBinding[],
+  readonly extractedPairItems: AggregatedRoleBinding[]
 }
 
 /**

@@ -5,16 +5,16 @@ import Select from 'react-select'
 interface NamespaceMultiSelectArguments {
   /**
    * set namespaces
-   * @param n
+   * @param namespace
    */
-  onSelect(n: string[]),
+  onSelect(namespace: string[]),
   
   /**
    * namespaces
    */
-  value: string[],
-  disabled: boolean,
-  placeholder: string
+ readonly value: string[],
+ readonly disabled: boolean,
+ readonly placeholder: string
 }
 
 export default function NamespaceMultiSelect({onSelect, value, disabled, placeholder}: NamespaceMultiSelectArguments) {

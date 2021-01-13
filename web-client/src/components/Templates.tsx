@@ -1,10 +1,10 @@
 import React from 'react'
 import TemplatePairSelect from './TemplatePairSelect'
 import {AggregatedRoleBinding} from "../services/role";
-import {AggregateRoleBindingManager} from "./new-user-wizard";
+import {AggregatedRoleBindingManager} from "./new-user-wizard";
 
-interface TemplatesParameters extends AggregateRoleBindingManager {
-  pairItems: AggregatedRoleBinding[]
+interface TemplatesParameters extends AggregatedRoleBindingManager {
+  readonly pairItems: AggregatedRoleBinding[]
 }
 
 export default function Templates({pairItems, savePair, setPairItems, addEmptyPair}: TemplatesParameters) {

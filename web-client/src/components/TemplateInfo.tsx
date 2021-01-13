@@ -3,8 +3,8 @@ import {templateNamespacedResourceRolePrefix} from '../constants'
 import {RuleSet} from "./types";
 
 interface TemplateInfoParameters {
-  ruleSets: RuleSet[];
-  hideNamespaceCol?: boolean;
+ readonly ruleSets: RuleSet[];
+ readonly hideNamespaceCol?: boolean;
 }
 
 export default function TemplateInfo({ruleSets, hideNamespaceCol}: TemplateInfoParameters) {
