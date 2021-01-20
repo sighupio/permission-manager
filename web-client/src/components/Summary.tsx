@@ -1,15 +1,21 @@
 import React from 'react'
-import { useRbac } from '../hooks/useRbac'
+import {useRbac} from '../hooks/useRbac'
 import TemplateInfo from './TemplateInfo'
+import {AggregatedRoleBinding} from "../services/role";
+import {RuleSet} from "./types";
 
-export default function Summary({ pairItems }) {
+interface SummaryParameters {
+  readonly pairItems: AggregatedRoleBinding[];
+}
+
+export default function Summary({ pairItems }: SummaryParameters) {
   const { clusterRoles } = useRbac()
 
   if (!clusterRoles) {
     return null
   }
 
-  const ruleSets = pairItems
+  const ruleSets: RuleSet[] = pairItems
     .reduce((acc, p) => {
       const crs = clusterRoles.filter(c => c.metadata.name === p.template)
 

@@ -4,7 +4,9 @@ import CreateKubeconfigButton from '../components/CreateKubeconfigButton'
 import { useUsers } from '../hooks/useUsers'
 import { useParams } from 'react-router-dom'
 export default function UserPage() {
-  const { username } = useParams()
+  
+  const { username }: {username: string} = useParams()
+  
   const { users, refreshUsers } = useUsers()
 
   useEffect(refreshUsers, [])

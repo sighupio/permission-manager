@@ -1,42 +1,44 @@
-import React, { useState, useEffect } from 'react'
+import React, {useState, useEffect} from 'react'
 import {httpClient} from '../services/httpClient'
-import { Dialog } from '@reach/dialog'
+import {Dialog} from '@reach/dialog'
 import Editor from 'react-simple-code-editor'
-import {useRbac} from "../hooks/useRbac";
+import {ClusterRoleBinding, RoleBinding, useRbac} from "../hooks/useRbac";
 import {extractUsersRoles} from "../services/role";
+import {User} from "../types";
 
 /**
- * Extracts the valid kubeconfig namespace values
- * @param {array} roleBindings
- * @param {array} clusterRoleBindings
- * @param {object} user
- * @returns {*[]}
+ * getValidNamespaces extracts the valid kubeconfig namespace values
  */
-function getValidNamespaces(roleBindings, clusterRoleBindings, user) {
-    const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);
-
-    const uniqueNamespaces = extractedPairItems.length === 0 ? [] : [...new Set(extractedPairItems.map(i => i.namespaces).flat(1))];
-
-    // we remove the invalid namespaces from the array
-    const validNamespaces = uniqueNamespaces.filter(i => i !== "ALL_NAMESPACES");
-
-    //a) If no elements are present we add the default namespace to the extracted namespaces.
-    if (validNamespaces.length === 0) {
-        validNamespaces.push("default");
-    }
-    return validNamespaces;
+function getValidNamespaces(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], user: User): string[] {
+  const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);
+  
+  const uniqueNamespaces = extractedPairItems.length === 0 ? [] : [...new Set(extractedPairItems.map(i => i.namespaces).flat(1))];
+  
+  // we remove the invalid namespaces from the array
+  const validNamespaces = uniqueNamespaces.filter(i => i !== "ALL_NAMESPACES");
+  
+  //a) If no elements are present we add the default namespace to the extracted namespaces.
+  if (validNamespaces.length === 0) {
+    validNamespaces.push("default");
+  }
+  return validNamespaces;
 }
 
-export default function CreateKubeconfigButton({ user }) {
-  const [showModal, setShowModal] = useState(false)
-  const [kubeconfig, setKubeconfig] = useState('')
-  const [copied, setCopied] = useState(false);
-  const { clusterRoleBindings, roleBindings } = useRbac()
+interface CreateKubeconfigButtonParameters {
+  user: User;
+}
+
+export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonParameters) {
+
+  const [showModal, setShowModal] = useState<boolean>(false)
+  const [kubeconfig, setKubeconfig] = useState<string>('')
+  const [copied, setCopied] = useState<boolean>(false);
+  const {clusterRoleBindings, roleBindings} = useRbac()
   const validNamespaces = getValidNamespaces(roleBindings, clusterRoleBindings, user);
-
+  
   //b) we generate an array of unique namespaces.
-  const [chosenNamespace, setChosenNamespace] = useState(validNamespaces[0]);
-
+  const [chosenNamespace, setChosenNamespace] = useState<string>(validNamespaces[0]);
+  
   useEffect(() => {
     // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed
     if (showModal && (kubeconfig === '' || !kubeconfig.includes("namespace: " + chosenNamespace))) {
@@ -44,18 +46,18 @@ export default function CreateKubeconfigButton({ user }) {
         .post('/api/create-kubeconfig', {
           username: user.name, namespace: chosenNamespace
         })
-        .then(({ data }) => {
+        .then(({data}) => {
           setKubeconfig(data.kubeconfig)
         })
     }
-
+    
     // needed for properly refresh the state if the user has selected a namespace that doesn't exist anymore
-    if(!validNamespaces.find(n => n === chosenNamespace)) {
-        setChosenNamespace(validNamespaces[0])
+    if (!validNamespaces.find(n => n === chosenNamespace)) {
+      setChosenNamespace(validNamespaces[0])
     }
-
+    
   }, [kubeconfig, showModal, user.name, chosenNamespace, validNamespaces])
-
+  
   return (
     <span>
       <Dialog
@@ -83,11 +85,11 @@ export default function CreateKubeconfigButton({ user }) {
                 type="button"
                 onClick={() => {
                   navigator.clipboard.writeText(kubeconfig).then(
-                    function() {
+                    function () {
                       setCopied(true)
                       console.log('Async: Copying to clipboard was successful!')
                     },
-                    function(err) {
+                    function (err) {
                       console.error('Async: Could not copy text: ', err)
                     }
                   )
@@ -96,7 +98,7 @@ export default function CreateKubeconfigButton({ user }) {
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-
+  
             {kubeconfig ? (
               <div data-testid="yaml">
                 <Editor
@@ -125,17 +127,17 @@ export default function CreateKubeconfigButton({ user }) {
         show kubeconfig for {user.name}
       </button>
       <select
-            defaultValue={chosenNamespace}
-            onChange={e => setChosenNamespace(e.target.value)}
-            style= {{
-                marginLeft: "5%"
-            }}
-          >
+        defaultValue={chosenNamespace}
+        onChange={e => setChosenNamespace(e.target.value)}
+        style={{
+          marginLeft: "5%"
+        }}
+      >
             {validNamespaces.map((ns) => {
               return (
-                  <option key={ns} value={ns}>
-                    {ns}
-                  </option>
+                <option key={ns} value={ns}>
+                  {ns}
+                </option>
               )
             })}
       </select>

@@ -1,26 +1,36 @@
-import React, { useState, useEffect } from 'react'
-import { useRbac } from '../hooks/useRbac'
-import { templateNamespacedResourceRolePrefix } from '../constants'
-import Select, { components } from 'react-select'
+import React, {useState, useEffect} from 'react'
+import {Rule, useRbac} from '../hooks/useRbac'
+import {templateNamespacedResourceRolePrefix} from '../constants'
+import Select, {components} from 'react-select'
 import TemplateInfo from './TemplateInfo'
 
-export default function TemplateSelect({ onSelect, initialValue }) {
-  const { clusterRoles } = useRbac()
+interface TemplateSelectParameters {
+  /**
+   * set template
+   * @param template
+   */
+  onSelect(template: string): void,
+  
+  readonly initialValue: string
+}
+
+export default function TemplateSelect({onSelect, initialValue}: TemplateSelectParameters) {
+  const {clusterRoles} = useRbac()
   const templateNames = (clusterRoles || [])
     .map(s => s.metadata.name)
     .filter(s => s.startsWith(templateNamespacedResourceRolePrefix))
   const [selected, setSelected] = useState(initialValue || '')
-
+  
   useEffect(() => {
     if (templateNames.length > 0 && selected === '') {
       setSelected(templateNames[0])
     }
   }, [selected, templateNames])
-
+  
   useEffect(() => {
     onSelect(selected)
   }, [onSelect, selected])
-
+  
   const Option = props => {
     return (
       <div className="flex">
@@ -34,14 +44,14 @@ export default function TemplateSelect({ onSelect, initialValue }) {
       </div>
     )
   }
-
+  
   return (
     <Select
       value={{
         label: selected.replace(templateNamespacedResourceRolePrefix, ''),
         value: selected,
       }}
-      components={{ Option }}
+      components={{Option}}
       onChange={e => setSelected(e.value)}
       options={templateNames.map(t => {
         return {
@@ -49,18 +59,23 @@ export default function TemplateSelect({ onSelect, initialValue }) {
           value: t,
         }
       })}
-    ></Select>
+    />
   )
 }
 
-function ShowTemplateInfo({ label, rules }) {
+interface ShowTemplateInfoParameters {
+  label: string
+  rules: Rule[]
+}
+
+function ShowTemplateInfo({label, rules}: ShowTemplateInfoParameters) {
   const [coordinates, setCoordinates] = useState(null)
   return (
     <div>
       <div
         className="p-2 cursor-default"
         onMouseEnter={e => {
-          setCoordinates({ top: e.clientY - 250, left: e.clientX + 30 })
+          setCoordinates({top: e.clientY - 250, left: e.clientX + 30})
         }}
         onMouseLeave={() => setCoordinates(null)}
       >
@@ -69,15 +84,15 @@ function ShowTemplateInfo({ label, rules }) {
       {coordinates !== null ? (
         <div
           className="fixed z-10 border rounded shadow-2xl py-4 px-4 bg-gray-100"
-          style={{ top: coordinates.top, left: coordinates.left }}
+          style={{top: coordinates.top, left: coordinates.left}}
         >
           <h2 className="text-md text-gray-700 font-bold mb-2 uppercase">
             {label}
           </h2>
           <TemplateInfo
             hideNamespaceCol
-            ruleSets={[{ rules, namespaces: [] }]}
-          ></TemplateInfo>
+            ruleSets={[{rules, namespaces: []}]}
+          />
         </div>
       ) : null}
     </div>

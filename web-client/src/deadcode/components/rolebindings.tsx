@@ -1,47 +1,26 @@
-import React, { useCallback, useState, useEffect } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
+import {httpClient} from '../../services/httpClient'
 import uuid from 'uuid'
-import { useRbac } from '../hooks/useRbac'
-import { useUsers } from '../hooks/useUsers'
+import {RoleBinding as RoleBindingType, Subject, useRbac} from '../../hooks/useRbac'
+import { useNamespaceList } from '../../hooks/useNamespaceList'
+import { useUsers } from '../../hooks/useUsers'
+import { RoleSelect } from '../../components/role-select'
 import { ClusterRoleSelect } from './cluster-role-select'
-import {httpClient} from '../services/httpClient'
 
 export default () => {
-  const { refreshRbacData, clusterRoleBindings } = useRbac()
-  const [
-    hideSystemCusterRoleBindings,
-    setHideSystemCusterRoleBindings
-  ] = useState(true)
+  const { refreshRbacData, roleBindings } = useRbac()
 
-  if (!clusterRoleBindings) return <div>no data</div>
-
-  const crbs = hideSystemCusterRoleBindings
-    ? clusterRoleBindings.filter(c => {
-        return !c.roleRef.name.startsWith('system:')
-      })
-    : clusterRoleBindings
+  if (!roleBindings) return <div>no data</div>
 
   return (
     <div>
       <div style={{ display: 'flex' }}>
         <div>
-          <h1 style={{ padding: 20, margin: 30, background: 'aqua' }}>
-            cluster rolebindings
+          <h1 style={{ padding: 20, margin: 30, background: 'yellow' }}>
+            rolebindings
           </h1>
-          <NewClusterRoleBindingForm fetchData={refreshRbacData} />
-          <div>
-            <label>
-              hide system clusterRoleBindings (role name starting with
-              "system:")
-              <input
-                type="checkbox"
-                checked={hideSystemCusterRoleBindings}
-                onChange={e =>
-                  setHideSystemCusterRoleBindings(e.target.checked)
-                }
-              />
-            </label>
-          </div>
-          {crbs.map(rb => {
+          <NewRoleBindingForm fetchData={refreshRbacData} />
+          {roleBindings.map(rb => {
             return (
               <RoleBinding
                 rolebinding={rb}
@@ -56,11 +35,11 @@ export default () => {
   )
 }
 
-function RoleBinding({ rolebinding: rb, fetchData }) {
+function RoleBinding({ rolebinding: rb, fetchData } : {rolebinding: RoleBindingType, fetchData(): void}) {
   const [, setShowMore] = useState(false)
 
   async function deleteRoleBinding(e) {
-    await httpClient.post('/api/delete-cluster-rolebinding', {
+    await httpClient.post('/api/delete-rolebinding', {
       rolebindingName: rb.metadata.name,
       namespace: rb.metadata.namespace
     })
@@ -71,7 +50,7 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
     <div
       onMouseEnter={() => setShowMore(true)}
       onMouseLeave={() => setShowMore(false)}
-      style={{ padding: 20, margin: 30, background: 'aqua' }}
+      style={{ padding: 20, margin: 30, background: 'yellow' }}
     >
       <button onClick={deleteRoleBinding}>delete</button>
 
@@ -98,43 +77,110 @@ function RoleBinding({ rolebinding: rb, fetchData }) {
   )
 }
 
-function NewClusterRoleBindingForm({ fetchData }) {
-  const [roleName, setRoleName] = useState('')
-  const [subjects, setSubjects] = useState([])
-  const [clusterRolebindingName, setClusterRolebindingName] = useState('')
+function NewRoleBindingForm({ fetchData }: {fetchData(): void}) {
+  const [namespace, setNamespace] = useState<string>('default')
+  const [roleName, setRoleName] = useState<string>('')
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [roleKind, setRoleKind] = useState<string>('Role')
+  const [rolebindingName, setRolebindingName] = useState<string>('')
+  const { namespaceList } = useNamespaceList()
+
+  function resetForm() {
+    setRoleName('')
+    setRolebindingName('')
+    setNamespace('default')
+    setSubjects([])
+  }
 
   async function onSubmit(e) {
     e.preventDefault()
-    await httpClient.post('/api/create-cluster-rolebinding', {
+    await httpClient.post('/api/create-rolebinding', {
+      namespace,
       roleName,
       subjects: subjects.map(s => ({
         ...s,
         namespace: 'permission-manager'
       })),
-      clusterRolebindingName
+      roleKind,
+      rolebindingName
     })
     fetchData()
+    resetForm()
   }
 
   return (
     <form
       onSubmit={onSubmit}
-      style={{ padding: 20, margin: 30, background: 'aqua' }}
+      style={{ padding: 20, margin: 30, background: 'yellow' }}
     >
-      <h1>new cluster rolebinding</h1>
+      <h1>new rolebinding</h1>
       <div>
         <label>
-          cluster rolebinding name
+          rolebinding name
           <input
             type="text"
             required
-            value={clusterRolebindingName}
-            onChange={e => setClusterRolebindingName(e.target.value)}
+            value={rolebindingName}
+            onChange={e => setRolebindingName(e.target.value)}
           />
         </label>
       </div>
 
-      <ClusterRoleSelect onSelected={cr => setRoleName(cr.metadata.name)} />
+      <div>
+        <label>
+          namespace
+          <select
+            value={namespace}
+            onChange={e => setNamespace(e.target.value)}
+          >
+            {namespaceList.map(ns => {
+              return (
+                <option key={ns.metadata.name} value={ns.metadata.name}>
+                  {ns.metadata.name}
+                </option>
+              )
+            })}
+          </select>
+        </label>
+      </div>
+
+      <div>
+        Role kind:
+        <div>
+          <label>
+            <input
+              type="radio"
+              checked={roleKind === 'Role'}
+              onChange={e => {
+                if (e.target.checked) {
+                  setRoleKind('Role')
+                }
+              }}
+            />
+            Role
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              checked={roleKind === 'ClusterRole'}
+              onChange={e => {
+                if (e.target.checked) {
+                  setRoleKind('ClusterRole')
+                }
+              }}
+            />
+            ClusterRole
+          </label>
+        </div>
+      </div>
+
+      {roleKind === 'Role' ? (
+        <RoleSelect onSelected={r => setRoleName(r.metadata.name)} />
+      ) : (
+        <ClusterRoleSelect onSelected={r => setRoleName(r.metadata.name)} />
+      )}
 
       <div>
         <h2>subjects</h2>
@@ -153,7 +199,6 @@ function SubjectList({ subjects, setSubjects }) {
   const addSubject = s => setSubjects(state => [...state, s])
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
-
   const updateSubject = useCallback(s => {
     setSubjects(state => {
       return state.map(sub => {
@@ -240,7 +285,6 @@ function SubjectItem({ id, updateSubject }) {
                 </option>
               )
             })}
-            )}
           </select>
         </label>
       </div>

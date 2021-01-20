@@ -10,9 +10,15 @@ import Summary from './Summary'
 import {useHistory} from 'react-router-dom'
 import {extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
+import {User} from "../types";
+import {ClusterAccess} from "./types";
 
-export default function EditUser({ user }) {
-  const [showLoader, setShowLoader] = useState(false)
+interface EditUserParameters {
+ readonly user: User;
+}
+
+export default function EditUser({ user }: EditUserParameters) {
+  const [showLoader, setShowLoader] = useState<boolean>(false)
   const username = user.name
   const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()
   const history = useHistory()
@@ -23,8 +29,8 @@ export default function EditUser({ user }) {
   }, [refreshRbacData])
 
   const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings,clusterRoleBindings, username);
-  const [clusterAccess, setClusterAccess] = useState('none')
-  const [initialClusterAccess, setInitialClusterAccess] = useState(null)
+  const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
+  const [initialClusterAccess, setInitialClusterAccess] = useState<ClusterAccess>(null)
   const [pairItems, setPairItems] = useState(extractedPairItems)
 
   useEffect(() => {
@@ -120,19 +126,6 @@ export default function EditUser({ user }) {
         }
       }
     }
-
-    // if (initialClusterAccess !== clusterAccess && initialClusterAccess !== null) {
-    //   let rolebindingName = ''
-    //   if (initialClusterAccess === 'read') {
-    //     rolebindingName = username + '___' + templateClusterResourceRolePrefix + 'read-only'
-    //   }
-    //   if (initialClusterAccess === 'write') {
-    //     rolebindingName = username + '___' + templateClusterResourceRolePrefix + 'admin'
-    //   }
-    //   await httpClient.post('/api/delete-cluster-rolebinding', {
-    //     rolebindingName: rolebindingName,
-    //   })
-    // }
 
     if (clusterAccess !== 'none') {
       let template = ''

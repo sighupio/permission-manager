@@ -1,9 +1,12 @@
 import React from 'react'
+import {ClusterAccess} from "./types";
 
-export default function ClusterAccessRadio({
-  clusterAccess,
-  setClusterAccess
-}) {
+interface ClusterAccessRadioParameters {
+  readonly clusterAccess: ClusterAccess,
+  setClusterAccess(clusterAccess: ClusterAccess): void
+}
+
+export default function ClusterAccessRadio({clusterAccess, setClusterAccess}: ClusterAccessRadioParameters) {
   return (
     <div>
       <div>
@@ -20,7 +23,7 @@ export default function ClusterAccessRadio({
             />
             <span className="ml-2">none</span>
           </label>
-
+          
           <label className="block uppercase tracking-wide text-gray-700 text-xs mb-2">
             <input
               type="radio"
@@ -30,7 +33,7 @@ export default function ClusterAccessRadio({
             />
             <span className="ml-2">read-only</span>
           </label>
-
+          
           <label className="block uppercase tracking-wide text-gray-700 text-xs mb-2">
             <input
               type="radio"

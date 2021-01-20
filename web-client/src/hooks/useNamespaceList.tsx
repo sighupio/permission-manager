@@ -1,11 +1,24 @@
-import { useState, useEffect } from 'react'
+import {useState, useEffect} from 'react'
 import {httpClient} from '../services/httpClient'
 
-export function useNamespaceList() {
+export interface Namespace {
+  metadata: {
+    name: string
+  };
+}
+
+/**
+ * NamespaceProvider allows the client to load the list of namespaces from kubernetes
+ */
+export interface NamespaceProvider {
+  namespaceList: Namespace[]
+}
+
+export function useNamespaceList(): NamespaceProvider {
   const [namespaceList, setNamespaceList] = useState([])
   useEffect(() => {
     let unmounted = false
-
+    
     httpClient.get('/api/list-namespace').then(res => {
       if (!unmounted)
         setNamespaceList(
@@ -19,11 +32,11 @@ export function useNamespaceList() {
           })
         )
     })
-
+    
     return () => {
       unmounted = true
     }
   }, [])
-
-  return { namespaceList }
+  
+  return {namespaceList}
 }

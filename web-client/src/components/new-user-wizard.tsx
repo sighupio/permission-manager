@@ -8,16 +8,25 @@ import Templates from './Templates'
 import {FullScreenLoader} from './Loader'
 import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
+import {AggregatedRoleBinding} from "../services/role";
+import {ClusterAccess} from "./types";
+
+
+export interface AggregatedRoleBindingManager {
+  savePair(aggregatedRoleBinding: AggregatedRoleBinding): void
+  setPairItems(aggregatedRoleBindings: AggregatedRoleBinding[]): void
+  addEmptyPair(): void
+}
 
 export default function NewUserWizard() {
   const history = useHistory()
 
-  const [username, setUsername] = useState('')
-  const [usernameError, setUsernameError] = useState(null)
-  const [templates, setTemplates] = useState([])
-  const [clusterAccess, setClusterAccess] = useState('none')
-  const [formTouched, setFormTouched] = useState(false)
-  const [showLoader, setShowLoader] = useState(false)
+  const [username, setUsername] = useState<string>('')
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+  const [templates, setTemplates] = useState<AggregatedRoleBinding[]>([])
+  const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
+  const [formTouched, setFormTouched] = useState<boolean>(false)
+  const [showLoader, setShowLoader] = useState<boolean>(false)
   const {users} = useUsers()
 
   const validateUsername = useCallback(() => {
@@ -135,7 +144,7 @@ export default function NewUserWizard() {
     }
   }
 
-  const savePair = useCallback(p => {
+  const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
     setTemplates(state => {
       if (state.find(x => x.id === p.id)) {
         return state.map(x => {

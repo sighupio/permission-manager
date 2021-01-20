@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { useRbac } from '../hooks/useRbac'
+import {Role, useRbac} from '../hooks/useRbac'
 
-export function RoleSelect({ onSelected }) {
+interface RoleSelectParameters {
+  /**
+   * sets a role
+   * @param callback
+   */
+  onSelected(callback: Role): void
+}
+export function RoleSelect({ onSelected }: RoleSelectParameters) {
   const { refreshRbacData, roles } = useRbac()
   const [roleName, setRoleName] = useState('')
 

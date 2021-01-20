@@ -8,7 +8,7 @@ import Header from './components/Header'
 import Footer from './components/Footer'
 import Home from './views/Home'
 import NewUser from './views/NewUser'
-import Advanced from './views/Advanced'
+import Advanced from './deadcode/views/Advanced'
 import EditUser from './views/EditUser'
 
 export default function App() {
