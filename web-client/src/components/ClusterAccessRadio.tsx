@@ -2,7 +2,7 @@ import React from 'react'
 import {ClusterAccess} from "./types";
 
 interface ClusterAccessRadioParameters {
-  readonly clusterAccess: string,
+  readonly clusterAccess: ClusterAccess,
   setClusterAccess(clusterAccess: ClusterAccess): void
 }
 
