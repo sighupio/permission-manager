@@ -1,304 +1,327 @@
 ---
 kind: pipeline
-name: release
-
-platform:
-  os: linux
-  arch: amd64
-
-clone:
-  disable: true
+name: build
 
 steps:
-  - name: clone
-    image: alpine/git
-    commands:
-      - git clone https://github.com/sighupio/permission-manager .
-      - git checkout $DRONE_COMMIT
-      - git fetch --tags
-
-  - name: unit-test
-    image: golang:1.14.2
+  - name: tests
+    depends_on: [ clone ]
+    image: golang:1.14
     pull: always
     commands:
       - apt-get update && apt-get install -y npm=5.8.0+ds6-4+deb10u2
       - npm install -g yarn@1.22.10
-      - make dependencies ui test
-    when:
-      event:
-        - push
-        - tag
+      - make clean dependencies ui test
 
-  - name: registry-sha
-    image: plugins/docker
-    settings:
-      username:
-        from_secret: quay_username
-      password:
-        from_secret: quay_password
-      registry: quay.io
-      repo: quay.io/sighup/permission-manager
-      tags:
-        - ${DRONE_COMMIT_SHA}
-    when:
-      event:
-        - push
-
-  - name: registry-tag
-    image: plugins/docker
-    settings:
-      username:
-        from_secret: quay_username
-      password:
-        from_secret: quay_password
-      registry: quay.io
-      repo: quay.io/sighup/permission-manager
-      tags:
-        - ${DRONE_TAG}
-    when:
-      event:
-        - tag
-
-  - name: release
-    image: golang
-    environment:
-      GITHUB_TOKEN:
-        from_secret: github_token
-    commands:
-      - git checkout .
-      - git clean -f
-      - curl -sL https://git.io/goreleaser | bash
-    when:
-      event:
-        - tag
-
----
-kind: pipeline
-name: e2e-kubernetes-1.16
-
-depends_on:
-  - release
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-  - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
-    volumes:
-    - name: shared
-      path: /shared
+  - name: build
     depends_on: [ clone ]
-    settings:
-      action: cluster-116
-      pipeline_id: cluster-116
-      instance_path: /shared
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-    when:
-      ref:
-        include:
-          - refs/tags/**
-
-  - name: e2e
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.16.4_3.2.2_2.4.1
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
+    image: docker:dind
+    pull: always
     environment:
-      DYNAMIC_DNS_SERVICE:
-        from_secret: dynamic_dns_service
+      CONTAINER_IMAGE_NAME: quay.io/sighup/permission-manager
+      CONTAINER_IMAGE_TAG: ${DRONE_COMMIT_SHA}
+      DOCKERFILE: Dockerfile
+      BUILD_CONTEXT: "."
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
     commands:
-      - apt-get update && apt-get install -y gettext # envsubst
-      - cp /shared/kube/kubeconfig-116 .kubeconfig
-      - bats -t tests/setup.sh
-      - bats -t tests/create-user.sh
-    when:
-      ref:
-        include:
-          - refs/tags/**
-
-  - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
-    depends_on: [ e2e ]
-    settings:
-      action: destroy
-      pipeline_id: cluster-116
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-    when:
-      status:
-      - success
-      - failure
+      - docker build
+        --pull=true
+        --rm=true
+        -f $${DOCKERFILE}
+        -t $${CONTAINER_IMAGE_NAME}:$${CONTAINER_IMAGE_TAG}
+        $${BUILD_CONTEXT}
 
 volumes:
-- name: shared
-  temp: {}
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+# ---
+# kind: pipeline
+# name: e2e-kubernetes-1.16
 
----
-kind: pipeline
-name: e2e-kubernetes-1.17
+# depends_on:
+#   - release
 
-depends_on:
-  - release
+# trigger:
+#   ref:
+#     include:
+#       - refs/tags/**
 
-platform:
-  os: linux
-  arch: amd64
+# steps:
+#   - name: init
+#     image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+#     volumes:
+#     - name: shared
+#       path: /shared
+#     depends_on: [ clone ]
+#     settings:
+#       action: cluster-116
+#       pipeline_id: cluster-116
+#       instance_path: /shared
+#       aws_default_region:
+#         from_secret: aws_region
+#       aws_access_key_id:
+#         from_secret: aws_access_key_id
+#       aws_secret_access_key:
+#         from_secret: aws_secret_access_key
+#       terraform_tf_states_bucket_name:
+#         from_secret: terraform_tf_states_bucket_name
+#     when:
+#       ref:
+#         include:
+#           - refs/tags/**
 
-steps:
-  - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ clone ]
-    settings:
-      action: cluster-117
-      pipeline_id: cluster-117
-      instance_path: /shared
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-    when:
-      ref:
-        include:
-          - refs/tags/**
+#   - name: e2e
+#     image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.16.4_3.2.2_2.4.1
+#     volumes:
+#     - name: shared
+#       path: /shared
+#     depends_on: [ init ]
+#     environment:
+#       DYNAMIC_DNS_SERVICE:
+#         from_secret: dynamic_dns_service
+#     commands:
+#       - apt-get update && apt-get install -y gettext # envsubst
+#       - cp /shared/kube/kubeconfig-116 .kubeconfig
+#       - bats -t tests/setup.sh
+#       - bats -t tests/create-user.sh
+#     when:
+#       ref:
+#         include:
+#           - refs/tags/**
 
-  - name: e2e
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.17.2_3.2.2_2.4.1
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
-    environment:
-      DYNAMIC_DNS_SERVICE:
-        from_secret: dynamic_dns_service
-    commands:
-      - apt-get update && apt-get install -y gettext # envsubst
-      - cp /shared/kube/kubeconfig-117 .kubeconfig
-      - bats -t tests/setup.sh
-      - bats -t tests/create-user.sh
-    when:
-      ref:
-        include:
-          - refs/tags/**
+#   - name: destroy
+#     image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+#     depends_on: [ e2e ]
+#     settings:
+#       action: destroy
+#       pipeline_id: cluster-116
+#       aws_default_region:
+#         from_secret: aws_region
+#       aws_access_key_id:
+#         from_secret: aws_access_key_id
+#       aws_secret_access_key:
+#         from_secret: aws_secret_access_key
+#       terraform_tf_states_bucket_name:
+#         from_secret: terraform_tf_states_bucket_name
+#     when:
+#       status:
+#       - success
+#       - failure
 
-  - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
-    depends_on: [ e2e ]
-    settings:
-      action: destroy
-      pipeline_id: cluster-117
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-    when:
-      status:
-      - success
-      - failure
+# volumes:
+# - name: shared
+#   temp: {}
 
-volumes:
-- name: shared
-  temp: {}
+# ---
+# kind: pipeline
+# name: e2e-kubernetes-1.17
 
----
-kind: pipeline
-name: e2e-kubernetes-1.18
+# depends_on:
+#   - release
 
-depends_on:
-  - release
+# trigger:
+#   ref:
+#     include:
+#       - refs/tags/**
 
-platform:
-  os: linux
-  arch: amd64
+# steps:
+#   - name: init
+#     image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+#     volumes:
+#     - name: shared
+#       path: /shared
+#     depends_on: [ clone ]
+#     settings:
+#       action: cluster-117
+#       pipeline_id: cluster-117
+#       instance_path: /shared
+#       aws_default_region:
+#         from_secret: aws_region
+#       aws_access_key_id:
+#         from_secret: aws_access_key_id
+#       aws_secret_access_key:
+#         from_secret: aws_secret_access_key
+#       terraform_tf_states_bucket_name:
+#         from_secret: terraform_tf_states_bucket_name
+#     when:
+#       ref:
+#         include:
+#           - refs/tags/**
 
-steps:
-  - name: init
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ clone ]
-    settings:
-      action: cluster-118
-      pipeline_id: cluster-118
-      instance_path: /shared
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-    when:
-      ref:
-        include:
-          - refs/tags/**
+#   - name: e2e
+#     image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.17.2_3.2.2_2.4.1
+#     volumes:
+#     - name: shared
+#       path: /shared
+#     depends_on: [ init ]
+#     environment:
+#       DYNAMIC_DNS_SERVICE:
+#         from_secret: dynamic_dns_service
+#     commands:
+#       - apt-get update && apt-get install -y gettext # envsubst
+#       - cp /shared/kube/kubeconfig-117 .kubeconfig
+#       - bats -t tests/setup.sh
+#       - bats -t tests/create-user.sh
+#     when:
+#       ref:
+#         include:
+#           - refs/tags/**
 
-  - name: e2e
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.18.0_3.2.2_2.4.1
-    volumes:
-    - name: shared
-      path: /shared
-    depends_on: [ init ]
-    environment:
-      DYNAMIC_DNS_SERVICE:
-        from_secret: dynamic_dns_service
-    commands:
-      - apt-get update && apt-get install -y gettext # envsubst
-      - cp /shared/kube/kubeconfig-118 .kubeconfig
-      - bats -t tests/setup.sh
-      - bats -t tests/create-user.sh
-    when:
-      ref:
-        include:
-          - refs/tags/**
+#   - name: destroy
+#     image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+#     depends_on: [ e2e ]
+#     settings:
+#       action: destroy
+#       pipeline_id: cluster-117
+#       aws_default_region:
+#         from_secret: aws_region
+#       aws_access_key_id:
+#         from_secret: aws_access_key_id
+#       aws_secret_access_key:
+#         from_secret: aws_secret_access_key
+#       terraform_tf_states_bucket_name:
+#         from_secret: terraform_tf_states_bucket_name
+#     when:
+#       status:
+#       - success
+#       - failure
 
-  - name: destroy
-    image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
-    depends_on: [ e2e ]
-    settings:
-      action: destroy
-      pipeline_id: cluster-118
-      aws_default_region:
-        from_secret: aws_region
-      aws_access_key_id:
-        from_secret: aws_access_key_id
-      aws_secret_access_key:
-        from_secret: aws_secret_access_key
-      terraform_tf_states_bucket_name:
-        from_secret: terraform_tf_states_bucket_name
-    when:
-      status:
-      - success
-      - failure
+# volumes:
+# - name: shared
+#   temp: {}
 
-volumes:
-- name: shared
-  temp: {}
+# ---
+# kind: pipeline
+# name: e2e-kubernetes-1.18
+
+# depends_on:
+#   - release
+
+# trigger:
+#   ref:
+#     include:
+#       - refs/tags/**
+
+# steps:
+#   - name: init
+#     image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+#     volumes:
+#     - name: shared
+#       path: /shared
+#     depends_on: [ clone ]
+#     settings:
+#       action: cluster-118
+#       pipeline_id: cluster-118
+#       instance_path: /shared
+#       aws_default_region:
+#         from_secret: aws_region
+#       aws_access_key_id:
+#         from_secret: aws_access_key_id
+#       aws_secret_access_key:
+#         from_secret: aws_secret_access_key
+#       terraform_tf_states_bucket_name:
+#         from_secret: terraform_tf_states_bucket_name
+#     when:
+#       ref:
+#         include:
+#           - refs/tags/**
+
+#   - name: e2e
+#     image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.4.0_1.18.0_3.2.2_2.4.1
+#     volumes:
+#     - name: shared
+#       path: /shared
+#     depends_on: [ init ]
+#     environment:
+#       DYNAMIC_DNS_SERVICE:
+#         from_secret: dynamic_dns_service
+#     commands:
+#       - apt-get update && apt-get install -y gettext # envsubst
+#       - cp /shared/kube/kubeconfig-118 .kubeconfig
+#       - bats -t tests/setup.sh
+#       - bats -t tests/create-user.sh
+#     when:
+#       ref:
+#         include:
+#           - refs/tags/**
+
+#   - name: destroy
+#     image: quay.io/sighup/e2e-testing-drone-plugin:v0.3.2
+#     depends_on: [ e2e ]
+#     settings:
+#       action: destroy
+#       pipeline_id: cluster-118
+#       aws_default_region:
+#         from_secret: aws_region
+#       aws_access_key_id:
+#         from_secret: aws_access_key_id
+#       aws_secret_access_key:
+#         from_secret: aws_secret_access_key
+#       terraform_tf_states_bucket_name:
+#         from_secret: terraform_tf_states_bucket_name
+#     when:
+#       status:
+#       - success
+#       - failure
+
+# volumes:
+# - name: shared
+#   temp: {}
+
+
+# ---
+# kind: pipeline
+# name: release
+
+# clone:
+#   disable: true
+
+# steps:
+#   - name: clone
+#     image: alpine/git
+#     commands:
+#       - git clone https://github.com/sighupio/permission-manager .
+#       - git checkout $DRONE_COMMIT
+#       - git fetch --tags
+
+#   - name: unit-test
+#     image: golang:1.14.2
+#     pull: always
+#     commands:
+#       - apt-get update && apt-get install -y npm=5.8.0+ds6-4+deb10u2
+#       - npm install -g yarn@1.22.10
+#       - make dependencies ui test
+#     when:
+#       event:
+#         - push
+#         - tag
+
+#   - name: registry-tag
+#     image: plugins/docker
+#     settings:
+#       username:
+#         from_secret: quay_username
+#       password:
+#         from_secret: quay_password
+#       registry: quay.io
+#       repo: quay.io/sighup/permission-manager
+#       tags:
+#         - ${DRONE_TAG}
+#     when:
+#       event:
+#         - tag
+
+#   - name: release
+#     image: golang
+#     environment:
+#       GITHUB_TOKEN:
+#         from_secret: github_token
+#     commands:
+#       - git checkout .
+#       - git clean -f
+#       - curl -sL https://git.io/goreleaser | bash
+#     when:
+#       event:
+#         - tag
