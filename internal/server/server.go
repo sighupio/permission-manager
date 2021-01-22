@@ -38,15 +38,12 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 	}
 
-	//workaround to avoid breaking changes in production. We disable auth in local development
-	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
-		e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
-			if username == "admin" && password == basicAuthPassword {
-				return true, nil
-			}
-			return false, nil
-		}))
-	}
+	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == "admin" && password == basicAuthPassword {
+			return true, nil
+		}
+		return false, nil
+	}))
 
 	/* to deprecate, this is not tyesafe, see server.listUsers as a reference to how create new handlers */
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {

@@ -8,6 +8,7 @@ services:
       - ./:/app
     environment:
       REACT_APP_BACKEND_URL: "http://localhost:4002"
+      REACT_APP_BASIC_AUTH_PASSWORD: ${BASIC_AUTH_PASSWORD}
     ports:
       - "4001:3000"
     networks:
