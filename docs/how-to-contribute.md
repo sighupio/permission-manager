@@ -45,7 +45,6 @@ To create a local kind cluster, run the `make kind-cluster` command.
 #### Limitations
 
 - backend doesn't serve react bundle
-- backend doesn't support basic auth 
 
 #### How to start
 
