@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { useUsers } from '../hooks/useUsers'
+import React, {useState} from 'react'
+import {useUsers} from '../hooks/useUsers'
 import CreateKubeconfigButton from './CreateKubeconfigButton'
 
 export default function Users() {

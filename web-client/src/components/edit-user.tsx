@@ -12,31 +12,32 @@ import {extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
 import {ClusterAccess} from "./types";
+import {createClusterRolebinding} from "../services/clusterRolebindingRequests";
 
 interface EditUserParameters {
- readonly user: User;
+  readonly user: User;
 }
 
-export default function EditUser({ user }: EditUserParameters) {
+export default function EditUser({user}: EditUserParameters) {
   const [showLoader, setShowLoader] = useState<boolean>(false)
   const username = user.name
-  const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()
+  const {clusterRoleBindings, roleBindings, refreshRbacData} = useRbac()
   const history = useHistory()
-  const { refreshUsers } = useUsers()
-
+  const {refreshUsers} = useUsers()
+  
   useEffect(() => {
     refreshRbacData()
   }, [refreshRbacData])
-
-  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings,clusterRoleBindings, username);
+  
+  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState<ClusterAccess>(null)
   const [pairItems, setPairItems] = useState(extractedPairItems)
-
+  
   useEffect(() => {
     if (pairItems.length === 0) {
       setPairItems(extractedPairItems)
-
+      
       const ca = crbs.find(crb =>
         crb.metadata.name.includes(templateClusterResourceRolePrefix)
       )
@@ -47,7 +48,7 @@ export default function EditUser({ user }: EditUserParameters) {
           }
           setClusterAccess('write')
         }
-
+        
         if (ca.roleRef.name.endsWith('read-only')) {
           if (initialClusterAccess === null) {
             setInitialClusterAccess('read')
@@ -57,7 +58,7 @@ export default function EditUser({ user }: EditUserParameters) {
       }
     }
   }, [crbs, initialClusterAccess, pairItems.length, extractedPairItems])
-
+  
   async function handleUserDeletion() {
     setShowLoader(true)
     await deleteUserResources()
@@ -65,7 +66,7 @@ export default function EditUser({ user }: EditUserParameters) {
       username
     })
   }
-
+  
   async function deleteUserResources() {
     for await (const p of rbs) {
       await httpClient.post('/api/delete-rolebinding', {
@@ -73,22 +74,23 @@ export default function EditUser({ user }: EditUserParameters) {
         namespace: p.metadata.namespace
       })
     }
-
+    
     for await (const p of crbs) {
       await httpClient.post('/api/delete-cluster-rolebinding', {
         rolebindingName: p.metadata.name
       })
     }
   }
+  
   async function handleSubmit(e) {
     await deleteUserResources()
     const consumed = []
-
+    
     for await (const p of pairItems) {
       if (p.namespaces === 'ALL_NAMESPACES') {
         const clusterRolebindingName =
           username + '___' + p.template + 'all_namespaces'
-
+        
         if (!consumed.includes(clusterRolebindingName)) {
           await httpClient.post('/api/create-cluster-rolebinding', {
             roleName: p.template,
@@ -126,32 +128,12 @@ export default function EditUser({ user }: EditUserParameters) {
         }
       }
     }
-
-    if (clusterAccess !== 'none') {
-      let template = ''
-      if (clusterAccess === 'read') {
-        template = templateClusterResourceRolePrefix + 'read-only'
-      }
-      if (clusterAccess === 'write') {
-        template = templateClusterResourceRolePrefix + 'admin'
-      }
-      const clusterRolebindingName = username + '___' + template
-      await httpClient.post('/api/create-cluster-rolebinding', {
-        generated_for_user: username,
-        roleName: template,
-        subjects: [
-          {
-            kind: 'ServiceAccount',
-            name: username,
-            namespace: 'permission-manager'
-          }
-        ],
-        clusterRolebindingName
-      })
-    }
+    
+    await createClusterRolebinding(clusterAccess, username);
+    
     window.location.reload()
   }
-
+  
   const savePair = useCallback(p => {
     setPairItems(state => {
       if (state.find(x => x.id === p.id)) {
@@ -166,24 +148,24 @@ export default function EditUser({ user }: EditUserParameters) {
       }
     })
   }, [])
-
+  
   const addEmptyPair = useCallback(() => {
     setPairItems(state => {
-      return [...state, { id: uuid.v4(), namespaces: [], template: '' }]
+      return [...state, {id: uuid.v4(), namespaces: [], template: ''}]
     })
   }, [])
-
+  
   const saveButtonDisabled =
     pairItems.length === 0 || pairItems.some(p => p.namespaces.length === 0)
-
+  
   if (crbs && crbs.length === 0 && rbs && rbs.length === 0) {
     return <div>...loading</div>
   }
-
+  
   return (
     <div>
-      {showLoader && <FullScreenLoader />}
-
+      {showLoader && <FullScreenLoader/>}
+      
       <div className="flex content-between items-center mb-4">
         <h2 className="text-3xl text-gray-800">
           User: <span data-testid="username-heading">{username}</span>
@@ -197,7 +179,7 @@ export default function EditUser({ user }: EditUserParameters) {
               const confirmed = window.confirm(
                 `Confirm deletion of User ${username}`
               )
-
+              
               if (confirmed) {
                 handleUserDeletion().then(async () => {
                   await refreshUsers()
@@ -210,7 +192,7 @@ export default function EditUser({ user }: EditUserParameters) {
           </button>
         </div>
       </div>
-
+      
       <form
         onSubmit={e => {
           e.preventDefault()
@@ -226,14 +208,14 @@ export default function EditUser({ user }: EditUserParameters) {
             addEmptyPair={addEmptyPair}
           />
         </div>
-
+        
         <ClusterAccessRadio
           clusterAccess={clusterAccess}
           setClusterAccess={setClusterAccess}
         />
-
-        <hr className="my-6" />
-
+        
+        <hr className="my-6"/>
+        
         <button
           className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
             saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
@@ -244,10 +226,10 @@ export default function EditUser({ user }: EditUserParameters) {
           save
         </button>
       </form>
-
+      
       {pairItems.length > 0 && pairItems.some(p => p.namespaces.length > 0) ? (
         <>
-          <div className="mt-12 mb-4" />
+          <div className="mt-12 mb-4"/>
           <Summary pairItems={pairItems}></Summary>
         </>
       ) : null}
