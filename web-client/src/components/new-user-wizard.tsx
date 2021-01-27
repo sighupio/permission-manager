@@ -94,12 +94,7 @@ export default function NewUserWizard() {
   const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
     setAggregatedRoleBindings(state => {
       if (state.find(x => x.id === p.id)) {
-        return state.map(x => {
-          if (x.id === p.id) {
-            return p
-          }
-          return x
-        })
+        return state.map(x => x.id === p.id ? p : x)
       } else {
         return [...state, p]
       }
