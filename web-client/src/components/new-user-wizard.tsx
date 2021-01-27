@@ -9,7 +9,7 @@ import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
 import {AggregatedRoleBinding} from "../services/role";
 import {ClusterAccess} from "./types";
-import {createClusterRolebinding} from "../services/clusterRolebindingRequests";
+import {createClusterRolebindingNotNamespaced} from "../services/clusterRolebindingRequests";
 
 
 export interface AggregatedRoleBindingManager {
@@ -117,7 +117,7 @@ export default function NewUserWizard() {
         }
       }
       
-      await createClusterRolebinding(clusterAccess, username)
+      await createClusterRolebindingNotNamespaced(clusterAccess, username)
       
       history.push(`/users/${username}`)
     } catch (e) {

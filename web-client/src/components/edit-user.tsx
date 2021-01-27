@@ -12,7 +12,10 @@ import {extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
 import {ClusterAccess} from "./types";
-import {createClusterRolebinding} from "../services/clusterRolebindingRequests";
+import {
+  createClusterRolebindingNotNamespaced,
+  createClusterRolebindingNamespaced
+} from "../services/clusterRolebindingRequests";
 
 interface EditUserParameters {
   readonly user: User;
@@ -86,50 +89,43 @@ export default function EditUser({user}: EditUserParameters) {
     await deleteUserResources()
     const consumed = []
     
-    for await (const p of pairItems) {
-      if (p.namespaces === 'ALL_NAMESPACES') {
-        const clusterRolebindingName =
-          username + '___' + p.template + 'all_namespaces'
+    for await (const aggregatedRolebinding of pairItems) {
+      if (aggregatedRolebinding.namespaces === 'ALL_NAMESPACES') {
+        const clusterRolebindingName = username + '___' + aggregatedRolebinding.template + 'all_namespaces'
         
         if (!consumed.includes(clusterRolebindingName)) {
-          await httpClient.post('/api/create-cluster-rolebinding', {
-            roleName: p.template,
-            subjects: [
-              {
-                kind: 'ServiceAccount',
-                name: username,
-                namespace: 'permission-manager'
-              }
-            ],
-            clusterRolebindingName
+          
+          await createClusterRolebindingNamespaced({
+            template: aggregatedRolebinding.template,
+            username: username,
+            namespace: 'permission-manager',
+            roleBindingName: clusterRolebindingName,
+            addGeneratedForUser: false
           })
+          
           consumed.push(clusterRolebindingName)
         }
+        
       } else {
-        for await (const n of p.namespaces) {
-          const rolebindingName = username + '___' + p.template + '___' + n
+        for await (const namespace of aggregatedRolebinding.namespaces) {
+          const rolebindingName = username + '___' + aggregatedRolebinding.template + '___' + namespace
+          
           if (!consumed.includes(rolebindingName)) {
-            await httpClient.post('/api/create-rolebinding', {
-              roleName: p.template,
-              generated_for_user: username,
-              namespace: n,
-              roleKind: 'ClusterRole',
-              subjects: [
-                {
-                  kind: 'ServiceAccount',
-                  name: username,
-                  namespace: 'permission-manager'
-                }
-              ],
-              rolebindingName
-            })
+            await createClusterRolebindingNamespaced({
+              template: aggregatedRolebinding.template,
+              username: username,
+              namespace: namespace,
+              roleBindingName: rolebindingName,
+              addGeneratedForUser: true
+            });
+            
             consumed.push(rolebindingName)
           }
         }
       }
     }
     
-    await createClusterRolebinding(clusterAccess, username);
+    await createClusterRolebindingNotNamespaced(clusterAccess, username);
     
     window.location.reload()
   }

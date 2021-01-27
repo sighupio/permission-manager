@@ -17,7 +17,7 @@ function getTemplateName(clusterAccess: ClusterAccess): string {
   
 }
 
-export async function createClusterRolebinding(clusterAccess: ClusterAccess, username: string): Promise<AxiosResponse<any>> {
+export async function createClusterRolebindingNotNamespaced(clusterAccess: ClusterAccess, username: string): Promise<AxiosResponse<any>> {
   if (clusterAccess === 'none') {
     return;
   }
@@ -27,7 +27,6 @@ export async function createClusterRolebinding(clusterAccess: ClusterAccess, use
   const clusterRolebindingName = username + '___' + template
   
   return await httpClient.post('/api/create-cluster-rolebinding', {
-    generated_for_user: username,
     roleName: template,
     subjects: [
       {
@@ -36,7 +35,37 @@ export async function createClusterRolebinding(clusterAccess: ClusterAccess, use
         namespace: 'permission-manager'
       }
     ],
-    clusterRolebindingName
+    clusterRolebindingName: clusterRolebindingName
   })
   
+}
+
+interface CreateClusterRolebindingNamespacedParameters {
+  readonly template: string,
+  readonly username: string,
+  readonly namespace: string,
+  readonly roleBindingName: string
+  readonly addGeneratedForUser: boolean
+}
+
+export async function createClusterRolebindingNamespaced(params: CreateClusterRolebindingNamespacedParameters) {
+  const request = {
+    roleName: params.template,
+    namespace: params.namespace,
+    roleKind: 'ClusterRole',
+    subjects: [
+      {
+        kind: 'ServiceAccount',
+        name: params.username,
+        namespace: 'permission-manager'
+      }
+    ],
+    clusterRolebindingName: params.roleBindingName
+  };
+  
+  if(params.addGeneratedForUser) {
+    request['generated_for_user'] = params.username
+  }
+  
+  await httpClient.post('/api/create-rolebinding', request)
 }
