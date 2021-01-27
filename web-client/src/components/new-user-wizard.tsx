@@ -78,11 +78,13 @@ export default function NewUserWizard() {
       return
     }
     
+    //todo try catch with silent console.log is not ideal nor production ready
     try {
       await httpClient.post('/api/create-user', {name: username})
       
+      //todo why await?
       for await (const aggregatedRoleBinding of aggregatedRoleBindings) {
-      
+        
         if (aggregatedRoleBinding.namespaces === 'ALL_NAMESPACES') {
           
           await httpRolebindingRequests.createRolebindingAllNamespaces({
@@ -116,6 +118,7 @@ export default function NewUserWizard() {
       })
       
       history.push(`/users/${username}`)
+  
     } catch (e) {
       console.error(e)
     }

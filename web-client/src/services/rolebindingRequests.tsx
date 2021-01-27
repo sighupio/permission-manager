@@ -82,6 +82,8 @@ class RolebindingRequests {
    * @param params
    */
   public async createClusterRolebinding(params: CreateClusterRolebindingParameters): Promise<AxiosResponse<any>> {
+    
+    // none takes no action in resource creation
     if (params.clusterAccess === 'none') {
       return;
     }
@@ -111,7 +113,7 @@ class RolebindingRequests {
           namespace: 'permission-manager'
         }
       ],
-      clusterRolebindingName: params.roleBindingName
+      roleBindingName: params.roleBindingName
     };
     
     if (params.addGeneratedForUser) {
