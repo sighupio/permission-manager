@@ -25,7 +25,7 @@ export default function NewUserWizard() {
   
   const [username, setUsername] = useState<string>('')
   const [usernameError, setUsernameError] = useState<string | null>(null)
-  const [templates, setTemplates] = useState<AggregatedRoleBinding[]>([])
+  const [aggregatedRoleBindings, setTemplates] = useState<AggregatedRoleBinding[]>([])
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [formTouched, setFormTouched] = useState<boolean>(false)
   const [showLoader, setShowLoader] = useState<boolean>(false)
@@ -61,9 +61,9 @@ export default function NewUserWizard() {
   )
   
   const saveButtonDisabled =
-    templates.length === 0 ||
+    aggregatedRoleBindings.length === 0 ||
     usernameError !== null ||
-    templates.some(p => p.namespaces.length === 0)
+    aggregatedRoleBindings.some(p => p.namespaces.length === 0)
   
   async function handleSubmit(e) {
     e.preventDefault()
@@ -73,6 +73,7 @@ export default function NewUserWizard() {
     }
     
     const valid = validateUsername()
+    
     if (!valid) {
       return
     }
@@ -80,28 +81,25 @@ export default function NewUserWizard() {
     try {
       await httpClient.post('/api/create-user', {name: username})
       
-      for await (const p of templates) {
+      for await (const aggregatedRoleBinding of aggregatedRoleBindings) {
       
-        if (p.namespaces === 'ALL_NAMESPACES') {
-          const clusterRolebindingName = username + '___' + p.template + '___all_namespaces'
+        if (aggregatedRoleBinding.namespaces === 'ALL_NAMESPACES') {
           
-  
           await httpRolebindingRequests.createRolebindingAllNamespaces({
-            clusterRolebindingName: clusterRolebindingName,
+            clusterRolebindingName: username + '___' + aggregatedRoleBinding.template + '___all_namespaces',
             addGeneratedForUser: false,
-            template: p.template,
+            template: aggregatedRoleBinding.template,
             username: username
           })
           
-  
           
         } else {
-          for await (const n of p.namespaces) {
-            const rolebindingName = username + '___' + p.template + '___' + n;
+          for await (const n of aggregatedRoleBinding.namespaces) {
+            const rolebindingName = username + '___' + aggregatedRoleBinding.template + '___' + n;
             
             await httpRolebindingRequests.createRolebinding({
               addGeneratedForUser: true,
-              template: p.template,
+              template: aggregatedRoleBinding.template,
               namespace: n,
               roleBindingName: rolebindingName,
               username: username
@@ -187,7 +185,7 @@ export default function NewUserWizard() {
           
           <div className="mb-6">
             <Templates
-              pairItems={templates}
+              pairItems={aggregatedRoleBindings}
               savePair={savePair}
               setPairItems={setTemplates}
               addEmptyPair={addEmptyPair}
@@ -212,10 +210,10 @@ export default function NewUserWizard() {
         </div>
       </form>
       
-      {templates.length > 0 && templates.some(p => p.namespaces.length > 0) ? (
+      {aggregatedRoleBindings.length > 0 && aggregatedRoleBindings.some(p => p.namespaces.length > 0) ? (
         <>
           <div className="mt-12 mb-4"/>
-          <Summary pairItems={templates}></Summary>
+          <Summary pairItems={aggregatedRoleBindings}></Summary>
         </>
       ) : null}
     </div>

@@ -33,11 +33,8 @@ interface CreateClusterRolebindingNamespacedParameters extends HasAddGeneratedUs
  */
 class RolebindingRequests {
   
-  private readonly httpClient: AxiosInstance;
   
-  // todo in future adopt dependency injection?
-  constructor() {
-    this.httpClient = httpClient;
+  constructor(private readonly httpClient: AxiosInstance) {
   }
   
   private getTemplateName(clusterAccess: ClusterAccess): string {
@@ -135,4 +132,4 @@ class RolebindingRequests {
 }
 
 //todo in future remove the singleton
-export const httpRolebindingRequests = new RolebindingRequests();
+export const httpRolebindingRequests = new RolebindingRequests(httpClient);
