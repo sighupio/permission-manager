@@ -12,7 +12,7 @@ import {AggregatedRoleBinding, extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
 import {ClusterAccess} from "./types";
-import {httpRolebindingRequests} from "../services/rolebindingRequests";
+import {rolebindingCreateRequests} from "../services/rolebindingRequests";
 
 interface EditUserParameters {
   readonly user: User;
@@ -51,17 +51,17 @@ export default function EditUser({user}: EditUserParameters) {
   const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState<ClusterAccess>(null)
-  const [pairItems, setPairItems] = useState(extractedPairItems)
+  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState(extractedPairItems)
   
   useEffect(() => {
     
     // means that aggragatedRoleBindings is already bootstrapped
-    if (pairItems.length !== 0) {
+    if (aggregatedRoleBindings.length !== 0) {
       return;
     }
     
     // we proceed to bootstrap aggragatedRoleBindings
-    setPairItems(extractedPairItems)
+    setAggregatedRoleBindings(extractedPairItems)
     
     // we bootstrap clusterRoleBinding value.
     const clusterRoleBinding = crbs.find(crb => crb.metadata.name.includes(templateClusterResourceRolePrefix))
@@ -86,16 +86,14 @@ export default function EditUser({user}: EditUserParameters) {
     
     setClusterAccess(clusterBindingAccessValue)
     
-  }, [crbs, initialClusterAccess, pairItems.length, extractedPairItems])
+  }, [crbs, initialClusterAccess, aggregatedRoleBindings.length, extractedPairItems])
   
   async function handleUserDeletion() {
     setShowLoader(true)
     
     await deleteUserResources()
     
-    await httpClient.post('/api/delete-user', {
-      username
-    })
+    await httpClient.post('/api/delete-user', {username})
   }
   
   async function deleteUserResources() {
@@ -117,61 +115,16 @@ export default function EditUser({user}: EditUserParameters) {
   
   async function handleSubmit(e) {
     await deleteUserResources()
-    const consumed: string[] = []
     
-    for await (const aggregatedRolebinding of pairItems) {
-      if (aggregatedRolebinding.namespaces === 'ALL_NAMESPACES') {
-        const clusterRolebindingName = username + '___' + aggregatedRolebinding.template + 'all_namespaces'
-        
-        if (!consumed.includes(clusterRolebindingName)) {
-          
-          await httpRolebindingRequests.createRolebindingAllNamespaces({
-            clusterRolebindingName: clusterRolebindingName,
-            addGeneratedForUser: false,
-            template: aggregatedRolebinding.template,
-            username: username
-          })
-          
-          consumed.push(clusterRolebindingName)
-        }
-        
-      } else {
-        for await (const namespace of aggregatedRolebinding.namespaces) {
-          const rolebindingName = username + '___' + aggregatedRolebinding.template + '___' + namespace
-          
-          if (!consumed.includes(rolebindingName)) {
-            await httpRolebindingRequests.createRolebinding({
-              template: aggregatedRolebinding.template,
-              username: username,
-              namespace: namespace,
-              roleBindingName: rolebindingName,
-              addGeneratedForUser: true
-            });
-            
-            consumed.push(rolebindingName)
-          }
-        }
-      }
-    }
-    
-    await httpRolebindingRequests.createClusterRolebinding({
-      clusterAccess,
-      username,
-      addGeneratedForUser: false
-    });
+    await rolebindingCreateRequests.createAllRolebindings({aggregatedRoleBindings, username, clusterAccess});
     
     window.location.reload()
   }
   
   const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
-    setPairItems(state => {
+    setAggregatedRoleBindings(state => {
       if (state.find(x => x.id === p.id)) {
-        return state.map(x => {
-          if (x.id === p.id) {
-            return p
-          }
-          return x
-        })
+        return state.map(x => x.id === p.id ? p : x)
       } else {
         return [...state, p]
       }
@@ -179,12 +132,12 @@ export default function EditUser({user}: EditUserParameters) {
   }, [])
   
   const addEmptyPair = useCallback(() => {
-    setPairItems(state => {
+    setAggregatedRoleBindings(state => {
       return [...state, {id: uuid.v4(), namespaces: [], template: ''}]
     })
   }, [])
   
-  const saveButtonDisabled = pairItems.length === 0 || pairItems.some(p => p.namespaces.length === 0)
+  const saveButtonDisabled = aggregatedRoleBindings.length === 0 || aggregatedRoleBindings.some(p => p.namespaces.length === 0)
   
   if (crbs && crbs.length === 0 && rbs && rbs.length === 0) {
     return <div>...loading</div>
@@ -230,9 +183,9 @@ export default function EditUser({user}: EditUserParameters) {
       >
         <div className="mb-6">
           <Templates
-            pairItems={pairItems}
+            pairItems={aggregatedRoleBindings}
             savePair={savePair}
-            setPairItems={setPairItems}
+            setPairItems={setAggregatedRoleBindings}
             addEmptyPair={addEmptyPair}
           />
         </div>
@@ -255,10 +208,10 @@ export default function EditUser({user}: EditUserParameters) {
         </button>
       </form>
       
-      {pairItems.length > 0 && pairItems.some(p => p.namespaces.length > 0) ? (
+      {aggregatedRoleBindings.length > 0 && aggregatedRoleBindings.some(p => p.namespaces.length > 0) ? (
         <>
           <div className="mt-12 mb-4"/>
-          <Summary pairItems={pairItems}></Summary>
+          <Summary pairItems={aggregatedRoleBindings}/>
         </>
       ) : null}
     </div>

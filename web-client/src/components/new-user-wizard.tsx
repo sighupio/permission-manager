@@ -9,7 +9,7 @@ import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
 import {AggregatedRoleBinding} from "../services/role";
 import {ClusterAccess} from "./types";
-import {httpRolebindingRequests} from "../services/rolebindingRequests";
+import {rolebindingCreateRequests} from "../services/rolebindingRequests";
 
 
 export interface AggregatedRoleBindingManager {
@@ -25,7 +25,7 @@ export default function NewUserWizard() {
   
   const [username, setUsername] = useState<string>('')
   const [usernameError, setUsernameError] = useState<string | null>(null)
-  const [aggregatedRoleBindings, setTemplates] = useState<AggregatedRoleBinding[]>([])
+  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [formTouched, setFormTouched] = useState<boolean>(false)
   const [showLoader, setShowLoader] = useState<boolean>(false)
@@ -82,50 +82,17 @@ export default function NewUserWizard() {
     try {
       await httpClient.post('/api/create-user', {name: username})
       
-      //todo why await?
-      for await (const aggregatedRoleBinding of aggregatedRoleBindings) {
-        
-        if (aggregatedRoleBinding.namespaces === 'ALL_NAMESPACES') {
-          
-          await httpRolebindingRequests.createRolebindingAllNamespaces({
-            clusterRolebindingName: username + '___' + aggregatedRoleBinding.template + '___all_namespaces',
-            addGeneratedForUser: false,
-            template: aggregatedRoleBinding.template,
-            username: username
-          })
-          
-          
-        } else {
-          for await (const n of aggregatedRoleBinding.namespaces) {
-            const rolebindingName = username + '___' + aggregatedRoleBinding.template + '___' + n;
-            
-            await httpRolebindingRequests.createRolebinding({
-              addGeneratedForUser: true,
-              template: aggregatedRoleBinding.template,
-              namespace: n,
-              roleBindingName: rolebindingName,
-              username: username
-            })
-            
-          }
-        }
-      }
-      
-      await httpRolebindingRequests.createClusterRolebinding({
-        clusterAccess,
-        username,
-        addGeneratedForUser: true
-      })
+      await rolebindingCreateRequests.createAllRolebindings({aggregatedRoleBindings, username, clusterAccess})
       
       history.push(`/users/${username}`)
-  
+      
     } catch (e) {
       console.error(e)
     }
   }
   
   const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
-    setTemplates(state => {
+    setAggregatedRoleBindings(state => {
       if (state.find(x => x.id === p.id)) {
         return state.map(x => {
           if (x.id === p.id) {
@@ -140,7 +107,7 @@ export default function NewUserWizard() {
   }, [])
   
   const addEmptyPair = useCallback(() => {
-    setTemplates(state => {
+    setAggregatedRoleBindings(state => {
       return [...state, {id: uuid.v4(), namespaces: [], template: ''}]
     })
   }, [])
@@ -190,7 +157,7 @@ export default function NewUserWizard() {
             <Templates
               pairItems={aggregatedRoleBindings}
               savePair={savePair}
-              setPairItems={setTemplates}
+              setPairItems={setAggregatedRoleBindings}
               addEmptyPair={addEmptyPair}
             />
           </div>
