@@ -30,9 +30,9 @@ interface CreateRolebindingParameters extends HasAddGeneratedUser {
 }
 
 interface CreateAllRolebindingsParameters {
-  aggregatedRoleBindings: AggregatedRoleBinding[],
-  username: string,
-  clusterAccess: ClusterAccess
+  readonly aggregatedRoleBindings: AggregatedRoleBinding[],
+  readonly username: string,
+  readonly clusterAccess: ClusterAccess
 }
 
 /**
