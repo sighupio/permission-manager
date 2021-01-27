@@ -9,7 +9,7 @@ import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
 import {AggregatedRoleBinding} from "../services/role";
 import {ClusterAccess} from "./types";
-import {createClusterRolebindingNotNamespaced} from "../services/clusterRolebindingRequests";
+import {httpRolebindingRequests} from "../services/rolebindingRequests";
 
 
 export interface AggregatedRoleBindingManager {
@@ -81,43 +81,41 @@ export default function NewUserWizard() {
       await httpClient.post('/api/create-user', {name: username})
       
       for await (const p of templates) {
+      
         if (p.namespaces === 'ALL_NAMESPACES') {
-          const clusterRolebindingName =
-            username + '___' + p.template + '___all_namespaces'
-          await httpClient.post('/api/create-cluster-rolebinding', {
-            generated_for_user: username,
-            roleName: p.template,
-            subjects: [
-              {
-                kind: 'ServiceAccount',
-                name: username,
-                namespace: 'permission-manager'
-              }
-            ],
-            clusterRolebindingName
+          const clusterRolebindingName = username + '___' + p.template + '___all_namespaces'
+          
+  
+          await httpRolebindingRequests.createRolebindingAllNamespaces({
+            clusterRolebindingName: clusterRolebindingName,
+            addGeneratedForUser: false,
+            template: p.template,
+            username: username
           })
+          
+  
+          
         } else {
           for await (const n of p.namespaces) {
-            const rolebindingName = username + '___' + p.template + '___' + n
-            await httpClient.post('/api/create-rolebinding', {
-              generated_for_user: username,
-              roleName: p.template,
+            const rolebindingName = username + '___' + p.template + '___' + n;
+            
+            await httpRolebindingRequests.createRolebinding({
+              addGeneratedForUser: true,
+              template: p.template,
               namespace: n,
-              roleKind: 'ClusterRole',
-              subjects: [
-                {
-                  kind: 'ServiceAccount',
-                  name: username,
-                  namespace: 'permission-manager'
-                }
-              ],
-              rolebindingName
+              roleBindingName: rolebindingName,
+              username: username
             })
+            
           }
         }
       }
       
-      await createClusterRolebindingNotNamespaced(clusterAccess, username)
+      await httpRolebindingRequests.createClusterRolebinding({
+        clusterAccess,
+        username,
+        addGeneratedForUser: true
+      })
       
       history.push(`/users/${username}`)
     } catch (e) {

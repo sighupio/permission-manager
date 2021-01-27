@@ -12,10 +12,7 @@ import {extractUsersRoles} from "../services/role";
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
 import {ClusterAccess} from "./types";
-import {
-  createClusterRolebindingNotNamespaced,
-  createClusterRolebindingNamespaced
-} from "../services/clusterRolebindingRequests";
+import {httpRolebindingRequests} from "../services/rolebindingRequests";
 
 interface EditUserParameters {
   readonly user: User;
@@ -95,12 +92,11 @@ export default function EditUser({user}: EditUserParameters) {
         
         if (!consumed.includes(clusterRolebindingName)) {
           
-          await createClusterRolebindingNamespaced({
+          await httpRolebindingRequests.createRolebindingAllNamespaces({
+            clusterRolebindingName: clusterRolebindingName,
+            addGeneratedForUser: false,
             template: aggregatedRolebinding.template,
-            username: username,
-            namespace: 'permission-manager',
-            roleBindingName: clusterRolebindingName,
-            addGeneratedForUser: false
+            username: username
           })
           
           consumed.push(clusterRolebindingName)
@@ -111,7 +107,7 @@ export default function EditUser({user}: EditUserParameters) {
           const rolebindingName = username + '___' + aggregatedRolebinding.template + '___' + namespace
           
           if (!consumed.includes(rolebindingName)) {
-            await createClusterRolebindingNamespaced({
+            await httpRolebindingRequests.createRolebinding({
               template: aggregatedRolebinding.template,
               username: username,
               namespace: namespace,
@@ -125,7 +121,11 @@ export default function EditUser({user}: EditUserParameters) {
       }
     }
     
-    await createClusterRolebindingNotNamespaced(clusterAccess, username);
+    await httpRolebindingRequests.createClusterRolebinding({
+      clusterAccess,
+      username,
+      addGeneratedForUser: false
+    });
     
     window.location.reload()
   }
