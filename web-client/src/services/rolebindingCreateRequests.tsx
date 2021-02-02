@@ -5,7 +5,7 @@ import {AggregatedRoleBinding} from "./role";
 import {Subject} from "../hooks/useRbac";
 
 
-interface RolebindindingAttributes {
+interface RoleCreate {
   /**
    * rolename
    */
@@ -19,12 +19,12 @@ interface RolebindindingAttributes {
 }
 
 
-interface ClusterRolebindingCreate extends RolebindindingAttributes {
+interface ClusterRolebindingCreate extends RoleCreate {
   readonly clusterRolebindingName: string
 }
 
 
-interface RolebindingCreate extends RolebindindingAttributes {
+interface RolebindingCreate extends RoleCreate {
   readonly namespace: string,
   readonly roleBindingName: string
   readonly roleKind: string
