@@ -17,7 +17,7 @@ export default function Summary({ pairItems }: SummaryParameters) {
 
   const ruleSets: RuleSet[] = pairItems
     .reduce((acc, p) => {
-      const crs = clusterRoles.filter(c => c.metadata.name === p.template)
+      const crs = clusterRoles.filter(c => c.metadata.name === p.roleName)
 
       const rules = crs.reduce((acc, v) => {
         acc = acc.concat(v.rules)
@@ -25,12 +25,12 @@ export default function Summary({ pairItems }: SummaryParameters) {
       }, [])
 
       const ruleset = {
-        template: p.template,
+        template: p.roleName,
         rules,
         namespaces: p.namespaces === 'ALL_NAMESPACES' ? ['all'] : p.namespaces
       }
 
-      const itemForSameTemplate = acc.find(rs => rs.template === p.template)
+      const itemForSameTemplate = acc.find(rs => rs.template === p.roleName)
       if (itemForSameTemplate) {
         if (
           itemForSameTemplate.namespaces.includes('all') ||

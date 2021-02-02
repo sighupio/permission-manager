@@ -31,7 +31,7 @@ export interface AggregatedRoleBinding {
   /**
    * example: template-namespaced-resources___developer
    */
-  readonly template: string
+  readonly roleName: string
 }
 
 

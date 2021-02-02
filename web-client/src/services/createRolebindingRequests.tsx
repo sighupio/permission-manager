@@ -12,7 +12,10 @@ interface HasAddGeneratedUser {
 }
 
 interface HasTemplateUsername {
-  readonly template: string,
+  /**
+   * rolename
+   */
+  readonly roleName: string,
   readonly username: string,
 }
 
@@ -47,7 +50,7 @@ class RolebindingCreateRequests {
   constructor(private readonly httpClient: AxiosInstance) {
   }
   
-  private getTemplateName(clusterAccess: ClusterAccess): string {
+  private getRoleName(clusterAccess: ClusterAccess): string {
     switch (clusterAccess) {
       case "none":
         throw new Error("case 'none' not supported");
@@ -68,7 +71,7 @@ class RolebindingCreateRequests {
    */
   private async httpCreateClusterRolebinding(params: CreateClusterRoleBindingParameters) {
     const request = {
-      roleName: params.template,
+      roleName: params.roleName,
       subjects: [
         {
           kind: 'ServiceAccount',
@@ -98,14 +101,14 @@ class RolebindingCreateRequests {
       return;
     }
     
-    const template = this.getTemplateName(params.clusterAccess);
+    const template = this.getRoleName(params.clusterAccess);
     
     const clusterRolebindingName = params.username + '___' + template
     
     return await this.httpCreateClusterRolebinding({
       addGeneratedForUser: params.addGeneratedForUser,
       clusterRolebindingName: clusterRolebindingName,
-      template: template,
+      roleName: template,
       username: params.username
     })
     
@@ -117,7 +120,7 @@ class RolebindingCreateRequests {
    */
   public async rolebinding(params: CreateRolebindingParameters) {
     const request = {
-      roleName: params.template,
+      roleName: params.roleName,
       namespace: params.namespace,
       roleKind: 'ClusterRole',
       subjects: [
@@ -160,14 +163,14 @@ class RolebindingCreateRequests {
     
     // we grab all the 'ALL_NAMESPACE' rolebindings and create them on the backend
     for (const allNamespaceRolebinding of params.aggregatedRoleBindings.filter(e => e.namespaces === 'ALL_NAMESPACES')) {
-      const clusterRolebindingName = params.username + '___' + allNamespaceRolebinding.template + 'all_namespaces'
+      const clusterRolebindingName = params.username + '___' + allNamespaceRolebinding.roleName + 'all_namespaces'
       
       if (!consumed.includes(clusterRolebindingName)) {
         
         await this.rolebindingAllNamespaces({
           clusterRolebindingName: clusterRolebindingName,
           addGeneratedForUser: false,
-          template: allNamespaceRolebinding.template,
+          roleName: allNamespaceRolebinding.roleName,
           username: params.username
         })
         
@@ -179,11 +182,11 @@ class RolebindingCreateRequests {
     for (const namespacedRoleBinding of params.aggregatedRoleBindings.filter(e => e.namespaces !== 'ALL_NAMESPACES')) {
       for (const namespace of namespacedRoleBinding.namespaces) {
         
-        const rolebindingName = params.username + '___' + namespacedRoleBinding.template + '___' + namespace
+        const rolebindingName = params.username + '___' + namespacedRoleBinding.roleName + '___' + namespace
         
         if (!consumed.includes(rolebindingName)) {
           await this.rolebinding({
-            template: namespacedRoleBinding.template,
+            roleName: namespacedRoleBinding.roleName,
             username: params.username,
             namespace: namespace,
             roleBindingName: rolebindingName,

@@ -15,7 +15,7 @@ interface TemplatePairSelectParameters {
 export default function TemplatePairSelect({onSave, initialValues}: TemplatePairSelectParameters) {
   const [namespaces, setNamespaces] = useState<AggregatedRoleBindingNamespace>(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState<boolean>(initialValues.namespaces === 'ALL_NAMESPACES' ? true : null)
-  const [template, setTemplate] = useState(initialValues.template)
+  const [template, setTemplate] = useState(initialValues.roleName)
   
   useEffect(() => {
     if (allNamespace === null) {
@@ -33,7 +33,7 @@ export default function TemplatePairSelect({onSave, initialValues}: TemplatePair
     onSave({
       id: initialValues.id,
       namespaces,
-      template
+      roleName: template
     })
   }, [initialValues.id, namespaces, onSave, template])
   
@@ -45,7 +45,7 @@ export default function TemplatePairSelect({onSave, initialValues}: TemplatePair
         </div>
         <TemplateSelect
           onSelect={t => setTemplate(t)}
-          initialValue={initialValues.template}
+          initialValue={initialValues.roleName}
         />
       </div>
       <div style={{marginLeft: 20, flex: 3}} data-testid="namespaces-select">
