@@ -15,26 +15,25 @@ interface HasTemplateUsername {
    * this field adds generated_for_user to the http request
    */
   readonly username?: string,
+  readonly subjects: Subject[]
+  
 }
 
-interface CreateClusterRoleBindingParameters extends  HasTemplateUsername {
-  readonly subjects: Subject[]
+interface httpClusterRolebinding extends  HasTemplateUsername {
   readonly clusterRolebindingName: string
 }
 
-interface CreateClusterRolebindingParameters extends  HasTemplateUsername {
+interface CreateClusterRolebinding extends  HasTemplateUsername {
   readonly clusterRolebindingName: string
-  readonly subjects: Subject[]
 }
 
 
-interface CreateRolebindingParameters extends  HasTemplateUsername {
+interface CreateRolebinding extends  HasTemplateUsername {
   readonly namespace: string,
   readonly roleBindingName: string
-  readonly subjects: Subject[]
 }
 
-interface CreateAllRolebindingsParameters {
+interface CreateFromAggregatedRolebindings {
   readonly aggregatedRoleBindings: AggregatedRoleBinding[],
   readonly username: string,
   readonly clusterAccess: ClusterAccess
@@ -68,7 +67,7 @@ class RolebindingCreateRequests {
    *
    * @param params
    */
-  private async httpCreateClusterRolebinding(params: CreateClusterRoleBindingParameters) {
+  private async httpCreateClusterRolebinding(params: httpClusterRolebinding) {
     const request = {
       roleName: params.roleName,
       subjects: params.subjects,
@@ -87,7 +86,7 @@ class RolebindingCreateRequests {
    * @see ClusterAccess
    * @param params
    */
-  public async clusterRolebinding(params: CreateClusterRolebindingParameters): Promise<AxiosResponse<any>> {
+  public async clusterRolebinding(params: CreateClusterRolebinding): Promise<AxiosResponse<any>> {
     
 
     return await this.httpCreateClusterRolebinding({
@@ -103,7 +102,7 @@ class RolebindingCreateRequests {
    * create a namespaced rolebinding
    * @param params
    */
-  public async rolebinding(params: CreateRolebindingParameters) {
+  public async rolebinding(params: CreateRolebinding) {
     const request = {
       roleName: params.roleName,
       namespace: params.namespace,
@@ -123,7 +122,7 @@ class RolebindingCreateRequests {
    * ALL_NAMESPACES rolebinding creates a cluster-rolebinding in kubernetes
    * @param params
    */
-  public async rolebindingAllNamespaces(params: CreateClusterRoleBindingParameters) {
+  public async rolebindingAllNamespaces(params: httpClusterRolebinding) {
     
     return await this.httpCreateClusterRolebinding(params)
   }
@@ -134,7 +133,7 @@ class RolebindingCreateRequests {
    * b) Rolebindings
    * @param params
    */
-  public async createFromAggregatedRolebindings(params: CreateAllRolebindingsParameters) {
+  public async createFromAggregatedRolebindings(params: CreateFromAggregatedRolebindings) {
     /**
      * templates already sent to the backend
      */
