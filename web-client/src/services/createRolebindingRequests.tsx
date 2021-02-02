@@ -31,6 +31,7 @@ interface CreateClusterRolebinding extends  HasTemplateUsername {
 interface CreateRolebinding extends  HasTemplateUsername {
   readonly namespace: string,
   readonly roleBindingName: string
+  readonly roleKind: string
 }
 
 interface CreateFromAggregatedRolebindings {
@@ -106,7 +107,7 @@ class RolebindingCreateRequests {
     const request = {
       roleName: params.roleName,
       namespace: params.namespace,
-      roleKind: 'ClusterRole',
+      roleKind: params.roleKind,
       subjects: params.subjects,
       roleBindingName: params.roleBindingName
     };
@@ -176,7 +177,8 @@ class RolebindingCreateRequests {
             username: params.username,
             namespace: namespace,
             roleBindingName: rolebindingName,
-            subjects: subjects
+            subjects: subjects,
+            roleKind: 'ClusterRole'
           });
           
           consumed.push(rolebindingName)
