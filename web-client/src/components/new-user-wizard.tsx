@@ -82,7 +82,7 @@ export default function NewUserWizard() {
     try {
       await userRequests.create(username)
       
-      await rolebindingCreateRequests.allRolebindingsType({aggregatedRoleBindings, username, clusterAccess})
+      await rolebindingCreateRequests.createFromAggregatedRolebindings({aggregatedRoleBindings, username, clusterAccess})
       
       history.push(`/users/${username}`)
       

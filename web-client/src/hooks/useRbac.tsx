@@ -32,7 +32,7 @@ export interface RoleRef {
 
 export interface Subject {
   readonly kind: string,
-  readonly apiGroup: string
+  readonly apiGroup?: string
   readonly name: string
   readonly namespace?: string
 }

@@ -5,6 +5,7 @@ import {useUsers} from '../../hooks/useUsers'
 import {ClusterRoleSelect} from './cluster-role-select'
 import {httpClient} from '../../services/httpClient'
 import {rolebindingDeleteRequests} from "../../services/deleteRolebindingRequests";
+import {rolebindingCreateRequests} from "../../services/createRolebindingRequests";
 
 export default () => {
   const {refreshRbacData, clusterRoleBindings} = useRbac()
@@ -110,14 +111,16 @@ function NewClusterRoleBindingForm({fetchData}) {
   
   async function onSubmit(e) {
     e.preventDefault()
-    await httpClient.post('/api/create-cluster-rolebinding', {
-      roleName,
+  
+    await rolebindingCreateRequests.clusterRolebinding({
       subjects: subjects.map(s => ({
         ...s,
         namespace: 'permission-manager'
       })),
-      clusterRolebindingName
+      roleName,
+      clusterRolebindingName,
     })
+
     fetchData()
   }
   

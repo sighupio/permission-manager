@@ -110,7 +110,7 @@ export default function EditUser({user}: EditUserParameters) {
     await deleteUserResources()
     
     //we create the resources choosen in the UI
-    await rolebindingCreateRequests.allRolebindingsType({aggregatedRoleBindings, username, clusterAccess});
+    await rolebindingCreateRequests.createFromAggregatedRolebindings({aggregatedRoleBindings, username, clusterAccess});
     
     window.location.reload()
   }
