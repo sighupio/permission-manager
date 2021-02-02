@@ -1,5 +1,4 @@
 import React, {useCallback, useEffect, useState} from 'react'
-import {httpClient} from '../services/httpClient'
 import uuid from 'uuid'
 import {useHistory} from 'react-router-dom'
 import ClusterAccessRadio from './ClusterAccessRadio'
@@ -9,7 +8,8 @@ import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
 import {AggregatedRoleBinding} from "../services/role";
 import {ClusterAccess} from "./types";
-import {rolebindingCreateRequests} from "../services/rolebindingRequests";
+import {rolebindingCreateRequests} from "../services/createRolebindingRequests";
+import {userRequests} from "../services/userRequests";
 
 
 export interface AggregatedRoleBindingManager {
@@ -80,9 +80,9 @@ export default function NewUserWizard() {
     
     //todo try catch with silent console.log is not ideal nor production ready
     try {
-      await httpClient.post('/api/create-user', {name: username})
+      await userRequests.create(username)
       
-      await rolebindingCreateRequests.createAllRolebindings({aggregatedRoleBindings, username, clusterAccess})
+      await rolebindingCreateRequests.allRolebindingsType({aggregatedRoleBindings, username, clusterAccess})
       
       history.push(`/users/${username}`)
       

@@ -5,13 +5,18 @@ import {AxiosInstance, AxiosResponse} from "axios";
 import {AggregatedRoleBinding} from "./role";
 
 interface HasAddGeneratedUser {
+  /**
+   * this field adds generated_for_user to the http request
+   */
   readonly addGeneratedForUser: boolean
-  
 }
 
-interface CreateClusterRoleBindingParameters extends HasAddGeneratedUser {
+interface HasTemplateUsername {
   readonly template: string,
   readonly username: string,
+}
+
+interface CreateClusterRoleBindingParameters extends HasAddGeneratedUser, HasTemplateUsername {
   readonly clusterRolebindingName: string
 }
 
@@ -22,9 +27,7 @@ interface CreateClusterRolebindingParameters extends HasAddGeneratedUser {
 }
 
 
-interface CreateRolebindingParameters extends HasAddGeneratedUser {
-  readonly template: string,
-  readonly username: string,
+interface CreateRolebindingParameters extends HasAddGeneratedUser, HasTemplateUsername {
   readonly namespace: string,
   readonly roleBindingName: string
 }
@@ -88,7 +91,7 @@ class RolebindingCreateRequests {
    * @see ClusterAccess
    * @param params
    */
-  private async createClusterRolebinding(params: CreateClusterRolebindingParameters): Promise<AxiosResponse<any>> {
+  public async clusterRolebinding(params: CreateClusterRolebindingParameters): Promise<AxiosResponse<any>> {
     
     // none takes no action in resource creation
     if (params.clusterAccess === 'none') {
@@ -108,7 +111,11 @@ class RolebindingCreateRequests {
     
   }
   
-  private async createRolebinding(params: CreateRolebindingParameters) {
+  /**
+   * create a namespaced rolebinding
+   * @param params
+   */
+  public async rolebinding(params: CreateRolebindingParameters) {
     const request = {
       roleName: params.template,
       namespace: params.namespace,
@@ -134,7 +141,7 @@ class RolebindingCreateRequests {
    * ALL_NAMESPACES rolebinding creates a cluster-rolebinding in kubernetes
    * @param params
    */
-  private async createRolebindingAllNamespaces(params: CreateClusterRoleBindingParameters) {
+  public async rolebindingAllNamespaces(params: CreateClusterRoleBindingParameters) {
     
     return await this.httpCreateClusterRolebinding(params)
   }
@@ -145,7 +152,7 @@ class RolebindingCreateRequests {
    * b) Rolebindings
    * @param params
    */
-  public async createAllRolebindings(params: CreateAllRolebindingsParameters) {
+  public async allRolebindingsType(params: CreateAllRolebindingsParameters) {
     /**
      * templates already sent to the backend
      */
@@ -157,7 +164,7 @@ class RolebindingCreateRequests {
       
       if (!consumed.includes(clusterRolebindingName)) {
         
-        await this.createRolebindingAllNamespaces({
+        await this.rolebindingAllNamespaces({
           clusterRolebindingName: clusterRolebindingName,
           addGeneratedForUser: false,
           template: allNamespaceRolebinding.template,
@@ -175,7 +182,7 @@ class RolebindingCreateRequests {
         const rolebindingName = params.username + '___' + namespacedRoleBinding.template + '___' + namespace
         
         if (!consumed.includes(rolebindingName)) {
-          await this.createRolebinding({
+          await this.rolebinding({
             template: namespacedRoleBinding.template,
             username: params.username,
             namespace: namespace,
@@ -190,7 +197,7 @@ class RolebindingCreateRequests {
     
     // we create the clusterRoleBinding
     //todo this must be changed in the future to support dynamic cluster roles. Right now it's just a single api call based on a radio select
-    await this.createClusterRolebinding({
+    await this.clusterRolebinding({
       clusterAccess: params.clusterAccess,
       username: params.username,
       addGeneratedForUser: false
