@@ -6,7 +6,7 @@ import {useNamespaceList} from '../../hooks/useNamespaceList'
 import {useUsers} from '../../hooks/useUsers'
 import {RoleSelect} from '../../components/role-select'
 import {ClusterRoleSelect} from './cluster-role-select'
-import {rolebindingCreateRequests} from "../../services/createRolebindingRequests";
+import {httpRequests} from "../../services/httpRequests";
 
 export default () => {
   const {refreshRbacData, roleBindings} = useRbac()
@@ -96,7 +96,7 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
   async function onSubmit(e) {
     e.preventDefault()
     
-    await rolebindingCreateRequests.rolebinding({
+    await httpRequests.rolebindingRequests.create.rolebinding({
       namespace,
       roleName,
       roleBindingName: rolebindingName,

@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useEffect, useState} from 'react'
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
-import {userRequests} from "../services/userRequests";
+import {httpRequests} from "../services/httpRequests";
 
 /**
  * UserProvider allows the client to load/add/delete/get kubernetes users
@@ -61,13 +61,13 @@ function useUsersFromApi(): UserProvider {
   }, [])
   
   function addUser({name}: { name: string }): void {
-    userRequests.create(name).then(res => {
+    httpRequests.userRequests.create(name).then(res => {
       fetchUsers()
     })
   }
   
   function removeUser({id}: { id: string }): void {
-    userRequests.delete(id).then(res => {
+    httpRequests.userRequests.delete(id).then(res => {
       fetchUsers()
     })
   }

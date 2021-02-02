@@ -11,9 +11,7 @@ import {useHistory} from 'react-router-dom'
 import {AggregatedRoleBinding, extractUsersRoles} from "../services/role";
 import {User} from "../types";
 import {ClusterAccess} from "./types";
-import {rolebindingCreateRequests} from "../services/createRolebindingRequests";
-import {rolebindingDeleteRequests} from "../services/deleteRolebindingRequests";
-import {userRequests} from "../services/userRequests";
+import {httpRequests} from "../services/httpRequests";
 
 interface EditUserParameters {
   readonly user: User;
@@ -94,15 +92,15 @@ export default function EditUser({user}: EditUserParameters) {
     
     await deleteUserResources()
     
-    await userRequests.delete(username)
+    await httpRequests.userRequests.delete(username)
   }
   
   /**
    * delete all the user-resources currently in the k8s cluster
    */
   async function deleteUserResources() {
-    await rolebindingDeleteRequests.rolebinding(rbs);
-    await rolebindingDeleteRequests.clusterRolebinding(crbs)
+    await httpRequests.rolebindingRequests.delete.rolebinding(rbs);
+    await httpRequests.rolebindingRequests.delete.clusterRolebinding(crbs);
   }
   
   async function handleSubmit(e) {
@@ -110,7 +108,11 @@ export default function EditUser({user}: EditUserParameters) {
     await deleteUserResources()
     
     //we create the resources choosen in the UI
-    await rolebindingCreateRequests.createFromAggregatedRolebindings({aggregatedRoleBindings, username, clusterAccess});
+    await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
+      aggregatedRoleBindings,
+      username,
+      clusterAccess
+    );
     
     window.location.reload()
   }

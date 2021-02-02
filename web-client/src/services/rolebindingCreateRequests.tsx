@@ -1,12 +1,11 @@
 import {templateClusterResourceRolePrefix} from "../constants";
-import {httpClient} from "./httpClient";
 import {ClusterAccess} from "../components/types";
 import {AxiosInstance, AxiosResponse} from "axios";
 import {AggregatedRoleBinding} from "./role";
 import {Subject} from "../hooks/useRbac";
 
 
-interface HasTemplateUsername {
+interface RolebindindingAttributes {
   /**
    * rolename
    */
@@ -19,31 +18,23 @@ interface HasTemplateUsername {
   
 }
 
-interface httpClusterRolebinding extends  HasTemplateUsername {
+
+interface ClusterRolebindingCreate extends RolebindindingAttributes {
   readonly clusterRolebindingName: string
 }
 
-interface CreateClusterRolebinding extends  HasTemplateUsername {
-  readonly clusterRolebindingName: string
-}
 
-
-interface CreateRolebinding extends  HasTemplateUsername {
+interface RolebindingCreate extends RolebindindingAttributes {
   readonly namespace: string,
   readonly roleBindingName: string
   readonly roleKind: string
 }
 
-interface CreateFromAggregatedRolebindings {
-  readonly aggregatedRoleBindings: AggregatedRoleBinding[],
-  readonly username: string,
-  readonly clusterAccess: ClusterAccess
-}
 
 /**
  * This class contains all the httpRequests for the clusterRoleBinding, roleBinding creation.
  */
-class RolebindingCreateRequests {
+export class RolebindingCreateRequests {
   
   
   constructor(private readonly httpClient: AxiosInstance) {
@@ -68,7 +59,7 @@ class RolebindingCreateRequests {
    *
    * @param params
    */
-  private async httpCreateClusterRolebinding(params: httpClusterRolebinding) {
+  private async httpCreateClusterRolebinding(params: ClusterRolebindingCreate) {
     const request = {
       roleName: params.roleName,
       subjects: params.subjects,
@@ -87,9 +78,9 @@ class RolebindingCreateRequests {
    * @see ClusterAccess
    * @param params
    */
-  public async clusterRolebinding(params: CreateClusterRolebinding): Promise<AxiosResponse<any>> {
+  public async clusterRolebinding(params: ClusterRolebindingCreate): Promise<AxiosResponse<any>> {
     
-
+    
     return await this.httpCreateClusterRolebinding({
       clusterRolebindingName: params.clusterRolebindingName,
       roleName: params.roleName,
@@ -103,7 +94,7 @@ class RolebindingCreateRequests {
    * create a namespaced rolebinding
    * @param params
    */
-  public async rolebinding(params: CreateRolebinding) {
+  public async rolebinding(params: RolebindingCreate) {
     const request = {
       roleName: params.roleName,
       namespace: params.namespace,
@@ -123,18 +114,21 @@ class RolebindingCreateRequests {
    * ALL_NAMESPACES rolebinding creates a cluster-rolebinding in kubernetes
    * @param params
    */
-  public async rolebindingAllNamespaces(params: httpClusterRolebinding) {
+  public async rolebindingAllNamespaces(params: ClusterRolebindingCreate) {
     
     return await this.httpCreateClusterRolebinding(params)
   }
   
+
   /**
    * Handles the creation of:
    * a) ClusterRoleBindings
    * b) Rolebindings
-   * @param params
+   * @param aggregatedRoleBindings
+   * @param username
+   * @param clusterAccess
    */
-  public async createFromAggregatedRolebindings(params: CreateFromAggregatedRolebindings) {
+  public async fromAggregatedRolebindings(aggregatedRoleBindings: AggregatedRoleBinding[], username: string, clusterAccess: ClusterAccess) {
     /**
      * templates already sent to the backend
      */
@@ -142,14 +136,14 @@ class RolebindingCreateRequests {
     const subjects: Subject[] = [
       {
         kind: 'ServiceAccount',
-        name: params.username,
+        name: username,
         namespace: 'permission-manager'
       }
     ]
     
     // we grab all the 'ALL_NAMESPACE' rolebindings and create them on the backend
-    for (const allNamespaceRolebinding of params.aggregatedRoleBindings.filter(e => e.namespaces === 'ALL_NAMESPACES')) {
-      const clusterRolebindingName = params.username + '___' + allNamespaceRolebinding.roleName + 'all_namespaces'
+    for (const allNamespaceRolebinding of aggregatedRoleBindings.filter(e => e.namespaces === 'ALL_NAMESPACES')) {
+      const clusterRolebindingName = username + '___' + allNamespaceRolebinding.roleName + 'all_namespaces'
       
       if (!consumed.includes(clusterRolebindingName)) {
         
@@ -166,15 +160,15 @@ class RolebindingCreateRequests {
     }
     
     // we grab all the namespaced rolebinding and create them on the backend
-    for (const namespacedRoleBinding of params.aggregatedRoleBindings.filter(e => e.namespaces !== 'ALL_NAMESPACES')) {
+    for (const namespacedRoleBinding of aggregatedRoleBindings.filter(e => e.namespaces !== 'ALL_NAMESPACES')) {
       for (const namespace of namespacedRoleBinding.namespaces) {
         
-        const rolebindingName = params.username + '___' + namespacedRoleBinding.roleName + '___' + namespace
+        const rolebindingName = username + '___' + namespacedRoleBinding.roleName + '___' + namespace
         
         if (!consumed.includes(rolebindingName)) {
           await this.rolebinding({
             roleName: namespacedRoleBinding.roleName,
-            username: params.username,
+            username: username,
             namespace: namespace,
             roleBindingName: rolebindingName,
             subjects: subjects,
@@ -189,13 +183,13 @@ class RolebindingCreateRequests {
     // we create the clusterRoleBinding
     
     // none takes no action in resource creation
-    if (params.clusterAccess === 'none') {
+    if (clusterAccess === 'none') {
       return;
     }
     
-    const roleName = params.username + '___' + this.getRoleName(params.clusterAccess);
+    const roleName = username + '___' + this.getRoleName(clusterAccess);
     
-    const clusterRolebindingName = params.username + '___' + roleName
+    const clusterRolebindingName = username + '___' + roleName
     
     //todo this must be changed in the future to support dynamic cluster roles. Right now it's just a single api call based on a radio select
     await this.clusterRolebinding({
@@ -208,6 +202,3 @@ class RolebindingCreateRequests {
     
   }
 }
-
-//todo in future remove the singleton
-export const rolebindingCreateRequests = new RolebindingCreateRequests(httpClient);

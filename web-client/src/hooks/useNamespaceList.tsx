@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react'
-import {httpClient} from '../services/httpClient'
+import {httpRequests} from "../services/httpRequests";
 
 export interface Namespace {
   metadata: {
@@ -19,7 +19,7 @@ export function useNamespaceList(): NamespaceProvider {
   useEffect(() => {
     let unmounted = false
     
-    httpClient.get('/api/list-namespace').then(res => {
+    httpRequests.namespaceRequests.list().then(res => {
       if (!unmounted)
         setNamespaceList(
           res.data.namespaces.map(ns => {

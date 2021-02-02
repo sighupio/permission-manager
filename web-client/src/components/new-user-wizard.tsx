@@ -8,8 +8,7 @@ import Summary from './Summary'
 import {useUsers} from '../hooks/useUsers'
 import {AggregatedRoleBinding} from "../services/role";
 import {ClusterAccess} from "./types";
-import {rolebindingCreateRequests} from "../services/createRolebindingRequests";
-import {userRequests} from "../services/userRequests";
+import {httpRequests} from "../services/httpRequests";
 
 
 export interface AggregatedRoleBindingManager {
@@ -80,9 +79,13 @@ export default function NewUserWizard() {
     
     //todo try catch with silent console.log is not ideal nor production ready
     try {
-      await userRequests.create(username)
+      await httpRequests.userRequests.create(username)
       
-      await rolebindingCreateRequests.createFromAggregatedRolebindings({aggregatedRoleBindings, username, clusterAccess})
+      await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
+        aggregatedRoleBindings,
+        username,
+        clusterAccess
+      )
       
       history.push(`/users/${username}`)
       

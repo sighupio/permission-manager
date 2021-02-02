@@ -1,8 +1,7 @@
-import {httpClient} from "./httpClient";
 import {ClusterRoleBinding, RoleBinding} from "../hooks/useRbac";
 import {AxiosInstance} from "axios";
 
-class DeleteRolebindingRequests {
+export class RolebindingDeleteRequests {
   public constructor(private readonly httpClient: AxiosInstance) {
   }
   
@@ -25,4 +24,3 @@ class DeleteRolebindingRequests {
 }
 
 
-export const rolebindingDeleteRequests = new DeleteRolebindingRequests(httpClient)
