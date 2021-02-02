@@ -19,7 +19,7 @@ export function useNamespaceList(): NamespaceProvider {
   useEffect(() => {
     let unmounted = false
     
-    httpRequests.namespaceRequests.list().then(res => {
+    httpRequests.namespaceList().then(res => {
       if (!unmounted)
         setNamespaceList(
           res.data.namespaces.map(ns => {

@@ -1,10 +1,10 @@
 import React, {useEffect, useState} from 'react'
-import {httpClient} from '../services/httpClient'
 import {Dialog} from '@reach/dialog'
 import Editor from 'react-simple-code-editor'
 import {ClusterRoleBinding, RoleBinding, useRbac} from "../hooks/useRbac";
 import {extractUsersRoles} from "../services/role";
 import {User} from "../types";
+import {httpRequests} from "../services/httpRequests";
 
 /**
  * getValidNamespaces extracts the valid kubeconfig namespace values
@@ -42,10 +42,7 @@ export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonPar
   useEffect(() => {
     // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed
     if (showModal && (kubeconfig === '' || !kubeconfig.includes("namespace: " + chosenNamespace))) {
-      httpClient
-        .post('/api/create-kubeconfig', {
-          username: user.name, namespace: chosenNamespace
-        })
+      httpRequests.kubeconfigCreate(user.name, chosenNamespace)
         .then(({data}) => {
           setKubeconfig(data.kubeconfig)
         })
