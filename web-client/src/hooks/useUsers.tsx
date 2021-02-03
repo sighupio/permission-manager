@@ -1,6 +1,7 @@
-import React, {useState, useEffect, useContext, createContext} from 'react'
+import React, {createContext, useContext, useEffect, useState} from 'react'
 import {httpClient} from '../services/httpClient'
 import {User} from "../types";
+import {httpRequests} from "../services/httpRequests";
 
 /**
  * UserProvider allows the client to load/add/delete/get kubernetes users
@@ -20,7 +21,7 @@ interface UserProvider {
   
   /**
    * removes an user
-   * @param id
+   * @param id should be the username
    */
   removeUser({id}: { id: string }): void;
   
@@ -60,13 +61,13 @@ function useUsersFromApi(): UserProvider {
   }, [])
   
   function addUser({name}: { name: string }): void {
-    httpClient.post('/api/create-user', {name}).then(res => {
+    httpRequests.userRequests.create(name).then(res => {
       fetchUsers()
     })
   }
   
   function removeUser({id}: { id: string }): void {
-    httpClient.post('/api/delete-user', {id}).then(res => {
+    httpRequests.userRequests.delete(id).then(res => {
       fetchUsers()
     })
   }

@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react'
+import React, {useEffect} from 'react'
 import EditUser from '../components/edit-user'
 import CreateKubeconfigButton from '../components/CreateKubeconfigButton'
-import { useUsers } from '../hooks/useUsers'
-import { useParams } from 'react-router-dom'
+import {useUsers} from '../hooks/useUsers'
+import {useParams} from 'react-router-dom'
+
 export default function UserPage() {
   
   const { username }: {username: string} = useParams()

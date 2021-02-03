@@ -1,4 +1,4 @@
-import {useRbac} from '../hooks/useRbac'
+import {ClusterRoleBinding, useRbac} from '../hooks/useRbac'
 import {useUsers} from '../hooks/useUsers'
 import React, {useCallback, useEffect, useState} from 'react'
 import uuid from 'uuid'
@@ -8,182 +8,141 @@ import Templates from './Templates'
 import {FullScreenLoader} from './Loader'
 import Summary from './Summary'
 import {useHistory} from 'react-router-dom'
-import {extractUsersRoles} from "../services/role";
-import {httpClient} from '../services/httpClient'
+import {AggregatedRoleBinding, extractUsersRoles} from "../services/role";
 import {User} from "../types";
 import {ClusterAccess} from "./types";
+import {httpRequests} from "../services/httpRequests";
 
 interface EditUserParameters {
- readonly user: User;
+  readonly user: User;
 }
 
-export default function EditUser({ user }: EditUserParameters) {
+/**
+ * extract the initial clusterBindingRoleValue.
+ * @param clusterRoleBinding ClusterRoleBinding
+ * @todo this bootstrap cases are based off an enum. To implement dynamic cluster roles it needs to be refactored
+ * @return ClusterAccess|null - null if no state change needed.
+ */
+function getClusterBindindingAccessValue(clusterRoleBinding: ClusterRoleBinding): ClusterAccess | null {
+  
+  if (clusterRoleBinding.roleRef.name.endsWith('admin')) {
+    return 'write'
+  }
+  
+  if (clusterRoleBinding.roleRef.name.endsWith('read-only')) {
+    return 'read'
+  }
+  
+  return null;
+}
+
+export default function EditUser({user}: EditUserParameters) {
   const [showLoader, setShowLoader] = useState<boolean>(false)
   const username = user.name
-  const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac()
+  const {clusterRoleBindings, roleBindings, refreshRbacData} = useRbac()
   const history = useHistory()
-  const { refreshUsers } = useUsers()
-
+  const {refreshUsers} = useUsers()
+  
   useEffect(() => {
     refreshRbacData()
   }, [refreshRbacData])
-
-  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings,clusterRoleBindings, username);
+  
+  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState<ClusterAccess>(null)
-  const [pairItems, setPairItems] = useState(extractedPairItems)
-
+  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState(extractedPairItems)
+  
   useEffect(() => {
-    if (pairItems.length === 0) {
-      setPairItems(extractedPairItems)
-
-      const ca = crbs.find(crb =>
-        crb.metadata.name.includes(templateClusterResourceRolePrefix)
-      )
-      if (ca) {
-        if (ca.roleRef.name.endsWith('admin')) {
-          if (initialClusterAccess === null) {
-            setInitialClusterAccess('write')
-          }
-          setClusterAccess('write')
-        }
-
-        if (ca.roleRef.name.endsWith('read-only')) {
-          if (initialClusterAccess === null) {
-            setInitialClusterAccess('read')
-          }
-          setClusterAccess('read')
-        }
-      }
+    
+    // means that aggragatedRoleBindings is already bootstrapped
+    if (aggregatedRoleBindings.length !== 0) {
+      return;
     }
-  }, [crbs, initialClusterAccess, pairItems.length, extractedPairItems])
-
+    
+    // we proceed to bootstrap aggragatedRoleBindings
+    setAggregatedRoleBindings(extractedPairItems)
+    
+    // we bootstrap clusterRoleBinding value.
+    const clusterRoleBinding = crbs.find(crb => crb.metadata.name.includes(templateClusterResourceRolePrefix))
+    
+    
+    if (!clusterRoleBinding) {
+      return;
+    }
+    
+    
+    const clusterBindingAccessValue = getClusterBindindingAccessValue(clusterRoleBinding)
+    
+    // if null we don't set any state.
+    if (!clusterBindingAccessValue) {
+      return;
+    }
+    
+    // we bootstrap initialClusterAccess if its value is null
+    if (initialClusterAccess === null) {
+      setInitialClusterAccess(clusterBindingAccessValue)
+    }
+    
+    setClusterAccess(clusterBindingAccessValue)
+    
+  }, [crbs, initialClusterAccess, aggregatedRoleBindings.length, extractedPairItems])
+  
   async function handleUserDeletion() {
     setShowLoader(true)
+    
     await deleteUserResources()
-    await httpClient.post('/api/delete-user', {
-      username
-    })
+    
+    await httpRequests.userRequests.delete(username)
   }
-
+  
+  /**
+   * delete all the user-resources currently in the k8s cluster
+   */
   async function deleteUserResources() {
-    for await (const p of rbs) {
-      await httpClient.post('/api/delete-rolebinding', {
-        rolebindingName: p.metadata.name,
-        namespace: p.metadata.namespace
-      })
-    }
-
-    for await (const p of crbs) {
-      await httpClient.post('/api/delete-cluster-rolebinding', {
-        rolebindingName: p.metadata.name
-      })
-    }
+    await httpRequests.rolebindingRequests.delete.rolebinding(rbs);
+    await httpRequests.rolebindingRequests.delete.clusterRolebinding(crbs);
   }
+  
   async function handleSubmit(e) {
+    //we delete all the user resources.
     await deleteUserResources()
-    const consumed = []
-
-    for await (const p of pairItems) {
-      if (p.namespaces === 'ALL_NAMESPACES') {
-        const clusterRolebindingName =
-          username + '___' + p.template + 'all_namespaces'
-
-        if (!consumed.includes(clusterRolebindingName)) {
-          await httpClient.post('/api/create-cluster-rolebinding', {
-            roleName: p.template,
-            subjects: [
-              {
-                kind: 'ServiceAccount',
-                name: username,
-                namespace: 'permission-manager'
-              }
-            ],
-            clusterRolebindingName
-          })
-          consumed.push(clusterRolebindingName)
-        }
-      } else {
-        for await (const n of p.namespaces) {
-          const rolebindingName = username + '___' + p.template + '___' + n
-          if (!consumed.includes(rolebindingName)) {
-            await httpClient.post('/api/create-rolebinding', {
-              roleName: p.template,
-              generated_for_user: username,
-              namespace: n,
-              roleKind: 'ClusterRole',
-              subjects: [
-                {
-                  kind: 'ServiceAccount',
-                  name: username,
-                  namespace: 'permission-manager'
-                }
-              ],
-              rolebindingName
-            })
-            consumed.push(rolebindingName)
-          }
-        }
-      }
-    }
-
-    if (clusterAccess !== 'none') {
-      let template = ''
-      if (clusterAccess === 'read') {
-        template = templateClusterResourceRolePrefix + 'read-only'
-      }
-      if (clusterAccess === 'write') {
-        template = templateClusterResourceRolePrefix + 'admin'
-      }
-      const clusterRolebindingName = username + '___' + template
-      await httpClient.post('/api/create-cluster-rolebinding', {
-        generated_for_user: username,
-        roleName: template,
-        subjects: [
-          {
-            kind: 'ServiceAccount',
-            name: username,
-            namespace: 'permission-manager'
-          }
-        ],
-        clusterRolebindingName
-      })
-    }
+    
+    //we create the resources choosen in the UI
+    await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
+      aggregatedRoleBindings,
+      username,
+      clusterAccess
+    );
+    
     window.location.reload()
   }
-
-  const savePair = useCallback(p => {
-    setPairItems(state => {
+  
+  const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
+    setAggregatedRoleBindings(state => {
+      
       if (state.find(x => x.id === p.id)) {
-        return state.map(x => {
-          if (x.id === p.id) {
-            return p
-          }
-          return x
-        })
-      } else {
-        return [...state, p]
+        return state.map(x => x.id === p.id ? p : x)
       }
+      
+      return [...state, p]
+      
     })
   }, [])
-
+  
   const addEmptyPair = useCallback(() => {
-    setPairItems(state => {
-      return [...state, { id: uuid.v4(), namespaces: [], template: '' }]
-    })
+    setAggregatedRoleBindings(state => [...state, {id: uuid.v4(), namespaces: [], roleName: ''}])
   }, [])
-
-  const saveButtonDisabled =
-    pairItems.length === 0 || pairItems.some(p => p.namespaces.length === 0)
-
+  
+  const saveButtonDisabled = aggregatedRoleBindings.length === 0 || aggregatedRoleBindings.some(p => p.namespaces.length === 0)
+  
   if (crbs && crbs.length === 0 && rbs && rbs.length === 0) {
     return <div>...loading</div>
   }
-
+  
   return (
     <div>
-      {showLoader && <FullScreenLoader />}
-
+      {showLoader && <FullScreenLoader/>}
+      
       <div className="flex content-between items-center mb-4">
         <h2 className="text-3xl text-gray-800">
           User: <span data-testid="username-heading">{username}</span>
@@ -197,7 +156,7 @@ export default function EditUser({ user }: EditUserParameters) {
               const confirmed = window.confirm(
                 `Confirm deletion of User ${username}`
               )
-
+              
               if (confirmed) {
                 handleUserDeletion().then(async () => {
                   await refreshUsers()
@@ -210,7 +169,7 @@ export default function EditUser({ user }: EditUserParameters) {
           </button>
         </div>
       </div>
-
+      
       <form
         onSubmit={e => {
           e.preventDefault()
@@ -220,20 +179,20 @@ export default function EditUser({ user }: EditUserParameters) {
       >
         <div className="mb-6">
           <Templates
-            pairItems={pairItems}
+            pairItems={aggregatedRoleBindings}
             savePair={savePair}
-            setPairItems={setPairItems}
+            setPairItems={setAggregatedRoleBindings}
             addEmptyPair={addEmptyPair}
           />
         </div>
-
+        
         <ClusterAccessRadio
           clusterAccess={clusterAccess}
           setClusterAccess={setClusterAccess}
         />
-
-        <hr className="my-6" />
-
+        
+        <hr className="my-6"/>
+        
         <button
           className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
             saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
@@ -244,11 +203,11 @@ export default function EditUser({ user }: EditUserParameters) {
           save
         </button>
       </form>
-
-      {pairItems.length > 0 && pairItems.some(p => p.namespaces.length > 0) ? (
+      
+      {aggregatedRoleBindings.length > 0 && aggregatedRoleBindings.some(p => p.namespaces.length > 0) ? (
         <>
-          <div className="mt-12 mb-4" />
-          <Summary pairItems={pairItems}></Summary>
+          <div className="mt-12 mb-4"/>
+          <Summary pairItems={aggregatedRoleBindings}/>
         </>
       ) : null}
     </div>

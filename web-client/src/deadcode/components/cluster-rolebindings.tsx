@@ -1,9 +1,9 @@
-import React, {useCallback, useState, useEffect} from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 import uuid from 'uuid'
 import {ClusterRoleBinding, RoleBinding as RoleBindingType, Subject, useRbac} from '../../hooks/useRbac'
 import {useUsers} from '../../hooks/useUsers'
 import {ClusterRoleSelect} from './cluster-role-select'
-import {httpClient} from '../../services/httpClient'
+import {httpRequests} from "../../services/httpRequests";
 
 export default () => {
   const {refreshRbacData, clusterRoleBindings} = useRbac()
@@ -60,21 +60,15 @@ function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingTyp
   const [, setShowMore] = useState(false)
   
   async function deleteRoleBinding(e) {
+    
     // we check if its a rolebinding
-    if ("namespace" in rb.metadata) {
-      await httpClient.post('/api/delete-rolebinding', {
-        rolebindingName: rb.metadata.name,
-        namespace: rb.metadata.namespace
-      })
-      fetchData()
-      return
-    }
+    if ("namespace" in rb.metadata) await httpRequests.rolebindingRequests.delete.rolebinding([(rb as RoleBindingType)])
     //cluster role binding case
-    await httpClient.post('/api/delete-cluster-rolebinding', {
-      rolebindingName: rb.metadata.name,
-    })
+    else await httpRequests.rolebindingRequests.delete.clusterRolebinding([rb])
+    
     
     fetchData()
+    return;
   }
   
   return (
@@ -115,14 +109,16 @@ function NewClusterRoleBindingForm({fetchData}) {
   
   async function onSubmit(e) {
     e.preventDefault()
-    await httpClient.post('/api/create-cluster-rolebinding', {
-      roleName,
+    
+    await httpRequests.rolebindingRequests.create.clusterRolebinding({
       subjects: subjects.map(s => ({
         ...s,
         namespace: 'permission-manager'
       })),
-      clusterRolebindingName
+      roleName,
+      clusterRolebindingName,
     })
+    
     fetchData()
   }
   
@@ -159,10 +155,10 @@ function NewClusterRoleBindingForm({fetchData}) {
   )
 }
 
-function SubjectList({subjects, setSubjects}: {subjects: Subject[], setSubjects(state: any): void}) {
- 
+function SubjectList({subjects, setSubjects}: { subjects: Subject[], setSubjects(state: any): void }) {
+  
   const addSubject = s => setSubjects(state => [...state, s])
- 
+  
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
   

@@ -10,7 +10,7 @@ interface TemplatesParameters extends AggregatedRoleBindingManager {
 export default function Templates({pairItems, savePair, setPairItems, addEmptyPair}: TemplatesParameters) {
   const lastPair = pairItems[pairItems.length - 1]
   const addButtonDisabled =
-    lastPair && lastPair.template && lastPair.namespaces.length === 0
+    lastPair && lastPair.roleName && lastPair.namespaces.length === 0
   
   return (
     <div>

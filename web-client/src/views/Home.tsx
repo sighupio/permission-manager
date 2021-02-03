@@ -1,6 +1,6 @@
 import React from 'react'
-import { useUsers } from '../hooks/useUsers'
-import { Link } from 'react-router-dom'
+import {useUsers} from '../hooks/useUsers'
+import {Link} from 'react-router-dom'
 
 export default function Home() {
   const { users, loading, loaded } = useUsers()
