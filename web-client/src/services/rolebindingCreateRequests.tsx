@@ -119,9 +119,9 @@ export class RolebindingCreateRequests {
     return await this.httpCreateClusterRolebinding(params)
   }
   
-
+  
   /**
-   * Handles the creation of:
+   * Uses an aggregatedRoleBinding to handle the creation of:
    * a) ClusterRoleBindings
    * b) Rolebindings
    * @param aggregatedRoleBindings
@@ -143,40 +143,44 @@ export class RolebindingCreateRequests {
     
     // we grab all the 'ALL_NAMESPACE' rolebindings and create them on the backend
     for (const allNamespaceRolebinding of aggregatedRoleBindings.filter(e => e.namespaces === 'ALL_NAMESPACES')) {
+      // we construct the resource name
       const clusterRolebindingName = username + '___' + allNamespaceRolebinding.roleName + 'all_namespaces'
       
-      if (!consumed.includes(clusterRolebindingName)) {
-        
-        await this.rolebindingAllNamespaces({
-          clusterRolebindingName: clusterRolebindingName,
-          // addGeneratedForUser: false,
-          roleName: allNamespaceRolebinding.roleName,
-          // username: params.username,
-          subjects: subjects
-        })
-        
-        consumed.push(clusterRolebindingName)
-      }
+      // means that we already created the resource
+      if (consumed.includes(clusterRolebindingName)) continue;
+      
+      await this.rolebindingAllNamespaces({
+        clusterRolebindingName: clusterRolebindingName,
+        // addGeneratedForUser: false,
+        roleName: allNamespaceRolebinding.roleName,
+        // username: params.username,
+        subjects: subjects
+      })
+      
+      consumed.push(clusterRolebindingName)
     }
     
     // we grab all the namespaced rolebinding and create them on the backend
     for (const namespacedRoleBinding of aggregatedRoleBindings.filter(e => e.namespaces !== 'ALL_NAMESPACES')) {
       for (const namespace of namespacedRoleBinding.namespaces) {
         
+        // we construct the resource name
         const rolebindingName = username + '___' + namespacedRoleBinding.roleName + '___' + namespace
+       
+        // means that we already created the resource
+        if (consumed.includes(rolebindingName)) continue;
         
-        if (!consumed.includes(rolebindingName)) {
-          await this.rolebinding({
-            roleName: namespacedRoleBinding.roleName,
-            username: username,
-            namespace: namespace,
-            roleBindingName: rolebindingName,
-            subjects: subjects,
-            roleKind: 'ClusterRole'
-          });
-          
-          consumed.push(rolebindingName)
-        }
+        await this.rolebinding({
+          roleName: namespacedRoleBinding.roleName,
+          username: username,
+          namespace: namespace,
+          roleBindingName: rolebindingName,
+          subjects: subjects,
+          roleKind: 'ClusterRole'
+        });
+        
+        consumed.push(rolebindingName)
+        
       }
     }
     
