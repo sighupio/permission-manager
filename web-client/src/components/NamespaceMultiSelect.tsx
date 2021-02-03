@@ -12,30 +12,27 @@ interface NamespaceMultiSelectArguments {
   /**
    * namespaces
    */
- readonly value: string[],
- readonly disabled: boolean,
- readonly placeholder: string
+  readonly value: string[],
+  readonly disabled: boolean,
+  readonly placeholder: string
 }
 
 export default function NamespaceMultiSelect({onSelect, value, disabled, placeholder}: NamespaceMultiSelectArguments) {
   const {namespaceList} = useNamespaceList()
   
-  const options = namespaceList
-    .filter(ns => !ns.metadata.name.startsWith('kube'))
+  const options = disabled ? [] : namespaceList
     .map(ns => {
       return {value: ns.metadata.name, label: ns.metadata.name}
     })
   
   return (
     <Select
-      value={value.map(ns => {
-        return {value: ns, label: ns}
-      })}
+      value={value.map(ns => ({value: ns, label: ns}))}
       closeMenuOnSelect={false}
       isMulti
       placeholder={placeholder}
       isDisabled={disabled}
-      options={disabled ? [] : options}
+      options={options}
       hideSelectedOptions={false}
       onChange={vs => {
         if (!vs) {
