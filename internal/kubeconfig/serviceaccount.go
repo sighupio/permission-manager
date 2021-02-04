@@ -28,13 +28,13 @@ func getServiceAccountToken(ctx context.Context, c clientset.Interface, name str
 		log.Printf("Service Account not created: %v", err)
 	}
 
-	// check for errors
-	_, _, err = getReferencedServiceAccountToken(c.(*clientset.Clientset), ns, name, true)
+	// get service account token
+	_, token, err = getReferencedServiceAccountToken(c.(*clientset.Clientset), ns, name, true)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return
+	return token
 }
 
 //todo refactor
