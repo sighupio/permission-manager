@@ -18,12 +18,15 @@ type ErrorRes struct {
 	Error string `json:"error"`
 }
 
+type OkRes struct {
+	Ok bool `json:"ok"`
+}
+
 func listUsers(us resources.UserService) echo.HandlerFunc {
-	type response = []resources.User
 	return func(c echo.Context) error {
 		users := us.GetAllUsers(c.Request().Context())
-		var r response = users
-		return c.JSON(http.StatusOK, r)
+
+		return c.JSON(http.StatusOK, users)
 	}
 }
 
@@ -55,9 +58,6 @@ func deleteUser(us resources.UserService) echo.HandlerFunc {
 		type Request struct {
 			Username string `json:"username" validate:"required"`
 		}
-		type Response struct {
-			Ok bool `json:"ok"`
-		}
 
 		r := new(Request)
 		if err := c.Bind(r); err != nil {
@@ -68,7 +68,7 @@ func deleteUser(us resources.UserService) echo.HandlerFunc {
 		}
 
 		us.DeleteUser(c.Request().Context(), r.Username)
-		return c.JSON(http.StatusOK, Response{Ok: true})
+		return c.JSON(http.StatusOK, OkRes{Ok: true})
 	}
 }
 
@@ -136,18 +136,18 @@ func CreateClusterRole(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
-
-	ac.Kubeclient.RbacV1().ClusterRoles().Create(c.Request().Context(), &rbacv1.ClusterRole{
+	_, err := ac.Kubeclient.RbacV1().ClusterRoles().Create(c.Request().Context(), &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.RoleName,
 		},
 		Rules: r.Rules,
 	}, metav1.CreateOptions{})
 
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func CreateRolebinding(c echo.Context) error {
@@ -168,11 +168,7 @@ func CreateRolebinding(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
-
-	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(c.Request().Context(), &rbacv1.RoleBinding{
+	_, err := ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(c.Request().Context(), &rbacv1.RoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      r.RolebindingName,
 			Namespace: r.Namespace,
@@ -186,7 +182,11 @@ func CreateRolebinding(c echo.Context) error {
 		Subjects: r.Subjects,
 	}, metav1.CreateOptions{})
 
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func createClusterRolebinding(c echo.Context) error {
@@ -202,10 +202,6 @@ func createClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
-
 	ac.Kubeclient.RbacV1().ClusterRoleBindings().Create(c.Request().Context(), &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:   r.ClusterRolebindingName,
@@ -219,7 +215,7 @@ func createClusterRolebinding(c echo.Context) error {
 		Subjects: r.Subjects,
 	}, metav1.CreateOptions{})
 
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func deleteClusterRole(c echo.Context) error {
@@ -227,9 +223,6 @@ func deleteClusterRole(c echo.Context) error {
 	type Request struct {
 		RoleName string `json:"roleName" validate:"required"`
 	}
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
 
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
@@ -239,8 +232,13 @@ func deleteClusterRole(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().ClusterRoles().Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	err := ac.Kubeclient.RbacV1().ClusterRoles().Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func deleteClusterRolebinding(c echo.Context) error {
@@ -248,9 +246,6 @@ func deleteClusterRolebinding(c echo.Context) error {
 	type Request struct {
 		RolebindingName string `json:"rolebindingName"`
 	}
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
 
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
@@ -260,8 +255,13 @@ func deleteClusterRolebinding(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	err := ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func deleteRole(c echo.Context) error {
@@ -271,9 +271,6 @@ func deleteRole(c echo.Context) error {
 		RoleName  string `json:"roleName" validate:"required"`
 		Namespace string `json:"namespace" validate:"required"`
 	}
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
 
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
@@ -283,8 +280,13 @@ func deleteRole(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	err := ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func deleteRolebinding(c echo.Context) error {
@@ -293,9 +295,6 @@ func deleteRolebinding(c echo.Context) error {
 		RolebindingName string `json:"rolebindingName" validate:"required"`
 		Namespace       string `json:"namespace" validate:"required"`
 	}
-	type Response struct {
-		Ok bool `json:"ok"`
-	}
 
 	r := new(Request)
 	if err := c.Bind(r); err != nil {
@@ -305,8 +304,13 @@ func deleteRolebinding(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
-	return c.JSON(http.StatusOK, Response{Ok: true})
+	err := ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
+
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
 func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.HandlerFunc {
@@ -361,10 +365,12 @@ func (frw *FallbackResponseWriter) Write(b []byte) (int, error) {
 
 // WriteHeader sends statusCode to wrapped response writer
 func (frw *FallbackResponseWriter) WriteHeader(statusCode int) {
+
 	if statusCode == http.StatusNotFound {
 		frw.FileNotFound = true
 		return
 	}
+
 	frw.WrappedResponseWriter.WriteHeader(statusCode)
 }
 

@@ -24,6 +24,8 @@ type UserService interface {
 
 const resourceURL = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers"
 
+const resourcePrefix = "permissionmanager.user."
+
 // GetAllUsers returns the list of Users defined in the K8s cluster.
 func (r *resourcesService) GetAllUsers(ctx context.Context) []User {
 	users := []User{}
@@ -77,7 +79,7 @@ func (r *resourcesService) GetAllUsers(ctx context.Context) []User {
 // CreateUser adds a new User with the given username to the K8s cluster
 // creating a new PermissionManagerUser CRD object.
 func (r *resourcesService) CreateUser(ctx context.Context, username string) User {
-	metadataName := "permissionmanager.user." + username
+	metadataName := resourcePrefix + username
 	jsonPayload := fmt.Sprintf(`{
 		"apiVersion":"permissionmanager.user/v1alpha1",
 		"kind":"Permissionmanageruser",
@@ -100,7 +102,7 @@ func (r *resourcesService) CreateUser(ctx context.Context, username string) User
 // DeleteUser delete an existing User from the K8s cluster removing
 // the PermissionManagerUser CRD object associated to the user with the given username.
 func (r *resourcesService) DeleteUser(ctx context.Context, username string) {
-	metadataName := "permissionmanager.user." + username
+	metadataName := resourcePrefix + username
 	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(resourceURL + "/" + metadataName).DoRaw(ctx)
 	if err != nil {
 		log.Printf("Failed to delete user:%s\n %v\n", username, err)

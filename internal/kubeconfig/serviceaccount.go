@@ -28,8 +28,8 @@ func getServiceAccountToken(ctx context.Context, c clientset.Interface, name str
 		log.Printf("Service Account not created: %v", err)
 	}
 
-	// Get token
-	_, token, err = getReferencedServiceAccountToken(c.(*clientset.Clientset), ns, name, true)
+	// check for errors
+	_, _, err = getReferencedServiceAccountToken(c.(*clientset.Clientset), ns, name, true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,6 +37,7 @@ func getServiceAccountToken(ctx context.Context, c clientset.Interface, name str
 	return
 }
 
+//todo refactor
 func getReferencedServiceAccountToken(c *clientset.Clientset, ns string, name string, shouldWait bool) (string, string, error) {
 	tokenName := ""
 	token := ""

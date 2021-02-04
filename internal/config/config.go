@@ -12,27 +12,22 @@ type Config struct {
 }
 
 func New() *Config {
-	cfg := &Config{}
+	cfg := &Config{
+		ClusterName:                os.Getenv("CLUSTER_NAME"),
+		ClusterControlPlaceAddress: os.Getenv("CLUSTER_NAME"),
+		Port:                       os.Getenv("PORT"),
+	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
+	if cfg.Port == "" {
 		log.Fatal("PORT env cannot be empty")
-	} else {
-		cfg.Port = port
 	}
 
-	clusterName := os.Getenv("CLUSTER_NAME")
-	if clusterName == "" {
+	if cfg.ClusterName == "" {
 		log.Fatal("CLUSTER_NAME env cannot be empty")
-	} else {
-		cfg.ClusterName = clusterName
 	}
 
-	clusterControlPlaceAddress := os.Getenv("CONTROL_PLANE_ADDRESS")
-	if clusterControlPlaceAddress == "" {
+	if cfg.ClusterControlPlaceAddress == "" {
 		log.Fatal("CONTROL_PLANE_ADDRESS env cannot be empty")
-	} else {
-		cfg.ClusterControlPlaceAddress = clusterControlPlaceAddress
 	}
 
 	return cfg

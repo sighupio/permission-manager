@@ -9,9 +9,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
 	retry "github.com/avast/retry-go"
@@ -149,21 +147,11 @@ func createCSR(username string, privateKey *rsa.PrivateKey) []byte {
 func getCaBase64() string {
 
 	config, err := runtime.GetConfig()
+
 	if err != nil {
 		log.Fatalf("Unable to get kubeconfig.\n%v", err)
 	}
 
-	// todo refactor after local development MVP.
-	// we extract the config.CAData directly. Could bring unwanted changes in production
-	if os.Getenv("IS_LOCAL_DEVELOPMENT") == "true" && len(config.CAData) != 0 {
-		return base64.StdEncoding.EncodeToString(config.CAData)
-	}
+	return base64.StdEncoding.EncodeToString(config.CAData)
 
-	//todo why it is read from CAFILE?
-	CAData, err := ioutil.ReadFile(config.CAFile)
-	if err != nil {
-		log.Fatalf("Unable to read kubeconfig file.\n%v", err)
-	}
-
-	return base64.StdEncoding.EncodeToString(CAData)
 }
