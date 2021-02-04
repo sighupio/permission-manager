@@ -14,7 +14,7 @@ type Config struct {
 func New() *Config {
 	cfg := &Config{
 		ClusterName:                os.Getenv("CLUSTER_NAME"),
-		ClusterControlPlaceAddress: os.Getenv("CLUSTER_NAME"),
+		ClusterControlPlaceAddress: os.Getenv("CONTROL_PLANE_ADDRESS"),
 		Port:                       os.Getenv("PORT"),
 	}
 
