@@ -99,6 +99,7 @@ export default function EditUser({user}: EditUserParameters) {
    * delete all the user-resources currently in the k8s cluster
    */
   async function deleteUserResources() {
+    
     await httpRequests.rolebindingRequests.delete.rolebinding(rbs);
     await httpRequests.rolebindingRequests.delete.clusterRolebinding(crbs);
   }
