@@ -53,6 +53,7 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
     
     if (name.length === 0) return false
     
+    // the first split always contains the name of the user
     return name[0] === username
   })
   
@@ -61,6 +62,7 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
     
     if (name.length === 0) return false
     
+    // the first split always contains the name of the user
     return name[0] === username
   })
   
