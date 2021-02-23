@@ -49,21 +49,21 @@ export interface ExtractedUserRoles {
  */
 export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], username: string): ExtractedUserRoles {
   const rbs = (roleBindings || []).filter(rb => {
-    const name = rb.metadata.name.split(resourceSeparator);
+    const separatedResourceName = rb.metadata.name.split(resourceSeparator);
     
-    if (name.length === 0) return false
+    if (separatedResourceName.length === 0) return false
     
     // the first split always contains the name of the user
-    return name[0] === username
+    return separatedResourceName[0] === username
   })
   
   const crbs = (clusterRoleBindings || []).filter(crb => {
-    const name = crb.metadata.name.split(resourceSeparator);
+    const separatedResourceName = crb.metadata.name.split(resourceSeparator);
     
-    if (name.length === 0) return false
+    if (separatedResourceName.length === 0) return false
     
     // the first split always contains the name of the user
-    return name[0] === username
+    return separatedResourceName[0] === username
   })
   
   const normalizedRoleBindings: NormalizedRoleBinding[] = [...rbs, ...crbs]
