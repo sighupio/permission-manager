@@ -63,6 +63,9 @@ export const VERBS = [
   'delete',
 ]
 
-export const templateNamespacedResourceRolePrefix = 'template-namespaced-resources___'
+export const resourceSeparator = '___'
 
-export const templateClusterResourceRolePrefix = 'template-cluster-resources___'
+export const templateNamespacedResourceRolePrefix = 'template-namespaced-resources' + resourceSeparator
+
+export const templateClusterResourceRolePrefix = 'template-cluster-resources' + resourceSeparator
+

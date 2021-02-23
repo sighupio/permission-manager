@@ -1,4 +1,4 @@
-import {templateClusterResourceRolePrefix} from "../constants";
+import {resourceSeparator, templateClusterResourceRolePrefix} from "../constants";
 import {ClusterAccess} from "../components/types";
 import {AxiosInstance, AxiosResponse} from "axios";
 import {AggregatedRoleBinding} from "./role";
@@ -144,7 +144,7 @@ export class RolebindingCreateRequests {
     // we grab all the 'ALL_NAMESPACE' rolebindings and create them on the backend
     for (const allNamespaceRolebinding of aggregatedRoleBindings.filter(e => e.namespaces === 'ALL_NAMESPACES')) {
       // we construct the resource name
-      const clusterRolebindingName = username + '___' + allNamespaceRolebinding.roleName + 'all_namespaces'
+      const clusterRolebindingName = username + resourceSeparator + allNamespaceRolebinding.roleName + 'all_namespaces'
       
       // means that we already created the resource
       if (consumed.includes(clusterRolebindingName)) continue;
@@ -165,8 +165,8 @@ export class RolebindingCreateRequests {
       for (const namespace of namespacedRoleBinding.namespaces) {
         
         // we construct the resource name
-        const rolebindingName = username + '___' + namespacedRoleBinding.roleName + '___' + namespace
-       
+        const rolebindingName = username + resourceSeparator + namespacedRoleBinding.roleName + resourceSeparator + namespace
+        
         // means that we already created the resource
         if (consumed.includes(rolebindingName)) continue;
         
@@ -191,9 +191,9 @@ export class RolebindingCreateRequests {
       return;
     }
     
-    const roleName = username + '___' + this.getRoleName(clusterAccess);
+    const roleName = username + resourceSeparator + this.getRoleName(clusterAccess);
     
-    const clusterRolebindingName = username + '___' + roleName
+    const clusterRolebindingName = username + resourceSeparator + roleName
     
     //todo this must be changed in the future to support dynamic cluster roles. Right now it's just a single api call based on a radio select
     await this.clusterRolebinding({

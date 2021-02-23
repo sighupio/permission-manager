@@ -101,7 +101,9 @@ func (r *resourcesService) CreateUser(ctx context.Context, username string) User
 // the PermissionManagerUser CRD object associated to the user with the given username.
 func (r *resourcesService) DeleteUser(ctx context.Context, username string) {
 	metadataName := "permissionmanager.user." + username
+
 	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(resourceURL + "/" + metadataName).DoRaw(ctx)
+
 	if err != nil {
 		log.Printf("Failed to delete user:%s\n %v\n", username, err)
 	}
