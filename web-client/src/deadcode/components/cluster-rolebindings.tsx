@@ -115,7 +115,7 @@ function NewClusterRoleBindingForm({fetchData}) {
         ...s,
         namespace: 'permission-manager'
       })),
-      roleName,
+      template: roleName,
       clusterRolebindingName,
     })
     
