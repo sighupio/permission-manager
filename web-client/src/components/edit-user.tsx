@@ -131,7 +131,7 @@ export default function EditUser({user}: EditUserParameters) {
   }, [])
   
   const addEmptyPair = useCallback(() => {
-    setAggregatedRoleBindings(state => [...state, {id: uuid.v4(), namespaces: [], roleName: ''}])
+    setAggregatedRoleBindings(state => [...state, {id: uuid.v4(), namespaces: [], template: ''}])
   }, [])
   
   const saveButtonDisabled = aggregatedRoleBindings.length === 0 || aggregatedRoleBindings.some(p => p.namespaces.length === 0)

@@ -29,9 +29,10 @@ export interface AggregatedRoleBinding {
   
   readonly namespaces: AggregatedRoleBindingNamespace
   /**
+   * DO NOT REFACTOR THIS NAME
    * example: template-namespaced-resources___developer
    */
-  readonly roleName: string
+  readonly template: string
 }
 
 

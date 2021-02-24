@@ -7,9 +7,10 @@ import {Subject} from "../hooks/useRbac";
 
 interface RoleCreate {
   /**
+   * DO NOT REFACTOR THIS NAME
    * rolename
    */
-  readonly roleName: string,
+  readonly template: string,
   /**
    * this field adds generated_for_user to the http request
    */
@@ -61,7 +62,7 @@ export class RolebindingCreateRequests {
    */
   private async httpCreateClusterRolebinding(params: ClusterRolebindingCreate) {
     const request = {
-      roleName: params.roleName,
+      roleName: params.template,
       subjects: params.subjects,
       clusterRolebindingName: params.clusterRolebindingName
     };
@@ -83,7 +84,7 @@ export class RolebindingCreateRequests {
     
     return await this.httpCreateClusterRolebinding({
       clusterRolebindingName: params.clusterRolebindingName,
-      roleName: params.roleName,
+      template: params.template,
       username: params.username,
       subjects: params.subjects
     })
@@ -96,7 +97,7 @@ export class RolebindingCreateRequests {
    */
   public async rolebinding(params: RolebindingCreate) {
     const request = {
-      roleName: params.roleName,
+      roleName: params.template,
       namespace: params.namespace,
       roleKind: params.roleKind,
       subjects: params.subjects,
@@ -144,7 +145,7 @@ export class RolebindingCreateRequests {
     // we grab all the 'ALL_NAMESPACE' rolebindings and create them on the backend
     for (const allNamespaceRolebinding of aggregatedRoleBindings.filter(e => e.namespaces === 'ALL_NAMESPACES')) {
       // we construct the resource name
-      const clusterRolebindingName = username + resourceSeparator + allNamespaceRolebinding.roleName + 'all_namespaces'
+      const clusterRolebindingName = username + resourceSeparator + allNamespaceRolebinding.template + 'all_namespaces'
       
       // means that we already created the resource
       if (consumed.includes(clusterRolebindingName)) continue;
@@ -152,7 +153,7 @@ export class RolebindingCreateRequests {
       await this.rolebindingAllNamespaces({
         clusterRolebindingName: clusterRolebindingName,
         // addGeneratedForUser: false,
-        roleName: allNamespaceRolebinding.roleName,
+        template: allNamespaceRolebinding.template,
         // username: params.username,
         subjects: subjects
       })
@@ -165,13 +166,13 @@ export class RolebindingCreateRequests {
       for (const namespace of namespacedRoleBinding.namespaces) {
         
         // we construct the resource name
-        const rolebindingName = username + resourceSeparator + namespacedRoleBinding.roleName + resourceSeparator + namespace
+        const rolebindingName = username + resourceSeparator + namespacedRoleBinding.template + resourceSeparator + namespace
         
         // means that we already created the resource
         if (consumed.includes(rolebindingName)) continue;
         
         await this.rolebinding({
-          roleName: namespacedRoleBinding.roleName,
+          template: namespacedRoleBinding.template,
           username: username,
           namespace: namespace,
           roleBindingName: rolebindingName,
@@ -197,7 +198,7 @@ export class RolebindingCreateRequests {
     
     //todo this must be changed in the future to support dynamic cluster roles. Right now it's just a single api call based on a radio select
     await this.clusterRolebinding({
-      roleName: roleName,
+      template: roleName,
       clusterRolebindingName: clusterRolebindingName,
       // username: params.username,
       // addGeneratedForUser: false,
