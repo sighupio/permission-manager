@@ -32,7 +32,7 @@ spec:
       serviceAccountName: permission-manager
       containers:
         - name: permission-manager
-          image: quay.io/sighup/permission-manager:v1.7.0-rc2
+          image: quay.io/sighup/permission-manager:v1.7.0-rc3
           ports:
             - containerPort: 4000
           envFrom:
