@@ -192,7 +192,7 @@ export class RolebindingCreateRequests {
       return;
     }
     
-    const roleName = username + resourceSeparator + this.getRoleName(clusterAccess);
+    const roleName = this.getRoleName(clusterAccess);
     
     const clusterRolebindingName = username + resourceSeparator + roleName
     
