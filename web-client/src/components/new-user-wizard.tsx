@@ -104,7 +104,7 @@ export default function NewUserWizard() {
   }, [])
   
   const addEmptyPair = useCallback(() => {
-    setAggregatedRoleBindings(state => [...state, {id: uuid.v4(), namespaces: [], roleName: ''}])
+    setAggregatedRoleBindings(state => [...state, {id: uuid.v4(), namespaces: [], template: ''}])
   }, [])
   
   useEffect(addEmptyPair, [])

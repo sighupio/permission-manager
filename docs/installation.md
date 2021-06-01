@@ -30,9 +30,9 @@ stringData:
 
 - Then apply:
 ```
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.6.0/crd.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.6.0/seed.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.6.0/deploy.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.7.0-rc3/crd.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.7.0-rc3/seed.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.7.0-rc3/deploy.yml
 ```
 
 ## Basic auth

@@ -98,7 +98,7 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
     
     await httpRequests.rolebindingRequests.create.rolebinding({
       namespace,
-      roleName,
+      template: roleName,
       roleBindingName: rolebindingName,
       roleKind,
       subjects: subjects.map(s => ({

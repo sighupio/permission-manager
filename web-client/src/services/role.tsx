@@ -1,4 +1,4 @@
-import {templateClusterResourceRolePrefix} from "../constants";
+import {resourceSeparator, templateClusterResourceRolePrefix} from "../constants";
 import uuid from "uuid";
 import {ClusterRoleBinding, RoleBinding} from "../hooks/useRbac";
 
@@ -29,9 +29,10 @@ export interface AggregatedRoleBinding {
   
   readonly namespaces: AggregatedRoleBindingNamespace
   /**
+   * DO NOT REFACTOR THIS NAME
    * example: template-namespaced-resources___developer
    */
-  readonly roleName: string
+  readonly template: string
 }
 
 
@@ -49,11 +50,21 @@ export interface ExtractedUserRoles {
  */
 export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], username: string): ExtractedUserRoles {
   const rbs = (roleBindings || []).filter(rb => {
-    return rb.metadata.name.startsWith(username)
+    const separatedResourceName = rb.metadata.name.split(resourceSeparator);
+    
+    if (separatedResourceName.length === 0) return false
+    
+    // the first split always contains the name of the user
+    return separatedResourceName[0] === username
   })
   
   const crbs = (clusterRoleBindings || []).filter(crb => {
-    return crb.metadata.name.startsWith(username)
+    const separatedResourceName = crb.metadata.name.split(resourceSeparator);
+    
+    if (separatedResourceName.length === 0) return false
+    
+    // the first split always contains the name of the user
+    return separatedResourceName[0] === username
   })
   
   const normalizedRoleBindings: NormalizedRoleBinding[] = [...rbs, ...crbs]
