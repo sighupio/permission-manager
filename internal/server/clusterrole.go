@@ -70,13 +70,13 @@ func deleteClusterRolebinding(c echo.Context) error {
 		return err
 	}
 	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	err := ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
 
 	if err != nil {
-		panic(err.Error())
+		return err
 	}
 
 	return c.JSON(http.StatusOK, OkRes{Ok: true})
@@ -94,7 +94,7 @@ func createClusterRole(c echo.Context) error {
 		return err
 	}
 	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	_, err := ac.Kubeclient.RbacV1().ClusterRoles().Create(c.Request().Context(), &rbacv1.ClusterRole{
@@ -105,7 +105,7 @@ func createClusterRole(c echo.Context) error {
 	}, metav1.CreateOptions{})
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{Error: err.Error()})
+		return err
 	}
 
 	return c.JSON(http.StatusOK, OkRes{Ok: true})

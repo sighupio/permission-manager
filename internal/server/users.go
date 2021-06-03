@@ -28,9 +28,11 @@ func createUser(us resources.UserService) echo.HandlerFunc {
 		if err := c.Bind(r); err != nil {
 			return err
 		}
+
 		if err := c.Validate(r); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 		}
+
 		if !isValidUsername(r.Name) {
 			return c.JSON(http.StatusBadRequest, ErrorRes{invalidUsernameError})
 		}
@@ -57,7 +59,7 @@ func deleteUser(us resources.UserService) echo.HandlerFunc {
 			return err
 		}
 		if err := c.Validate(r); err != nil {
-			return c.JSON(http.StatusBadRequest, err)
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 		}
 
 		err := us.DeleteUser(c.Request().Context(), r.Username)

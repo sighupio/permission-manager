@@ -21,7 +21,7 @@ func deleteRole(c echo.Context) error {
 	}
 
 	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	err := ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
@@ -45,7 +45,7 @@ func deleteRolebinding(c echo.Context) error {
 		return err
 	}
 	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	err := ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
@@ -72,7 +72,7 @@ func createRolebinding(c echo.Context) error {
 		return err
 	}
 	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
 	_, err := ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(c.Request().Context(), &rbacv1.RoleBinding{
@@ -90,7 +90,7 @@ func createRolebinding(c echo.Context) error {
 	}, metav1.CreateOptions{})
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, ErrorRes{Error: err.Error()})
+		return err
 	}
 
 	return c.JSON(http.StatusOK, OkRes{Ok: true})
