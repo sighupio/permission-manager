@@ -62,11 +62,11 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 	api.GET("/list-users", listUsers(resourcesService))
 	api.GET("/list-namespace", ListNamespaces(resourcesService))
-	api.GET("/rbac", ListRbac)
+	api.GET("/rbac", listRbac)
 
-	api.POST("/create-cluster-role", CreateClusterRole)
+	api.POST("/create-cluster-role", createClusterRole)
 	api.POST("/create-user", createUser(resourcesService))
-	api.POST("/create-rolebinding", CreateRolebinding)
+	api.POST("/create-rolebinding", createRolebinding)
 	api.POST("/create-cluster-rolebinding", createClusterRolebinding)
 
 	/* should use DELETE method, using POST due to a weird bug that looks now resolved */
@@ -87,7 +87,7 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 		spaHandler := http.FileServer(statikFS)
 		/* allow every call to unknown paths to return index.html, this necessary when refreshing the browser at an url that is not backed by a real file but only a client route*/
-		e.Any("*", echo.WrapHandler(AddFallbackHandler(spaHandler.ServeHTTP, statikFS)))
+		e.Any("*", echo.WrapHandler(addFallbackHandler(spaHandler.ServeHTTP, statikFS)))
 	}
 
 	return e

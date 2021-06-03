@@ -16,7 +16,7 @@ type User struct {
 // UserService allows to manage the life-cycle of
 // Users defined in the managed K8s cluster.
 type UserService interface {
-	GetAllUsers(cxt context.Context) []User
+	GetAllUsers(cxt context.Context) ([]User, error)
 	DeleteUser(cxt context.Context, username string) error
 	CreateUser(cxt context.Context, username string) (User, error)
 }
@@ -25,76 +25,77 @@ const resourceURL = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers
 
 const resourcePrefix = "permissionmanager.user."
 
-// generated from the api-server JSON response, most of the fields are not used but useful as documentation
-type getAllUserResponse struct {
-	APIVersion string `json:"apiVersion"`
-	Items      []struct {
-		APIVersion string `json:"apiVersion"`
-		Kind       string `json:"kind"`
-		Metadata   struct {
-			Annotations struct {
-				KubectlKubernetesIoLastAppliedConfiguration string `json:"kubectl.kubernetes.io/last-applied-configuration"`
-			} `json:"annotations"`
-			CreationTimestamp time.Time `json:"creationTimestamp"`
-			Generation        int       `json:"generation"`
-			Name              string    `json:"name"`
-			ResourceVersion   string    `json:"resourceVersion"`
-			SelfLink          string    `json:"selfLink"`
-			UID               string    `json:"uid"`
-		} `json:"metadata"`
-		Spec struct {
-			Name string `json:"name"`
-		} `json:"spec"`
-	} `json:"items"`
-	Kind     string `json:"kind"`
-	Metadata struct {
-		Continue        string `json:"continue"`
-		ResourceVersion string `json:"resourceVersion"`
-		SelfLink        string `json:"selfLink"`
-	} `json:"metadata"`
-}
 
 // GetAllUsers returns the list of Users defined in the K8s cluster.
-func (r *resourcesService) GetAllUsers(ctx context.Context) []User {
+func (r *resourcesService) GetAllUsers(ctx context.Context) ([]User, error) {
 	var users []User
 
-	var res getAllUserResponse
 	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(resourceURL).DoRaw(ctx)
 
 	if err != nil {
 		log.Print("Failed to get users from k8s CRUD api", err)
+		return []User{}, err
 	}
 
-	err = json.Unmarshal(rawResponse, &res)
+	// generated from the api-server JSON response, most of the fields are not used but useful as documentation
+	var getAllUserResponse struct {
+		APIVersion string `json:"apiVersion"`
+		Items      []struct {
+			APIVersion string `json:"apiVersion"`
+			Kind       string `json:"kind"`
+			Metadata   struct {
+				Annotations struct {
+					KubectlKubernetesIoLastAppliedConfiguration string `json:"kubectl.kubernetes.io/last-applied-configuration"`
+				} `json:"annotations"`
+				CreationTimestamp time.Time `json:"creationTimestamp"`
+				Generation        int       `json:"generation"`
+				Name              string    `json:"name"`
+				ResourceVersion   string    `json:"resourceVersion"`
+				SelfLink          string    `json:"selfLink"`
+				UID               string    `json:"uid"`
+			} `json:"metadata"`
+			Spec struct {
+				Name string `json:"name"`
+			} `json:"spec"`
+		} `json:"items"`
+		Kind     string `json:"kind"`
+		Metadata struct {
+			Continue        string `json:"continue"`
+			ResourceVersion string `json:"resourceVersion"`
+			SelfLink        string `json:"selfLink"`
+		} `json:"metadata"`
+	}
+
+	err = json.Unmarshal(rawResponse, &getAllUserResponse)
 
 	if err != nil {
 		log.Print("Failed to decode users from k8s CRUD api", err)
+		return []User{}, err
 	}
 
-	for _, v := range res.Items {
+	for _, v := range getAllUserResponse.Items {
 		users = append(users, User{Name: v.Spec.Name})
 	}
 
-	return users
+	return users, nil
 }
 
-type createUserRequest struct {
-	APIVersion string `json:"apiVersion"`
-	Kind       string `json:"kind"`
-	MetaData   struct {
-		Name string `json:"name"`
-	} `json:"metadata"`
-	Spec struct {
-		Name string `json:"name"`
-	} `json:"spec"`
-}
 
 // CreateUser adds a new User with the given username to the K8s cluster
 // creating a new PermissionManagerUser CRD object. todo add error handling
 func (r *resourcesService) CreateUser(ctx context.Context, username string) (User, error) {
 	metadataName := resourcePrefix + username
 
-	jsonPayload, err := json.Marshal(createUserRequest{
+	var createUserRequest = struct {
+		APIVersion string `json:"apiVersion"`
+		Kind       string `json:"kind"`
+		MetaData   struct {
+			Name string `json:"name"`
+		} `json:"metadata"`
+		Spec struct {
+			Name string `json:"name"`
+		} `json:"spec"`
+	}{
 		APIVersion: "permissionmanager.user/v1alpha1",
 		Kind:       "Permissionmanageruser",
 		MetaData: struct {
@@ -107,7 +108,8 @@ func (r *resourcesService) CreateUser(ctx context.Context, username string) (Use
 		}{
 			Name: username,
 		},
-	})
+	}
+	jsonPayload, err := json.Marshal(createUserRequest)
 
 	if err != nil {
 		log.Printf("failed to serialize data")
