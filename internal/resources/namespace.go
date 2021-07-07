@@ -7,7 +7,7 @@ import (
 )
 
 // GetAllNamespaces lists all the Namespaces available in the K8s cluster.
-func (r *resourcesService) GetAllNamespaces(ctx context.Context) (names []string, err error) {
+func (r *resourceService) GetAllNamespaces(ctx context.Context) (names []string, err error) {
 	namespaces, err := r.kubeclient.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, err

@@ -5,35 +5,42 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
+	res "sighupio/permission-manager/internal/resources"
 )
 
-func createClusterRolebinding(c echo.Context) error {
-	ac := c.(*AppContext)
-	type Request struct {
-		ClusterRolebindingName string           `json:"clusterRolebindingName"`
-		Username               string           `json:"user"`
-		Subjects               []rbacv1.Subject `json:"subjects"`
-		RoleName               string           `json:"roleName"`
-	}
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
+func createClusterRolebinding(rs res.ResourceService) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		type Request struct {
+			ClusterRolebindingName string           `json:"clusterRolebindingName"`
+			Username               string           `json:"user"`
+			Subjects               []rbacv1.Subject `json:"subjects"`
+			RoleName               string           `json:"roleName"`
+		}
+		r := new(Request)
+		if err := c.Bind(r); err != nil {
+			return err
+		}
 
-	ac.Kubeclient.RbacV1().ClusterRoleBindings().Create(c.Request().Context(), &rbacv1.ClusterRoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:   r.ClusterRolebindingName,
-			Labels: map[string]string{"generated_for_user": r.Username},
-		},
-		RoleRef: rbacv1.RoleRef{
-			Kind:     "ClusterRole",
-			Name:     r.RoleName,
-			APIGroup: "rbac.authorization.k8s.io",
-		},
-		Subjects: r.Subjects,
-	}, metav1.CreateOptions{})
+		rbCreate := &rbacv1.ClusterRoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:   r.ClusterRolebindingName,
+				Labels: map[string]string{"generated_for_user": r.Username},
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind:     "ClusterRole",
+				Name:     r.RoleName,
+				APIGroup: "rbac.authorization.k8s.io",
+			},
+			Subjects: r.Subjects,
+		}
+		_, err := rs.CreateClusterRoleBinding(c.Request().Context(), rbCreate)
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, OkRes{Ok: true})
+	}
 }
 
 func deleteClusterRole(c echo.Context) error {
@@ -82,7 +89,6 @@ func deleteClusterRolebinding(c echo.Context) error {
 	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
-
 func createClusterRole(c echo.Context) error {
 	ac := c.(*AppContext)
 	type Request struct {
@@ -110,4 +116,3 @@ func createClusterRole(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
-

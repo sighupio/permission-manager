@@ -23,7 +23,7 @@ type AppContext struct {
 	Kubeclient kubernetes.Interface
 }
 
-func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService resources.ResourcesService) *echo.Echo {
+func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService resources.ResourceService) *echo.Echo {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 
@@ -66,14 +66,14 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 	api.POST("/create-cluster-role", createClusterRole)
 	api.POST("/create-user", createUser(resourcesService))
-	api.POST("/create-rolebinding", createRolebinding)
-	api.POST("/create-cluster-rolebinding", createClusterRolebinding)
+	api.POST("/create-rolebinding", createRoleBinding(resourcesService))
+	api.POST("/create-cluster-rolebinding", createClusterRolebinding(resourcesService))
 
 	/* should use DELETE method, using POST due to a weird bug that looks now resolved */
 	api.POST("/delete-cluster-role", deleteClusterRole)
 	api.POST("/delete-cluster-rolebinding", deleteClusterRolebinding)
-	api.POST("/delete-rolebinding", deleteRolebinding)
-	api.POST("/delete-role", deleteRole)
+	api.POST("/delete-rolebinding", deleteRolebinding(resourcesService))
+	api.POST("/delete-role", deleteRole(resourcesService))
 	api.POST("/delete-user", deleteUser(resourcesService))
 
 	api.POST("/create-kubeconfig", createKubeconfig(cfg.ClusterName, cfg.ClusterControlPlaceAddress))

@@ -41,7 +41,7 @@ func (frw *FallbackResponseWriter) WriteHeader(statusCode int) {
 }
 
 
-func ListNamespaces(rs resources.ResourcesService) echo.HandlerFunc {
+func ListNamespaces(rs resources.ResourceService) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		type Response struct {
 			Namespaces []string `json:"namespaces"`

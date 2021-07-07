@@ -5,93 +5,104 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
+	res "sighupio/permission-manager/internal/resources"
 )
 
-func deleteRole(c echo.Context) error {
-	ac := c.(*AppContext)
+func deleteRole(rs res.ResourceService) echo.HandlerFunc {
+	return func(c echo.Context) error {
 
-	type Request struct {
-		RoleName  string `json:"roleName" validate:"required"`
-		Namespace string `json:"namespace" validate:"required"`
+		type Request struct {
+			RoleName  string `json:"roleName" validate:"required"`
+			Namespace string `json:"namespace" validate:"required"`
+		}
+
+		r := new(Request)
+
+		if err := c.Bind(r); err != nil {
+			return err
+		}
+
+		if err := c.Validate(r); err != nil {
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+		}
+
+		err := rs.DeleteRole(r.Namespace, r.RoleName, c.Request().Context())
+
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, OkRes{Ok: true})
 	}
-
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
-
-	err := ac.Kubeclient.RbacV1().Roles(r.Namespace).Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
-
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
-func deleteRolebinding(c echo.Context) error {
-	ac := c.(*AppContext)
-	type Request struct {
-		RolebindingName string `json:"rolebindingName" validate:"required"`
-		Namespace       string `json:"namespace" validate:"required"`
-	}
+func deleteRolebinding(rs res.RoleBindingService) echo.HandlerFunc {
 
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
+	return func(c echo.Context) error {
+		type Request struct {
+			RolebindingName string `json:"rolebindingName" validate:"required"`
+			Namespace       string `json:"namespace" validate:"required"`
+		}
 
-	err := ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
+		r := new(Request)
+		if err := c.Bind(r); err != nil {
+			return err
+		}
+		if err := c.Validate(r); err != nil {
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+		}
 
-	if err != nil {
-		return err
+		err := rs.DeleteRoleBinding(r.Namespace, r.RolebindingName, c.Request().Context())
+
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, OkRes{Ok: true})
 	}
-
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }
 
-func createRolebinding(c echo.Context) error {
-	ac := c.(*AppContext)
-	type Request struct {
-		RolebindingName string           `json:"rolebindingName" validate:"required"`
-		Namespace       string           `json:"namespace" validate:"required"`
-		Username        string           `json:"generated_for_user" validate:"required"`
-		Subjects        []rbacv1.Subject `json:"subjects" validate:"required"`
-		RoleKind        string           `json:"roleKind" validate:"required"`
-		RoleName        string           `json:"roleName" validate:"required"`
-	}
-	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
+func createRoleBinding(rs res.RoleBindingService) echo.HandlerFunc {
 
-	_, err := ac.Kubeclient.RbacV1().RoleBindings(r.Namespace).Create(c.Request().Context(), &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.RolebindingName,
-			Namespace: r.Namespace,
-			Labels:    map[string]string{"generated_for_user": r.Username},
-		},
-		RoleRef: rbacv1.RoleRef{
-			Kind:     r.RoleKind,
-			Name:     r.RoleName,
-			APIGroup: "rbac.authorization.k8s.io",
-		},
-		Subjects: r.Subjects,
-	}, metav1.CreateOptions{})
+	return func(c echo.Context) error {
+		type Request struct {
+			RolebindingName string           `json:"rolebindingName" validate:"required"`
+			Namespace       string           `json:"namespace" validate:"required"`
+			Username        string           `json:"generated_for_user" validate:"required"`
+			Subjects        []rbacv1.Subject `json:"subjects" validate:"required"`
+			RoleKind        string           `json:"roleKind" validate:"required"`
+			RoleName        string           `json:"roleName" validate:"required"`
+		}
+		r := new(Request)
 
-	if err != nil {
-		return err
+		if err := c.Bind(r); err != nil {
+			return err
+		}
+
+		if err := c.Validate(r); err != nil {
+			return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+		}
+
+		rbRequest := &rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      r.RolebindingName,
+				Namespace: r.Namespace,
+				Labels:    map[string]string{"generated_for_user": r.Username},
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind:     r.RoleKind,
+				Name:     r.RoleName,
+				APIGroup: "rbac.authorization.k8s.io",
+			},
+			Subjects: r.Subjects,
+		}
+
+		_, err := rs.CreateRole(r.Namespace, c.Request().Context(), rbRequest)
+
+		if err != nil {
+			return err
+		}
+
+		return c.JSON(http.StatusOK, OkRes{Ok: true})
 	}
-
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
 }

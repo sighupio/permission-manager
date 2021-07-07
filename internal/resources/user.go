@@ -27,7 +27,7 @@ const resourcePrefix = "permissionmanager.user."
 
 
 // GetAllUsers returns the list of Users defined in the K8s cluster.
-func (r *resourcesService) GetAllUsers(ctx context.Context) ([]User, error) {
+func (r *resourceService) GetAllUsers(ctx context.Context) ([]User, error) {
 	var users []User
 
 	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(resourceURL).DoRaw(ctx)
@@ -83,7 +83,7 @@ func (r *resourcesService) GetAllUsers(ctx context.Context) ([]User, error) {
 
 // CreateUser adds a new User with the given username to the K8s cluster
 // creating a new PermissionManagerUser CRD object. todo add error handling
-func (r *resourcesService) CreateUser(ctx context.Context, username string) (User, error) {
+func (r *resourceService) CreateUser(ctx context.Context, username string) (User, error) {
 	metadataName := resourcePrefix + username
 
 	var createUserRequest = struct {
@@ -128,7 +128,7 @@ func (r *resourcesService) CreateUser(ctx context.Context, username string) (Use
 
 // DeleteUser delete an existing User from the K8s cluster removing
 // the PermissionManagerUser CRD object associated to the user with the given username.
-func (r *resourcesService) DeleteUser(ctx context.Context, username string) error {
+func (r *resourceService) DeleteUser(ctx context.Context, username string) error {
 	metadataName := resourcePrefix + username
 
 	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(resourceURL + "/" + metadataName).DoRaw(ctx)
