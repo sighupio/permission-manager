@@ -64,3 +64,24 @@ func getCaBase64() string {
 	return base64.StdEncoding.EncodeToString(kConfig.CAData)
 
 }
+
+func getServiceAccountToken(rs resources.ResourceService, name string) (token string) {
+	var err error
+	ns := "permission-manager" // TODO: must be received externally to this func
+
+	// Create service account
+	_, err = rs.ServiceAccountCreate(ns, name)
+
+	if err != nil {
+		log.Printf("Service Account not created: %v", err)
+	}
+
+	// get service account token
+	_, token, err = rs.ServiceAccountGetToken(ns, name, true)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return token
+}
+

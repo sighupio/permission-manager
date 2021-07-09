@@ -12,7 +12,7 @@ func TestListNamespaces(t *testing.T) {
 	kc := fake.NewSimpleClientset()
 	ctx := context.Background()
 
-	svc := NewResourcesService(kc, ctx)
+	svc := NewResourceService(kc, ctx)
 
 	names, err := svc.NamespaceList()
 
