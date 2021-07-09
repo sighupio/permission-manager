@@ -1,6 +1,7 @@
 package server
 
 import (
+	"net/http"
 	"regexp"
 
 	"github.com/go-playground/validator"
@@ -22,4 +23,17 @@ type CustomValidator struct {
 func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
 
+}
+
+func (c *AppContext) validateAndBindRequest(r interface{}) error {
+
+	if err := c.Bind(r); err != nil {
+		return err
+	}
+
+	if err := c.Validate(r); err != nil {
+		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+	}
+
+	return nil
 }

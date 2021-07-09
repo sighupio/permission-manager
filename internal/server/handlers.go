@@ -104,10 +104,12 @@ func createKubeconfig(c echo.Context) error {
 
 	ac := c.(*AppContext)
 	r := new(Request)
-	if err := c.Bind(r); err != nil {
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
 		return err
 	}
-
 	// if no namespace is set we set the value "default"
 	if r.Namespace == "" {
 		r.Namespace = "default"

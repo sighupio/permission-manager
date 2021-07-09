@@ -17,7 +17,10 @@ func createClusterRolebinding(c echo.Context) error {
 		RoleName               string           `json:"roleName"`
 	}
 	r := new(Request)
-	if err := c.Bind(r); err != nil {
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
 		return err
 	}
 
@@ -33,7 +36,7 @@ func createClusterRolebinding(c echo.Context) error {
 		},
 		Subjects: r.Subjects,
 	}
-	_, err := ac.ResourceService.CreateClusterRoleBinding(rbCreate)
+	_, err = ac.ResourceService.CreateClusterRoleBinding(rbCreate)
 
 	if err != nil {
 		return err
@@ -49,14 +52,14 @@ func deleteClusterRole(c echo.Context) error {
 	}
 
 	r := new(Request)
-	if err := c.Bind(r); err != nil {
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
 		return err
 	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
 
-	err := ac.Kubeclient.RbacV1().ClusterRoles().Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
+	err = ac.Kubeclient.RbacV1().ClusterRoles().Delete(c.Request().Context(), r.RoleName, metav1.DeleteOptions{})
 
 	if err != nil {
 		return err
@@ -72,14 +75,14 @@ func deleteClusterRolebinding(c echo.Context) error {
 	}
 
 	r := new(Request)
-	if err := c.Bind(r); err != nil {
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
 		return err
 	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
 
-	err := ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
+	err = ac.Kubeclient.RbacV1().ClusterRoleBindings().Delete(c.Request().Context(), r.RolebindingName, metav1.DeleteOptions{})
 
 	if err != nil {
 		return err
@@ -96,15 +99,13 @@ func createClusterRole(c echo.Context) error {
 	ac := c.(*AppContext)
 	r := new(Request)
 
-	if err := c.Bind(r); err != nil {
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
 		return err
 	}
 
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
-
-	_, err := ac.Kubeclient.RbacV1().ClusterRoles().Create(c.Request().Context(), &rbacv1.ClusterRole{
+	_, err = ac.Kubeclient.RbacV1().ClusterRoles().Create(c.Request().Context(), &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: r.RoleName,
 		},

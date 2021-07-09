@@ -26,12 +26,11 @@ func createUser(c echo.Context) error {
 	}
 	type response = resources.User
 	r := new(request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
 
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
+		return err
 	}
 
 	if !isValidUsername(r.Name) {
@@ -55,14 +54,14 @@ func deleteUser(c echo.Context) error {
 	}
 
 	r := new(Request)
-	if err := c.Bind(r); err != nil {
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
 		return err
 	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
 
-	err := ac.ResourceService.DeleteUser(r.Username)
+	err = ac.ResourceService.DeleteUser(r.Username)
 
 	if err != nil {
 		return err

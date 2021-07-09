@@ -72,12 +72,10 @@ func createRoleBinding(c echo.Context) error {
 	}
 	r := new(Request)
 
-	if err := c.Bind(r); err != nil {
-		return err
-	}
+	err := ac.validateAndBindRequest(r)
 
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+	if err != nil {
+		return err
 	}
 
 	rbRequest := &rbacv1.RoleBinding{
@@ -94,7 +92,7 @@ func createRoleBinding(c echo.Context) error {
 		Subjects: r.Subjects,
 	}
 
-	_, err := ac.ResourceService.CreateRole(r.Namespace, rbRequest)
+	_, err = ac.ResourceService.CreateRole(r.Namespace, rbRequest)
 
 	if err != nil {
 		return err
