@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/http"
 )
 
 func deleteRole(c echo.Context) error {
@@ -17,21 +16,19 @@ func deleteRole(c echo.Context) error {
 
 	r := new(Request)
 
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
-
-	err := ac.ResourceService.DeleteRole(r.Namespace, r.RoleName)
+	err := ac.validateAndBindRequest(r)
 
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	err = ac.ResourceService.DeleteRole(r.Namespace, r.RoleName)
+
+	if err != nil {
+		return err
+	}
+
+	return ac.okResponse()
 }
 
 func deleteRolebinding(c echo.Context) error {
@@ -43,20 +40,20 @@ func deleteRolebinding(c echo.Context) error {
 	}
 
 	r := new(Request)
-	if err := c.Bind(r); err != nil {
-		return err
-	}
-	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
-	}
 
-	err := ac.ResourceService.DeleteRoleBinding(r.Namespace, r.RolebindingName)
+	err := ac.validateAndBindRequest(r)
 
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	err = ac.ResourceService.DeleteRoleBinding(r.Namespace, r.RolebindingName)
+
+	if err != nil {
+		return err
+	}
+
+	return ac.okResponse()
 }
 
 func createRoleBinding(c echo.Context) error {
@@ -98,5 +95,5 @@ func createRoleBinding(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	return ac.okResponse()
 }

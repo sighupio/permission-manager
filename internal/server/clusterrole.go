@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"net/http"
 )
 
 func createClusterRolebinding(c echo.Context) error {
@@ -42,7 +41,7 @@ func createClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	return ac.okResponse()
 }
 
 func deleteClusterRole(c echo.Context) error {
@@ -65,11 +64,12 @@ func deleteClusterRole(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	return ac.okResponse()
 }
 
 func deleteClusterRolebinding(c echo.Context) error {
 	ac := c.(*AppContext)
+
 	type Request struct {
 		RolebindingName string `json:"rolebindingName"`
 	}
@@ -88,7 +88,7 @@ func deleteClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	return ac.okResponse()
 }
 
 func createClusterRole(c echo.Context) error {
@@ -116,5 +116,5 @@ func createClusterRole(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	return ac.okResponse()
 }

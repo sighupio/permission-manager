@@ -17,13 +17,7 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-// AppContext echo context extended with application specific fields
-type AppContext struct {
-	echo.Context
-	Kubeclient      kubernetes.Interface
-	ResourceService resources.ResourceService
-	Config          config.Config
-}
+
 
 func New(kubeclient kubernetes.Interface, cfg config.Config) *echo.Echo {
 	e := echo.New()

@@ -65,31 +65,36 @@ func listRbac(c echo.Context) error {
 	}
 
 	clusterRoles, err := ac.Kubeclient.RbacV1().ClusterRoles().List(c.Request().Context(), metav1.ListOptions{})
+
 	if err != nil {
 		return err
 	}
 
 	clusterRoleBindings, err := ac.Kubeclient.RbacV1().ClusterRoleBindings().List(c.Request().Context(), metav1.ListOptions{})
+
 	if err != nil {
 		return err
 	}
 
 	roles, err := ac.Kubeclient.RbacV1().Roles("").List(c.Request().Context(), metav1.ListOptions{})
+
 	if err != nil {
 		return err
 	}
 
 	roleBindings, err := ac.Kubeclient.RbacV1().RoleBindings("").List(c.Request().Context(), metav1.ListOptions{})
+
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, Response{
+	return ac.okResponseWithData(Response{
 		ClusterRoles:        clusterRoles.Items,
 		ClusterRoleBindings: clusterRoleBindings.Items,
 		Roles:               roles.Items,
 		RoleBindings:        roleBindings.Items,
 	})
+
 }
 
 func createKubeconfig(c echo.Context) error {

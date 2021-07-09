@@ -24,7 +24,9 @@ func createUser(c echo.Context) error {
 	type request struct {
 		Name string `json:"name" validate:"required"`
 	}
+
 	type response = resources.User
+
 	r := new(request)
 
 	err := ac.validateAndBindRequest(r)
@@ -34,7 +36,7 @@ func createUser(c echo.Context) error {
 	}
 
 	if !isValidUsername(r.Name) {
-		return c.JSON(http.StatusBadRequest, ErrorRes{invalidUsernameError})
+		return ac.errorResponse(invalidUsernameError)
 	}
 
 	u, err := ac.ResourceService.CreateUser(r.Name)
@@ -43,7 +45,7 @@ func createUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, response{Name: u.Name})
+	return ac.okResponseWithData(response{Name: u.Name})
 }
 
 func deleteUser(c echo.Context) error {
@@ -67,5 +69,5 @@ func deleteUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, OkRes{Ok: true})
+	return ac.okResponse()
 }
