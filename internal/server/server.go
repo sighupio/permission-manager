@@ -63,7 +63,7 @@ func addMiddlewareStack(e *echo.Echo, kubeclient kubernetes.Interface, cfg confi
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			context := c.Request().Context()
-			rs := resources.NewResourcesService(kubeclient, &context)
+			rs := resources.NewResourcesService(kubeclient, context)
 
 			customContext := &AppContext{
 				Context: c,

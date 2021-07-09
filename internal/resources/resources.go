@@ -21,12 +21,12 @@ type ResourceService interface {
 // resourceService implements the ResourceService interface.
 type resourceService struct {
 	kubeclient k8sclient.Interface
-	context    *context.Context
+	context    context.Context
 }
 
 // NewResourcesService returns a new instance of a ResourceService
 // allowing to interact with a K8s cluster via the given K8s client interface.
-func NewResourcesService(kc k8sclient.Interface, ctx *context.Context) ResourceService {
+func NewResourcesService(kc k8sclient.Interface, ctx context.Context) ResourceService {
 	return &resourceService{
 		kubeclient: kc,
 		context:    ctx,
