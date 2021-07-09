@@ -33,7 +33,7 @@ func createClusterRolebinding(c echo.Context) error {
 		},
 		Subjects: r.Subjects,
 	}
-	_, err := ac.ResourceService.CreateClusterRoleBinding(c.Request().Context(), rbCreate)
+	_, err := ac.ResourceService.CreateClusterRoleBinding(rbCreate)
 
 	if err != nil {
 		return err
@@ -89,15 +89,17 @@ func deleteClusterRolebinding(c echo.Context) error {
 }
 
 func createClusterRole(c echo.Context) error {
-	ac := c.(*AppContext)
 	type Request struct {
 		RoleName string              `json:"roleName" validate:"required"`
 		Rules    []rbacv1.PolicyRule `json:"rules" validate:"required"`
 	}
+	ac := c.(*AppContext)
 	r := new(Request)
+
 	if err := c.Bind(r); err != nil {
 		return err
 	}
+
 	if err := c.Validate(r); err != nil {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}

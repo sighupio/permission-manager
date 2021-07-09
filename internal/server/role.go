@@ -25,7 +25,7 @@ func deleteRole(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	err := ac.ResourceService.DeleteRole(r.Namespace, r.RoleName, c.Request().Context())
+	err := ac.ResourceService.DeleteRole(r.Namespace, r.RoleName)
 
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func deleteRolebinding(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	err := ac.ResourceService.DeleteRoleBinding(r.Namespace, r.RolebindingName, c.Request().Context())
+	err := ac.ResourceService.DeleteRoleBinding(r.Namespace, r.RolebindingName)
 
 	if err != nil {
 		return err
@@ -94,7 +94,7 @@ func createRoleBinding(c echo.Context) error {
 		Subjects: r.Subjects,
 	}
 
-	_, err := ac.ResourceService.CreateRole(r.Namespace, c.Request().Context(), rbRequest)
+	_, err := ac.ResourceService.CreateRole(r.Namespace, rbRequest)
 
 	if err != nil {
 		return err

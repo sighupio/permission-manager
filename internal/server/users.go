@@ -9,7 +9,7 @@ import (
 func listUsers(c echo.Context) error {
 	ac := c.(*AppContext)
 
-	users, err := ac.ResourceService.GetAllUsers(c.Request().Context())
+	users, err := ac.ResourceService.GetAllUsers()
 
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func createUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{invalidUsernameError})
 	}
 
-	u, err := ac.ResourceService.CreateUser(c.Request().Context(), r.Name)
+	u, err := ac.ResourceService.CreateUser(r.Name)
 
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func deleteUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
 	}
 
-	err := ac.ResourceService.DeleteUser(c.Request().Context(), r.Username)
+	err := ac.ResourceService.DeleteUser(r.Username)
 
 	if err != nil {
 		return err

@@ -1,7 +1,6 @@
 package resources
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"time"
@@ -16,9 +15,9 @@ type User struct {
 // UserService allows to manage the life-cycle of
 // Users defined in the managed K8s cluster.
 type UserService interface {
-	GetAllUsers(cxt context.Context) ([]User, error)
-	DeleteUser(cxt context.Context, username string) error
-	CreateUser(cxt context.Context, username string) (User, error)
+	GetAllUsers() ([]User, error)
+	DeleteUser(username string) error
+	CreateUser(username string) (User, error)
 }
 
 const resourceURL = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers"
@@ -27,10 +26,10 @@ const resourcePrefix = "permissionmanager.user."
 
 
 // GetAllUsers returns the list of Users defined in the K8s cluster.
-func (r *resourceService) GetAllUsers(ctx context.Context) ([]User, error) {
+func (r *resourceService) GetAllUsers() ([]User, error) {
 	var users []User
 
-	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(resourceURL).DoRaw(ctx)
+	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(resourceURL).DoRaw(r.context)
 
 	if err != nil {
 		log.Print("Failed to get users from k8s CRUD api", err)
@@ -83,7 +82,7 @@ func (r *resourceService) GetAllUsers(ctx context.Context) ([]User, error) {
 
 // CreateUser adds a new User with the given username to the K8s cluster
 // creating a new PermissionManagerUser CRD object. todo add error handling
-func (r *resourceService) CreateUser(ctx context.Context, username string) (User, error) {
+func (r *resourceService) CreateUser(username string) (User, error) {
 	metadataName := resourcePrefix + username
 
 	var createUserRequest = struct {
@@ -116,7 +115,7 @@ func (r *resourceService) CreateUser(ctx context.Context, username string) (User
 		return User{}, err
 	}
 
-	_, err = r.kubeclient.AppsV1().RESTClient().Post().AbsPath(resourceURL).Body([]byte(jsonPayload)).DoRaw(ctx)
+	_, err = r.kubeclient.AppsV1().RESTClient().Post().AbsPath(resourceURL).Body([]byte(jsonPayload)).DoRaw(r.context)
 
 	if err != nil {
 		log.Printf("Failed to create user:%s\n %v\n", username, err)
@@ -128,10 +127,10 @@ func (r *resourceService) CreateUser(ctx context.Context, username string) (User
 
 // DeleteUser delete an existing User from the K8s cluster removing
 // the PermissionManagerUser CRD object associated to the user with the given username.
-func (r *resourceService) DeleteUser(ctx context.Context, username string) error {
+func (r *resourceService) DeleteUser(username string) error {
 	metadataName := resourcePrefix + username
 
-	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(resourceURL + "/" + metadataName).DoRaw(ctx)
+	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(resourceURL + "/" + metadataName).DoRaw(r.context)
 
 	if err == nil {
 		return nil
