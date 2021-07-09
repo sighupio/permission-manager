@@ -6,14 +6,11 @@ import (
 	"log"
 	"net/http"
 
-	"sighupio/permission-manager/internal/kubeconfig"
-	"sighupio/permission-manager/internal/resources"
-
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sighupio/permission-manager/internal/kubeconfig"
 )
-
 
 // Header returns the header of the wrapped response writer
 func (frw *FallbackResponseWriter) Header() http.Header {
@@ -40,23 +37,22 @@ func (frw *FallbackResponseWriter) WriteHeader(statusCode int) {
 	frw.WrappedResponseWriter.WriteHeader(statusCode)
 }
 
+func ListNamespaces(c echo.Context) error {
+	ac := c.(*AppContext)
 
-func ListNamespaces(rs resources.ResourceService) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		type Response struct {
-			Namespaces []string `json:"namespaces"`
-		}
-
-		names, err := rs.GetAllNamespaces(c.Request().Context())
-
-		if err != nil {
-			return err
-		}
-
-		return c.JSON(http.StatusOK, Response{
-			Namespaces: names,
-		})
+	type Response struct {
+		Namespaces []string `json:"namespaces"`
 	}
+
+	names, err := ac.ResourceService.GetAllNamespaces(c.Request().Context())
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, Response{
+		Namespaces: names,
+	})
 }
 
 func listRbac(c echo.Context) error {
@@ -96,9 +92,7 @@ func listRbac(c echo.Context) error {
 	})
 }
 
-
-
-func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.HandlerFunc {
+func createKubeconfig(c echo.Context) error {
 	type Request struct {
 		Username  string `json:"username"`
 		Namespace string `json:"namespace"`
@@ -107,33 +101,29 @@ func createKubeconfig(clusterName, clusterControlPlaceAddress string) echo.Handl
 		Ok         bool   `json:"ok"`
 		Kubeconfig string `json:"kubeconfig"`
 	}
-	return func(c echo.Context) error {
-		ac := c.(*AppContext)
-		r := new(Request)
-		if err := c.Bind(r); err != nil {
-			return err
-		}
 
-		// if no namespace is set we set the value "default"
-		if r.Namespace == "" {
-			r.Namespace = "default"
-		}
-
-		kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, clusterName, clusterControlPlaceAddress, r.Username, r.Namespace)
-
-		return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
+	ac := c.(*AppContext)
+	r := new(Request)
+	if err := c.Bind(r); err != nil {
+		return err
 	}
+
+	// if no namespace is set we set the value "default"
+	if r.Namespace == "" {
+		r.Namespace = "default"
+	}
+
+	kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, ac.Config.ClusterName, ac.Config.ClusterControlPlaceAddress, r.Username, r.Namespace)
+
+	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 }
 
-type (
-	// FallbackResponseWriter wraps an http.Requesthandler and surpresses
-	// a 404 status code. In such case a given local file will be served.
-	FallbackResponseWriter struct {
-		WrappedResponseWriter http.ResponseWriter
-		FileNotFound          bool
-	}
-)
-
+// FallbackResponseWriter wraps an http.Requesthandler and surpresses
+// a 404 status code. In such case a given local file will be served.
+type FallbackResponseWriter struct {
+	WrappedResponseWriter http.ResponseWriter
+	FileNotFound          bool
+}
 
 func addFallbackHandler(handler http.HandlerFunc, fs http.FileSystem) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

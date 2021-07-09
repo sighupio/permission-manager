@@ -20,10 +20,12 @@ import (
 // AppContext echo context extended with application specific fields
 type AppContext struct {
 	echo.Context
-	Kubeclient kubernetes.Interface
+	Kubeclient      kubernetes.Interface
+	ResourceService resources.ResourceService
+	Config          config.Config
 }
 
-func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService resources.ResourceService) *echo.Echo {
+func New(kubeclient kubernetes.Interface, cfg config.Config) *echo.Echo {
 	e := echo.New()
 	e.Validator = &CustomValidator{validator: validator.New()}
 
@@ -45,10 +47,18 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 		return false, nil
 	}))
 
-	/* to deprecate, this is not tyesafe, see server.listUsers as a reference to how create new handlers */
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			customContext := &AppContext{Context: c, Kubeclient: kubeclient}
+			// we make a scoped resource service per request
+			rs := resources.NewResourcesService(kubeclient)
+
+			customContext := &AppContext{
+				Context: c,
+				//todo is it correct that kubeclient is a singleton?
+				Kubeclient:      kubeclient,
+				ResourceService: rs,
+				Config: cfg,
+			}
 			return next(customContext)
 		}
 	})
@@ -60,23 +70,23 @@ func New(kubeclient kubernetes.Interface, cfg *config.Config, resourcesService r
 
 	api := e.Group("/api")
 
-	api.GET("/list-users", listUsers(resourcesService))
-	api.GET("/list-namespace", ListNamespaces(resourcesService))
+	api.GET("/list-users", listUsers)
+	api.GET("/list-namespace", ListNamespaces)
 	api.GET("/rbac", listRbac)
 
 	api.POST("/create-cluster-role", createClusterRole)
-	api.POST("/create-user", createUser(resourcesService))
-	api.POST("/create-rolebinding", createRoleBinding(resourcesService))
-	api.POST("/create-cluster-rolebinding", createClusterRolebinding(resourcesService))
+	api.POST("/create-user", createUser)
+	api.POST("/create-rolebinding", createRoleBinding)
+	api.POST("/create-cluster-rolebinding", createClusterRolebinding)
 
 	/* should use DELETE method, using POST due to a weird bug that looks now resolved */
 	api.POST("/delete-cluster-role", deleteClusterRole)
 	api.POST("/delete-cluster-rolebinding", deleteClusterRolebinding)
-	api.POST("/delete-rolebinding", deleteRolebinding(resourcesService))
-	api.POST("/delete-role", deleteRole(resourcesService))
-	api.POST("/delete-user", deleteUser(resourcesService))
+	api.POST("/delete-rolebinding", deleteRolebinding)
+	api.POST("/delete-role", deleteRole)
+	api.POST("/delete-user", deleteUser)
 
-	api.POST("/create-kubeconfig", createKubeconfig(cfg.ClusterName, cfg.ClusterControlPlaceAddress))
+	api.POST("/create-kubeconfig", createKubeconfig)
 
 	//workaround to avoid breaking changes in production. We disable the react bundle in local testing
 	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {

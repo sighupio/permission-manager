@@ -10,7 +10,7 @@ type ClusterRoleBindingService interface {
 	CreateClusterRoleBinding(ctx context.Context, cr *rbacv1.ClusterRoleBinding) (*rbacv1.ClusterRoleBinding, error)
 }
 
-func (rs *resourceService) CreateClusterRoleBinding(ctx context.Context, cr *rbacv1.ClusterRoleBinding) (*rbacv1.ClusterRoleBinding, error) {
+func (r *resourceService) CreateClusterRoleBinding(ctx context.Context, cr *rbacv1.ClusterRoleBinding) (*rbacv1.ClusterRoleBinding, error) {
 
-	return rs.kubeclient.RbacV1().ClusterRoleBindings().Create(ctx, cr, metav1.CreateOptions{})
+	return r.kubeclient.RbacV1().ClusterRoleBindings().Create(ctx, cr, metav1.CreateOptions{})
 }
