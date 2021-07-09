@@ -44,7 +44,7 @@ func ListNamespaces(c echo.Context) error {
 		Namespaces []string `json:"namespaces"`
 	}
 
-	names, err := ac.ResourceService.GetAllNamespaces()
+	names, err := ac.ResourceService.NamespaceGetAll()
 
 	if err != nil {
 		return err

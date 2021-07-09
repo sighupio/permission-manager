@@ -5,10 +5,10 @@ import (
 )
 
 type RoleService interface {
-	DeleteRole(namespace, roleName string) error
+	RoleDelete(namespace, roleName string) error
 }
 
-func (r *resourceService) DeleteRole(namespace, roleName string) error {
+func (r *resourceService) RoleDelete(namespace, roleName string) error {
 	return r.kubeclient.RbacV1().Roles(namespace).Delete(r.context, roleName, metav1.DeleteOptions{})
 
 }

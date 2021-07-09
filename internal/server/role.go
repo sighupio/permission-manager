@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sighupio/permission-manager/internal/resources"
 )
 
 func deleteRole(c echo.Context) error {
@@ -22,7 +22,7 @@ func deleteRole(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.DeleteRole(r.Namespace, r.RoleName)
+	err = ac.ResourceService.RoleDelete(r.Namespace, r.RoleName)
 
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func deleteRolebinding(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.DeleteRoleBinding(r.Namespace, r.RolebindingName)
+	err = ac.ResourceService.RoleBindingDelete(r.Namespace, r.RolebindingName)
 
 	if err != nil {
 		return err
@@ -75,21 +75,12 @@ func createRoleBinding(c echo.Context) error {
 		return err
 	}
 
-	rbRequest := &rbacv1.RoleBinding{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      r.RolebindingName,
-			Namespace: r.Namespace,
-			Labels:    map[string]string{"generated_for_user": r.Username},
-		},
-		RoleRef: rbacv1.RoleRef{
-			Kind:     r.RoleKind,
-			Name:     r.RoleName,
-			APIGroup: "rbac.authorization.k8s.io",
-		},
-		Subjects: r.Subjects,
-	}
 
-	_, err = ac.ResourceService.CreateRole(r.Namespace, rbRequest)
+	_, err  =	ac.ResourceService.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
+		RoleKind:        r.RoleKind,
+		RoleName:        r.RoleName,
+		RolebindingName: r.RolebindingName,
+	})
 
 	if err != nil {
 		return err

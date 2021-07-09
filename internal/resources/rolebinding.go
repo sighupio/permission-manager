@@ -6,13 +6,33 @@ import (
 )
 
 type RoleBindingService interface {
-	CreateRole(namespace string, rb *rbacv1.RoleBinding) (*rbacv1.RoleBinding, error)
-	DeleteRoleBinding(namespace, roleBindingName string) error
+	RoleBindingCreate(namespace, username string, rbReq RoleBindingRequirements) (*rbacv1.RoleBinding, error)
+	RoleBindingDelete(namespace, roleBindingName string) error
 }
 
-func (r *resourceService) CreateRole(namespace string, rb *rbacv1.RoleBinding) (*rbacv1.RoleBinding, error) {
+type RoleBindingRequirements struct {
+	RoleKind        string
+	RoleName        string
+	RolebindingName string
+	subjects        []rbacv1.Subject
+}
 
-	rb, err := r.kubeclient.RbacV1().RoleBindings(namespace).Create(r.context, rb, metav1.CreateOptions{})
+func (r *resourceService) RoleBindingCreate(namespace, username string, rbReq RoleBindingRequirements) (*rbacv1.RoleBinding, error) {
+
+	rb, err := r.kubeclient.RbacV1().RoleBindings(namespace).Create(r.context,
+		&rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      rbReq.RolebindingName,
+				Namespace: namespace,
+				Labels:    map[string]string{"generated_for_user": username},
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind:     rbReq.RoleKind,
+				Name:     rbReq.RoleName,
+				APIGroup: "rbac.authorization.k8s.io",
+			},
+			Subjects: rbReq.subjects,
+		}, metav1.CreateOptions{})
 
 	if err != nil {
 		return nil, err
@@ -22,7 +42,7 @@ func (r *resourceService) CreateRole(namespace string, rb *rbacv1.RoleBinding) (
 
 }
 
-func (r *resourceService) DeleteRoleBinding(namespace, roleBindingName string) error {
+func (r *resourceService) RoleBindingDelete(namespace, roleBindingName string) error {
 
 	return r.kubeclient.RbacV1().RoleBindings(namespace).Delete(r.context, roleBindingName, metav1.DeleteOptions{})
 

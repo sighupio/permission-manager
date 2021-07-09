@@ -10,18 +10,20 @@ import (
 
 func TestListNamespaces(t *testing.T) {
 	kc := fake.NewSimpleClientset()
-	svc := NewResourcesService(kc)
-
 	ctx := context.Background()
-	names, err := svc.GetAllNamespaces(ctx)
+
+	svc := NewResourcesService(kc, ctx)
+
+	names, err := svc.NamespaceGetAll()
+
 	got := names
 	want := []string{}
 	if assert.NoError(t, err) {
 		assert.ElementsMatch(t, want, got)
 	}
 
-	// svc.CreateUser("jaga")
-	// svc.CreateUser("jacopo")
+	// svc.UserCreate("jaga")
+	// svc.UserCreate("jacopo")
 
 	// names, err = svc.GetNamespaces()
 	// got = names

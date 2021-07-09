@@ -9,7 +9,7 @@ import (
 func listUsers(c echo.Context) error {
 	ac := c.(*AppContext)
 
-	users, err := ac.ResourceService.GetAllUsers()
+	users, err := ac.ResourceService.UserGetAll()
 
 	if err != nil {
 		return err
@@ -39,7 +39,7 @@ func createUser(c echo.Context) error {
 		return ac.errorResponse(invalidUsernameError)
 	}
 
-	u, err := ac.ResourceService.CreateUser(r.Name)
+	u, err := ac.ResourceService.UserCreate(r.Name)
 
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func deleteUser(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.DeleteUser(r.Username)
+	err = ac.ResourceService.UserDelete(r.Username)
 
 	if err != nil {
 		return err
