@@ -24,10 +24,10 @@ const resourceURL = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers
 
 const resourcePrefix = "permissionmanager.user."
 
-
 // GetAllUsers returns the list of Users defined in the K8s cluster.
 func (r *resourceService) UserList() ([]User, error) {
-	var users []User
+	//noinspection GoPreferNilSlice
+	users := []User{}
 
 	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(resourceURL).DoRaw(r.context)
 
@@ -78,7 +78,6 @@ func (r *resourceService) UserList() ([]User, error) {
 
 	return users, nil
 }
-
 
 // CreateUser adds a new User with the given username to the K8s cluster
 // creating a new PermissionManagerUser CRD object. todo add error handling

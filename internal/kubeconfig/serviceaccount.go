@@ -1,35 +1,29 @@
 package kubeconfig
 
 import (
-	"context"
 	"fmt"
 	"log"
+	"sighupio/permission-manager/internal/resources"
 	"time"
 
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	clientset "k8s.io/client-go/kubernetes"
 )
 
-func getServiceAccountToken(ctx context.Context, c clientset.Interface, name string) (token string) {
+func getServiceAccountToken(rs resources.ResourceService, name string) (token string) {
 	var err error
-	ns := "permission-manager" // TODO: must be received externaly to this func
+	ns := "permission-manager" // TODO: must be received externally to this func
 
 	// Create service account
-	_, err = c.CoreV1().ServiceAccounts(ns).Create(ctx, &v1.ServiceAccount{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}, metav1.CreateOptions{})
+	_, err = rs.ServiceAccountCreate(ns, name)
 
 	if err != nil {
 		log.Printf("Service Account not created: %v", err)
 	}
 
 	// get service account token
-	_, token, err = getReferencedServiceAccountToken(c.(*clientset.Clientset), ns, name, true)
+	_, token, err = getReferencedServiceAccountToken(rs, ns, name, true)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,12 +32,13 @@ func getServiceAccountToken(ctx context.Context, c clientset.Interface, name str
 }
 
 //todo refactor
-func getReferencedServiceAccountToken(c *clientset.Clientset, ns string, name string, shouldWait bool) (string, string, error) {
+func getReferencedServiceAccountToken(rs resources.ResourceService, ns string, name string, shouldWait bool) (string, string, error) {
 	tokenName := ""
 	token := ""
 
 	findToken := func() (bool, error) {
-		user, err := c.CoreV1().ServiceAccounts(ns).Get(context.TODO(), name, metav1.GetOptions{})
+		user, err := rs.ServiceAccountGet(ns, name)
+
 		if apierrors.IsNotFound(err) {
 			return false, nil
 		}
@@ -53,7 +48,9 @@ func getReferencedServiceAccountToken(c *clientset.Clientset, ns string, name st
 		}
 
 		for _, ref := range user.Secrets {
-			secret, err := c.CoreV1().Secrets(ns).Get(context.TODO(), ref.Name, metav1.GetOptions{})
+
+			secret, err := rs.SecretGet(ns, ref.Name)
+
 			if apierrors.IsNotFound(err) {
 				continue
 			}

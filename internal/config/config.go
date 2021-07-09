@@ -5,28 +5,41 @@ import (
 	"os"
 )
 
+type ClusterConfig struct {
+	Name                string
+	ControlPlaneAddress string
+}
+
+type BackendConfig struct {
+	Port string
+}
+
+// Config contains PermissionManager cluster/server configuration
 type Config struct {
-	ClusterName                string
-	ClusterControlPlaceAddress string
-	Port                       string
+	Cluster ClusterConfig
+	Backend BackendConfig
 }
 
 func New() *Config {
 	cfg := &Config{
-		ClusterName:                os.Getenv("CLUSTER_NAME"),
-		ClusterControlPlaceAddress: os.Getenv("CONTROL_PLANE_ADDRESS"),
-		Port:                       os.Getenv("PORT"),
+		Cluster: ClusterConfig{
+			Name:                os.Getenv("CLUSTER_NAME"),
+			ControlPlaneAddress: os.Getenv("CONTROL_PLANE_ADDRESS"),
+		},
+		Backend: BackendConfig{
+			Port: os.Getenv("PORT"),
+		},
 	}
 
-	if cfg.Port == "" {
+	if cfg.Backend.Port == "" {
 		log.Fatal("PORT env cannot be empty")
 	}
 
-	if cfg.ClusterName == "" {
+	if cfg.Cluster.Name == "" {
 		log.Fatal("CLUSTER_NAME env cannot be empty")
 	}
 
-	if cfg.ClusterControlPlaceAddress == "" {
+	if cfg.Cluster.ControlPlaneAddress == "" {
 		log.Fatal("CONTROL_PLANE_ADDRESS env cannot be empty")
 	}
 

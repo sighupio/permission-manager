@@ -11,6 +11,6 @@ func main() {
 	kc := kubeclient.New()
 
 	s := server.New(kc, *cfg)
-	addr := ":" + cfg.Port
+	addr := ":" + cfg.Backend.Port
 	s.Logger.Fatal(s.Start(addr))
 }

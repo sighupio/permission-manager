@@ -13,6 +13,8 @@ type ResourceService interface {
 	RoleService
 	ClusterRoleBindingService
 	ClusterRoleService
+	ServiceAccountService
+	SecretService
 	NamespaceList() (names []string, err error)
 }
 

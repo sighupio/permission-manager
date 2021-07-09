@@ -12,9 +12,9 @@ func ExampleNew() {
 	os.Setenv("CONTROL_PLANE_ADDRESS", "https://192.168.64.33:8443")
 	cfg := config.New()
 
-	fmt.Println(cfg.Port)
-	fmt.Println(cfg.ClusterName)
-	fmt.Println(cfg.ClusterControlPlaceAddress)
+	fmt.Println(cfg.Backend.Port)
+	fmt.Println(cfg.Cluster.Name)
+	fmt.Println(cfg.Cluster.ControlPlaneAddress)
 
 	// Output:
 	// 4000

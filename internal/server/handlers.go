@@ -92,7 +92,7 @@ func createKubeconfig(c echo.Context) error {
 		r.Namespace = "default"
 	}
 
-	kubeCfg := kubeconfig.CreateKubeconfigYAMLForUser(c.Request().Context(), ac.Kubeclient, ac.Config.ClusterName, ac.Config.ClusterControlPlaceAddress, r.Username, r.Namespace)
+	kubeCfg := kubeconfig.CreateKubeConfigYAMLForUser(ac.ResourceService, ac.Config.Cluster, r.Username, r.Namespace)
 
 	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 }

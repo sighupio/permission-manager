@@ -1,18 +1,19 @@
 package kubeconfig
 
 import (
-	"context"
+	"encoding/base64"
 	"fmt"
-
-	"k8s.io/client-go/kubernetes"
+	"log"
+	"sighupio/permission-manager/internal/config"
+	"sighupio/permission-manager/internal/resources"
+	runtime "sigs.k8s.io/controller-runtime"
 )
 
-func CreateKubeconfigYAMLForUser(ctx context.Context, kc kubernetes.Interface, clusterName, clusterControlPlaceAddress, username string, namespace string) (kubeconfigYAML string) {
-	return createKubeconfig(clusterName, username, namespace, clusterControlPlaceAddress, getCaBase64(), getServiceAccountToken(ctx, kc, username))
-}
+// CreateKubeConfigYAML returns a kubeconfig YAML string
+func CreateKubeConfigYAMLForUser(rs resources.ResourceService, cluster config.ClusterConfig, username, namespace string) (kubeconfigYAML string) {
+	caBase64 := getCaBase64()
+	token := getServiceAccountToken(rs, username)
 
-// CreateKubeconfigYAML returns a kubeconfig YAML string
-func createKubeconfig(clusterName, username, namespace, clusterControlPlaceAddress, caBasebase64, token string) (kubeconfigYAML string) {
 	certificate_tpl := `---
 apiVersion: v1
 kind: Config
@@ -35,16 +36,31 @@ users:
 
 	return fmt.Sprintf(certificate_tpl,
 		username,
-		clusterName,
-		caBasebase64,
-		clusterControlPlaceAddress,
-		clusterName,
-		clusterName,
+		cluster.Name,
+		caBase64,
+		cluster.ControlPlaneAddress,
+		cluster.Name,
+		cluster.Name,
 		username,
 		namespace,
 		username,
-		clusterName,
+		cluster.Name,
 		username,
 		token,
 	)
+}
+
+
+
+// getCaBase64 returns the base64 encoding of the Kubernetes cluster api-server CA
+func getCaBase64() string {
+
+	kConfig, err := runtime.GetConfig()
+
+	if err != nil {
+		log.Fatalf("Unable to get kubeconfig.\n%v", err)
+	}
+
+	return base64.StdEncoding.EncodeToString(kConfig.CAData)
+
 }

@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/labstack/echo"
-	"net/http"
 	"sighupio/permission-manager/internal/resources"
 )
 
@@ -15,7 +14,7 @@ func listUsers(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, users)
+	return ac.okResponseWithData(users)
 }
 
 func createUser(c echo.Context) error {
