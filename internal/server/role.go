@@ -75,11 +75,11 @@ func createRoleBinding(c echo.Context) error {
 		return err
 	}
 
-
-	_, err  =	ac.ResourceService.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
+	_, err = ac.ResourceService.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
 		RoleKind:        r.RoleKind,
 		RoleName:        r.RoleName,
 		RolebindingName: r.RolebindingName,
+		Subjects:        r.Subjects,
 	})
 
 	if err != nil {

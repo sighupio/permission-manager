@@ -15,7 +15,7 @@ type RoleBindingRequirements struct {
 	RoleKind        string
 	RoleName        string
 	RolebindingName string
-	subjects        []rbacv1.Subject
+	Subjects        []rbacv1.Subject
 }
 
 
@@ -35,7 +35,7 @@ func (r *resourceService) RoleBindingCreate(namespace, username string, rbReq Ro
 				Name:     rbReq.RoleName,
 				APIGroup: "rbac.authorization.k8s.io",
 			},
-			Subjects: rbReq.subjects,
+			Subjects: rbReq.Subjects,
 		}, metav1.CreateOptions{})
 
 	if err != nil {
