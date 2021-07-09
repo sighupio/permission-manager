@@ -16,6 +16,15 @@ type AppContext struct {
 	Config          config.Config
 }
 
+type ErrorRes struct {
+	Error string `json:"error"`
+}
+
+// OkRes to deprecate. No reason in sending this struct, there is already HTTP Code 2xx for that
+type OkRes struct {
+	Ok bool `json:"ok"`
+}
+
 func (c *AppContext) validateAndBindRequest(r interface{}) error {
 
 	if err := c.Bind(r); err != nil {
@@ -23,7 +32,7 @@ func (c *AppContext) validateAndBindRequest(r interface{}) error {
 	}
 
 	if err := c.Validate(r); err != nil {
-		return c.JSON(http.StatusBadRequest, ErrorRes{err.Error()})
+		return c.errorResponse(err.Error())
 	}
 
 	return nil

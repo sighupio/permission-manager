@@ -6,8 +6,7 @@ import (
 	k8sclient "k8s.io/client-go/kubernetes"
 )
 
-// ResourceService allows to list and manage the life-cycle
-// of the various K8s cluster resources managed by the PermissionManager.
+// ResourceService allows to list and manage the life-cycle of the various K8s cluster resources managed by the PermissionManager.
 type ResourceService interface {
 	UserService
 	RoleBindingService
