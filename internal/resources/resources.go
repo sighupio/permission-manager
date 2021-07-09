@@ -14,7 +14,7 @@ type ResourceService interface {
 	RoleService
 	ClusterRoleBindingService
 	ClusterRoleService
-	NamespaceGetAll() (names []string, err error)
+	NamespaceList() (names []string, err error)
 }
 
 // resourceService implements the ResourceService interface.

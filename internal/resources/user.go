@@ -15,7 +15,7 @@ type User struct {
 // UserService allows to manage the life-cycle of
 // Users defined in the managed K8s cluster.
 type UserService interface {
-	UserGetAll() ([]User, error)
+	UserList() ([]User, error)
 	UserDelete(username string) error
 	UserCreate(username string) (User, error)
 }
@@ -26,7 +26,7 @@ const resourcePrefix = "permissionmanager.user."
 
 
 // GetAllUsers returns the list of Users defined in the K8s cluster.
-func (r *resourceService) UserGetAll() ([]User, error) {
+func (r *resourceService) UserList() ([]User, error) {
 	var users []User
 
 	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(resourceURL).DoRaw(r.context)

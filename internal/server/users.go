@@ -9,7 +9,7 @@ import (
 func listUsers(c echo.Context) error {
 	ac := c.(*AppContext)
 
-	users, err := ac.ResourceService.UserGetAll()
+	users, err := ac.ResourceService.UserList()
 
 	if err != nil {
 		return err

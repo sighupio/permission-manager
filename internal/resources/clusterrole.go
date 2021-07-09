@@ -7,6 +7,8 @@ import (
 
 type ClusterRoleService interface {
 	ClusterRoleCreate(roleName string, rules []rbacv1.PolicyRule) (*rbacv1.ClusterRole, error)
+	ClusterRoleDelete(roleName string) error
+	ClusterRoleList() (*rbacv1.ClusterRoleList, error)
 }
 
 func (r *resourceService) ClusterRoleCreate(roleName string, rules []rbacv1.PolicyRule) (*rbacv1.ClusterRole, error) {
@@ -17,4 +19,12 @@ func (r *resourceService) ClusterRoleCreate(roleName string, rules []rbacv1.Poli
 		Rules: rules,
 	}, metav1.CreateOptions{})
 
+}
+
+func (r *resourceService) ClusterRoleDelete(roleName string) error {
+	return r.kubeclient.RbacV1().ClusterRoles().Delete(r.context, roleName, metav1.DeleteOptions{})
+}
+
+func (r *resourceService) ClusterRoleList() (*rbacv1.ClusterRoleList, error) {
+	return r.kubeclient.RbacV1().ClusterRoles().List(r.context, metav1.ListOptions{})
 }

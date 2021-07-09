@@ -14,7 +14,7 @@ func TestListNamespaces(t *testing.T) {
 
 	svc := NewResourcesService(kc, ctx)
 
-	names, err := svc.NamespaceGetAll()
+	names, err := svc.NamespaceList()
 
 	got := names
 	want := []string{}

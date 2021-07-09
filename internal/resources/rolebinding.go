@@ -8,6 +8,7 @@ import (
 type RoleBindingService interface {
 	RoleBindingCreate(namespace, username string, rbReq RoleBindingRequirements) (*rbacv1.RoleBinding, error)
 	RoleBindingDelete(namespace, roleBindingName string) error
+	RoleBindingList(namespace string) (*rbacv1.RoleBindingList, error)
 }
 
 type RoleBindingRequirements struct {
@@ -16,6 +17,9 @@ type RoleBindingRequirements struct {
 	RolebindingName string
 	subjects        []rbacv1.Subject
 }
+
+
+
 
 func (r *resourceService) RoleBindingCreate(namespace, username string, rbReq RoleBindingRequirements) (*rbacv1.RoleBinding, error) {
 
@@ -46,4 +50,8 @@ func (r *resourceService) RoleBindingDelete(namespace, roleBindingName string) e
 
 	return r.kubeclient.RbacV1().RoleBindings(namespace).Delete(r.context, roleBindingName, metav1.DeleteOptions{})
 
+}
+
+func (r *resourceService) RoleBindingList(namespace string) (*rbacv1.RoleBindingList, error) {
+	return r.kubeclient.RbacV1().RoleBindings(namespace).List(r.context, metav1.ListOptions{})
 }

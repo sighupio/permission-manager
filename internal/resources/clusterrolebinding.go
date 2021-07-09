@@ -7,8 +7,12 @@ import (
 
 type ClusterRoleBindingService interface {
 	ClusterRoleBindingCreate(clusterRoleBindingName, username, roleName string, subjects []rbacv1.Subject) (*rbacv1.ClusterRoleBinding, error)
-
 	ClusterRoleBindingDelete(roleBindingName string) error
+	ClusterRoleBindingList() (*rbacv1.ClusterRoleBindingList, error)
+}
+
+func (r *resourceService) ClusterRoleBindingList() (*rbacv1.ClusterRoleBindingList, error) {
+	return r.kubeclient.RbacV1().ClusterRoleBindings().List(r.context, metav1.ListOptions{})
 }
 
 func (r *resourceService) ClusterRoleBindingCreate(clusterRoleBindingName, username, roleName string, subjects []rbacv1.Subject) (*rbacv1.ClusterRoleBinding, error) {

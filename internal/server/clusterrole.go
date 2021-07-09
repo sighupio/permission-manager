@@ -29,3 +29,26 @@ func createClusterRole(c echo.Context) error {
 	return ac.okResponse()
 }
 
+
+func deleteClusterRole(c echo.Context) error {
+	ac := c.(*AppContext)
+	type Request struct {
+		RoleName string `json:"roleName" validate:"required"`
+	}
+
+	r := new(Request)
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
+		return err
+	}
+
+	err = ac.ResourceService.ClusterRoleDelete(r.RoleName)
+
+	if err != nil {
+		return err
+	}
+
+	return ac.okResponse()
+}
