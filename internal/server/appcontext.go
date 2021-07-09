@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/labstack/echo"
-	"k8s.io/client-go/kubernetes"
 	"net/http"
 	"sighupio/permission-manager/internal/config"
 	"sighupio/permission-manager/internal/resources"
@@ -11,7 +10,6 @@ import (
 // AppContext echo context extended with application specific fields
 type AppContext struct {
 	echo.Context
-	Kubeclient      kubernetes.Interface
 	ResourceService resources.ResourceService
 	Config          config.Config
 }

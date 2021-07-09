@@ -5,11 +5,10 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestListNamespaces(t *testing.T) {
-	kc := fake.NewSimpleClientset()
+	kc := NewFakeKubeClient()
 	ctx := context.Background()
 
 	svc := NewResourceService(kc, ctx)

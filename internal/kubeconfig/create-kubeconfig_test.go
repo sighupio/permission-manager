@@ -3,7 +3,6 @@ package kubeconfig
 import (
 	"context"
 	"sighupio/permission-manager/internal/config"
-	"sighupio/permission-manager/internal/kubeclient"
 	"sighupio/permission-manager/internal/resources"
 	"testing"
 
@@ -18,7 +17,7 @@ func TestCreateKubeconfig(t *testing.T) {
 		ControlPlaneAddress: "https://100.200.10.200",
 	}
 
-	rs := resources.NewResourceService(kubeclient.New(), context.TODO())
+	rs := resources.NewResourceService(resources.NewFakeKubeClient(), context.TODO())
 
 	got := CreateKubeConfigYAMLForUser(rs, clusterConfig, "gino", "pangolier")
 

@@ -1,13 +1,14 @@
-package kubeclient
+package resources
 
 import (
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes/fake"
 	"log"
 	runtime "sigs.k8s.io/controller-runtime"
 )
 
-// New returns a kubernetes client already configured
-func New() kubernetes.Interface {
+// NewKubeClient returns a kubernetes client already configured
+func NewKubeClient() kubernetes.Interface {
 	config, err := runtime.GetConfig()
 
 	if err != nil {
@@ -21,4 +22,8 @@ func New() kubernetes.Interface {
 	}
 
 	return client
+}
+
+func NewFakeKubeClient() kubernetes.Interface {
+	return fake.NewSimpleClientset()
 }

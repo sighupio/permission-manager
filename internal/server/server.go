@@ -14,17 +14,14 @@ import (
 	_ "sighupio/permission-manager/statik"
 
 	"github.com/rakyll/statik/fs"
-	"k8s.io/client-go/kubernetes"
 )
 
-
-
-func New(kubeclient kubernetes.Interface, cfg config.Config) *echo.Echo {
+func New(cfg config.Config) *echo.Echo {
 	e := echo.New()
 
 	e.Validator = &CustomValidator{validator: validator.New()}
 
-	addMiddlewareStack(e, kubeclient, cfg)
+	addMiddlewareStack(e, cfg)
 
 	addRoutes(e)
 
@@ -36,7 +33,7 @@ func New(kubeclient kubernetes.Interface, cfg config.Config) *echo.Echo {
 	return e
 }
 
-func addMiddlewareStack(e *echo.Echo, kubeclient kubernetes.Interface, cfg config.Config) {
+func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 	basicAuthPassword := os.Getenv("BASIC_AUTH_PASSWORD")
 
 	if basicAuthPassword == "" {
@@ -62,12 +59,10 @@ func addMiddlewareStack(e *echo.Echo, kubeclient kubernetes.Interface, cfg confi
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			context := c.Request().Context()
-			rs := resources.NewResourceService(kubeclient, context)
+			rs := resources.NewResourceService(resources.NewKubeClient(), c.Request().Context())
 
 			customContext := &AppContext{
-				Context: c,
-				Kubeclient:      kubeclient,
+				Context:         c,
 				ResourceService: rs,
 				Config:          cfg,
 			}
