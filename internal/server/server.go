@@ -60,15 +60,13 @@ func addMiddlewareStack(e *echo.Echo, kubeclient kubernetes.Interface, cfg confi
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
-	// this middleware should be the last of the stack. It inject request.Context inside ResourceService
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// we make a scoped resource service per request
-			rs := resources.NewResourcesService(kubeclient, c.Request().Context())
+			context := c.Request().Context()
+			rs := resources.NewResourcesService(kubeclient, &context)
 
 			customContext := &AppContext{
 				Context: c,
-				//todo is it correct that kubeclient is a singleton?
 				Kubeclient:      kubeclient,
 				ResourceService: rs,
 				Config:          cfg,
