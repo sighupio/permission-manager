@@ -18,6 +18,7 @@ type UserService interface {
 	UserList() ([]User, error)
 	UserDelete(username string) error
 	UserCreate(username string) (User, error)
+
 }
 
 const resourceURL = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers"
@@ -139,3 +140,4 @@ func (r *resourceService) UserDelete(username string) error {
 
 	return err
 }
+

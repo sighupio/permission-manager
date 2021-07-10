@@ -1,9 +1,8 @@
-package kubeconfig
+package resources
 
 import (
 	"context"
 	"sighupio/permission-manager/internal/config"
-	"sighupio/permission-manager/internal/resources"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -17,9 +16,9 @@ func TestCreateKubeconfig(t *testing.T) {
 		ControlPlaneAddress: "https://100.200.10.200",
 	}
 
-	rs := resources.NewResourceService(resources.NewFakeKubeClient(), context.TODO())
+	rs := NewResourceService(NewFakeKubeClient(), context.TODO())
 
-	got := CreateKubeConfigYAMLForUser(rs, clusterConfig, "gino", "pangolier")
+	got := rs.ServiceAccountCreateKubeConfigForUser(clusterConfig, "gino", "pangolier")
 
 	want := `---
 apiVersion: v1

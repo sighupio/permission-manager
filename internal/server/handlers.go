@@ -1,11 +1,9 @@
 package server
 
 import (
-	"net/http"
-
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
-	"sighupio/permission-manager/internal/kubeconfig"
+	"net/http"
 )
 
 
@@ -92,7 +90,7 @@ func createKubeconfig(c echo.Context) error {
 		r.Namespace = "default"
 	}
 
-	kubeCfg := kubeconfig.CreateKubeConfigYAMLForUser(ac.ResourceService, ac.Config.Cluster, r.Username, r.Namespace)
+	kubeCfg := ac.ResourceService.ServiceAccountCreateKubeConfigForUser(ac.Config.Cluster, r.Username, r.Namespace)
 
 	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 }

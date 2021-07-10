@@ -6,13 +6,16 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
+	"log"
+	"sighupio/permission-manager/internal/config"
 	"time"
 )
 
 type ServiceAccountService interface {
 	ServiceAccountGet(namespace, name string) (*v1.ServiceAccount, error)
 	ServiceAccountCreate(namespace, name string) (*v1.ServiceAccount, error)
-	ServiceAccountGetToken(ns string, name string, shouldWaitSvcCreation bool) (string, string, error)
+	// ServiceAccountCreateKubeConfigForUser Creates a ServiceAccount for the user and returns the KubeConfig with its token
+	ServiceAccountCreateKubeConfigForUser(cluster config.ClusterConfig, username, namespace string) (kubeconfigYAML string)
 }
 
 func (r *resourceService) ServiceAccountGet(namespace, name string) (*v1.ServiceAccount, error) {
@@ -27,10 +30,64 @@ func (r *resourceService) ServiceAccountCreate(namespace, name string) (*v1.Serv
 	}, metav1.CreateOptions{})
 }
 
+func (r *resourceService) ServiceAccountCreateKubeConfigForUser(cluster config.ClusterConfig, username, kubeConfigNamespace string) (kubeconfigYAML string) {
+
+	serviceAccountNamespace := "permission-manager" // TODO: must be received externally to this func?
+
+	// Create service account
+	_, err := r.ServiceAccountCreate(serviceAccountNamespace, username)
+
+	if err != nil {
+		log.Printf("Service Account not created: %v", err)
+	}
+
+	// get service account token
+	_, token, err := r.serviceAccountGetToken(serviceAccountNamespace, username, true)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	certificateTpl := `---
+apiVersion: v1
+kind: Config
+current-context: %s@%s
+clusters:
+  - cluster:
+      certificate-authority-data: %s
+      server: %s
+    name: %s
+contexts:
+  - context:
+      cluster: %s
+      user: %s
+      namespace: %s
+    name: %s@%s
+users:
+  - name: %s
+    user:
+      token: %s`
+
+	return fmt.Sprintf(certificateTpl,
+		username,
+		cluster.Name,
+		getCaBase64(),
+		cluster.ControlPlaneAddress,
+		cluster.Name,
+		cluster.Name,
+		username,
+		kubeConfigNamespace,
+		username,
+		cluster.Name,
+		username,
+		token,
+	)
+}
+
+
+
 //todo refactor
-func (r *resourceService) ServiceAccountGetToken(ns string, name string, shouldWait bool) (string, string, error) {
-	tokenName := ""
-	token := ""
+func (r *resourceService) serviceAccountGetToken(ns string, name string, shouldWaitServiceAccountCreation bool) (tokenName string, token string, err error) {
 
 	findToken := func() (bool, error) {
 		user, err := r.ServiceAccountGet(ns, name)
@@ -74,7 +131,7 @@ func (r *resourceService) ServiceAccountGetToken(ns string, name string, shouldW
 		return false, nil
 	}
 
-	if shouldWait {
+	if shouldWaitServiceAccountCreation {
 		err := wait.Poll(time.Second, 10*time.Second, findToken)
 
 		if err != nil {
@@ -93,3 +150,6 @@ func (r *resourceService) ServiceAccountGetToken(ns string, name string, shouldW
 
 	return tokenName, token, nil
 }
+
+
+
