@@ -11,7 +11,7 @@ func TestListNamespaces(t *testing.T) {
 	kc := NewFakeKubeClient()
 	ctx := context.Background()
 
-	svc := NewResourceService(kc, ctx)
+	svc := NewManager(kc, ctx)
 
 	names, err := svc.NamespaceList()
 

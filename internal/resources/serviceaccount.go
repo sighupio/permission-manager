@@ -11,18 +11,12 @@ import (
 	"time"
 )
 
-type ServiceAccountService interface {
-	ServiceAccountGet(namespace, name string) (*v1.ServiceAccount, error)
-	ServiceAccountCreate(namespace, name string) (*v1.ServiceAccount, error)
-	// ServiceAccountCreateKubeConfigForUser Creates a ServiceAccount for the user and returns the KubeConfig with its token
-	ServiceAccountCreateKubeConfigForUser(cluster config.ClusterConfig, username, namespace string) (kubeconfigYAML string)
-}
 
-func (r *resourceService) ServiceAccountGet(namespace, name string) (*v1.ServiceAccount, error) {
+func (r *Manager) ServiceAccountGet(namespace, name string) (*v1.ServiceAccount, error) {
 	return r.kubeclient.CoreV1().ServiceAccounts(namespace).Get(r.context, name, metav1.GetOptions{})
 }
 
-func (r *resourceService) ServiceAccountCreate(namespace, name string) (*v1.ServiceAccount, error) {
+func (r *Manager) ServiceAccountCreate(namespace, name string) (*v1.ServiceAccount, error) {
 	return r.kubeclient.CoreV1().ServiceAccounts(namespace).Create(r.context, &v1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -30,7 +24,8 @@ func (r *resourceService) ServiceAccountCreate(namespace, name string) (*v1.Serv
 	}, metav1.CreateOptions{})
 }
 
-func (r *resourceService) ServiceAccountCreateKubeConfigForUser(cluster config.ClusterConfig, username, kubeConfigNamespace string) (kubeconfigYAML string) {
+// ServiceAccountCreateKubeConfigForUser Creates a ServiceAccount for the user and returns the KubeConfig with its token
+func (r *Manager) ServiceAccountCreateKubeConfigForUser(cluster config.ClusterConfig, username, kubeConfigNamespace string) (kubeconfigYAML string) {
 
 	serviceAccountNamespace := "permission-manager" // TODO: must be received externally to this func?
 
@@ -87,7 +82,7 @@ users:
 
 
 //todo refactor
-func (r *resourceService) serviceAccountGetToken(ns string, name string, shouldWaitServiceAccountCreation bool) (tokenName string, token string, err error) {
+func (r *Manager) serviceAccountGetToken(ns string, name string, shouldWaitServiceAccountCreation bool) (tokenName string, token string, err error) {
 
 	findToken := func() (bool, error) {
 		user, err := r.ServiceAccountGet(ns, name)

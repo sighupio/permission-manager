@@ -59,11 +59,9 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			rs := resources.NewResourceService(resources.NewKubeClient(), c.Request().Context())
-
 			customContext := &AppContext{
 				Context:         c,
-				ResourceService: rs,
+				ResourceManager: resources.NewManager(resources.NewKubeClient(), c.Request().Context()),
 				Config:          cfg,
 			}
 			return next(customContext)

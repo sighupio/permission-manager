@@ -22,7 +22,7 @@ func createClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	_, err = ac.ResourceService.ClusterRoleBindingCreate(r.ClusterRolebindingName, r.Username, r.RoleName, r.Subjects)
+	_, err = ac.ResourceManager.ClusterRoleBindingCreate(r.ClusterRolebindingName, r.Username, r.RoleName, r.Subjects)
 
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func deleteClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.ClusterRoleBindingDelete(r.RolebindingName)
+	err = ac.ResourceManager.ClusterRoleBindingDelete(r.RolebindingName)
 
 	if err != nil {
 		return err

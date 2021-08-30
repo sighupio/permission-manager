@@ -16,7 +16,7 @@ func TestCreateKubeconfig(t *testing.T) {
 		ControlPlaneAddress: "https://100.200.10.200",
 	}
 
-	rs := NewResourceService(NewFakeKubeClient(), context.TODO())
+	rs := NewManager(NewFakeKubeClient(), context.TODO())
 
 	got := rs.ServiceAccountCreateKubeConfigForUser(clusterConfig, "gino", "pangolier")
 

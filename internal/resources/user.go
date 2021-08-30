@@ -12,21 +12,12 @@ type User struct {
 	Name string `json:"name"`
 }
 
-// UserService allows to manage the life-cycle of
-// Users defined in the managed K8s cluster.
-type UserService interface {
-	UserList() ([]User, error)
-	UserDelete(username string) error
-	UserCreate(username string) (User, error)
-
-}
-
 const resourceURL = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers"
 
 const resourcePrefix = "permissionmanager.user."
 
 // GetAllUsers returns the list of Users defined in the K8s cluster.
-func (r *resourceService) UserList() ([]User, error) {
+func (r *Manager) UserList() ([]User, error) {
 	//noinspection GoPreferNilSlice
 	users := []User{}
 
@@ -82,7 +73,7 @@ func (r *resourceService) UserList() ([]User, error) {
 
 // CreateUser adds a new User with the given username to the K8s cluster
 // creating a new PermissionManagerUser CRD object. todo add error handling
-func (r *resourceService) UserCreate(username string) (User, error) {
+func (r *Manager) UserCreate(username string) (User, error) {
 	metadataName := resourcePrefix + username
 
 	var createUserRequest = struct {
@@ -127,7 +118,7 @@ func (r *resourceService) UserCreate(username string) (User, error) {
 
 // DeleteUser delete an existing User from the K8s cluster removing
 // the PermissionManagerUser CRD object associated to the user with the given username.
-func (r *resourceService) UserDelete(username string) error {
+func (r *Manager) UserDelete(username string) error {
 	metadataName := resourcePrefix + username
 
 	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(resourceURL + "/" + metadataName).DoRaw(r.context)

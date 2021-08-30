@@ -10,7 +10,7 @@ import (
 // AppContext echo context extended with application specific fields
 type AppContext struct {
 	echo.Context
-	ResourceService resources.ResourceService
+	ResourceManager *resources.Manager
 	Config          config.Config
 }
 

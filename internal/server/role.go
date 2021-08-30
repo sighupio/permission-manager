@@ -22,7 +22,7 @@ func deleteRole(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.RoleDelete(r.Namespace, r.RoleName)
+	err = ac.ResourceManager.RoleDelete(r.Namespace, r.RoleName)
 
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func deleteRolebinding(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.RoleBindingDelete(r.Namespace, r.RolebindingName)
+	err = ac.ResourceManager.RoleBindingDelete(r.Namespace, r.RolebindingName)
 
 	if err != nil {
 		return err
@@ -75,7 +75,7 @@ func createRoleBinding(c echo.Context) error {
 		return err
 	}
 
-	_, err = ac.ResourceService.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
+	_, err = ac.ResourceManager.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
 		RoleKind:        r.RoleKind,
 		RoleName:        r.RoleName,
 		RolebindingName: r.RolebindingName,

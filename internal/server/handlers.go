@@ -14,7 +14,7 @@ func ListNamespaces(c echo.Context) error {
 		Namespaces []string `json:"namespaces"`
 	}
 
-	names, err := ac.ResourceService.NamespaceList()
+	names, err := ac.ResourceManager.NamespaceList()
 
 	if err != nil {
 		return err
@@ -34,25 +34,25 @@ func listRbac(c echo.Context) error {
 		RoleBindings        []rbacv1.RoleBinding        `json:"roleBindings"`
 	}
 
-	clusterRoles, err := ac.ResourceService.ClusterRoleList()
+	clusterRoles, err := ac.ResourceManager.ClusterRoleList()
 
 	if err != nil {
 		return err
 	}
 
-	clusterRoleBindings, err := ac.ResourceService.ClusterRoleBindingList()
+	clusterRoleBindings, err := ac.ResourceManager.ClusterRoleBindingList()
 
 	if err != nil {
 		return err
 	}
 
-	roles, err := ac.ResourceService.RoleList("")
+	roles, err := ac.ResourceManager.RoleList("")
 
 	if err != nil {
 		return err
 	}
 
-	roleBindings, err := ac.ResourceService.RoleBindingList("")
+	roleBindings, err := ac.ResourceManager.RoleBindingList("")
 
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func createKubeconfig(c echo.Context) error {
 		r.Namespace = "default"
 	}
 
-	kubeCfg := ac.ResourceService.ServiceAccountCreateKubeConfigForUser(ac.Config.Cluster, r.Username, r.Namespace)
+	kubeCfg := ac.ResourceManager.ServiceAccountCreateKubeConfigForUser(ac.Config.Cluster, r.Username, r.Namespace)
 
 	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 }

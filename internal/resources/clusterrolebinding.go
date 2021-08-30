@@ -5,17 +5,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type ClusterRoleBindingService interface {
-	ClusterRoleBindingCreate(clusterRoleBindingName, username, roleName string, subjects []rbacv1.Subject) (*rbacv1.ClusterRoleBinding, error)
-	ClusterRoleBindingDelete(roleBindingName string) error
-	ClusterRoleBindingList() (*rbacv1.ClusterRoleBindingList, error)
-}
 
-func (r *resourceService) ClusterRoleBindingList() (*rbacv1.ClusterRoleBindingList, error) {
+func (r *Manager) ClusterRoleBindingList() (*rbacv1.ClusterRoleBindingList, error) {
 	return r.kubeclient.RbacV1().ClusterRoleBindings().List(r.context, metav1.ListOptions{})
 }
 
-func (r *resourceService) ClusterRoleBindingCreate(clusterRoleBindingName, username, roleName string, subjects []rbacv1.Subject) (*rbacv1.ClusterRoleBinding, error) {
+func (r *Manager) ClusterRoleBindingCreate(clusterRoleBindingName, username, roleName string, subjects []rbacv1.Subject) (*rbacv1.ClusterRoleBinding, error) {
 
 	return r.kubeclient.RbacV1().ClusterRoleBindings().Create(r.context,
 		&rbacv1.ClusterRoleBinding{
@@ -32,6 +27,6 @@ func (r *resourceService) ClusterRoleBindingCreate(clusterRoleBindingName, usern
 		}, metav1.CreateOptions{})
 }
 
-func (r *resourceService) ClusterRoleBindingDelete(roleBindingName string) error {
+func (r *Manager) ClusterRoleBindingDelete(roleBindingName string) error {
 	return r.kubeclient.RbacV1().ClusterRoleBindings().Delete(r.context, roleBindingName, metav1.DeleteOptions{})
 }

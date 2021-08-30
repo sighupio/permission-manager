@@ -20,7 +20,7 @@ func createClusterRole(c echo.Context) error {
 		return err
 	}
 
-	_, err = ac.ResourceService.ClusterRoleCreate(r.RoleName, r.Rules)
+	_, err = ac.ResourceManager.ClusterRoleCreate(r.RoleName, r.Rules)
 
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func deleteClusterRole(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceService.ClusterRoleDelete(r.RoleName)
+	err = ac.ResourceManager.ClusterRoleDelete(r.RoleName)
 
 	if err != nil {
 		return err
