@@ -8,7 +8,7 @@ import (
 func listUsers(c echo.Context) error {
 	ac := c.(*AppContext)
 
-	users, err := ac.ResourceManager.UserList()
+	users, err := ac.ResourceManager.V1Alpha1PermissionManagerUser.List()
 
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func createUser(c echo.Context) error {
 		return ac.errorResponse(invalidUsernameError)
 	}
 
-	u, err := ac.ResourceManager.UserCreate(r.Name)
+	u, err := ac.ResourceManager.V1Alpha1PermissionManagerUser.Create(r.Name)
 
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func deleteUser(c echo.Context) error {
 		return err
 	}
 
-	err = ac.ResourceManager.UserDelete(r.Username)
+	err = ac.ResourceManager.V1Alpha1PermissionManagerUser.Delete(r.Username)
 
 	if err != nil {
 		return err
