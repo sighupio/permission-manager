@@ -3,10 +3,11 @@ package resources
 import (
 	"context"
 	"encoding/json"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	k8sclient "k8s.io/client-go/kubernetes"
 	"log"
 	"sighupio/permission-manager/internal/crd/v1alpha1"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	k8sclient "k8s.io/client-go/kubernetes"
 )
 
 type V1Alpha1PermissionManagerUser struct {
@@ -24,7 +25,7 @@ func (r *V1Alpha1PermissionManagerUser) List() ([]User, error) {
 	//noinspection GoPreferNilSlice
 	users := []User{}
 
-	rawResponse, err := r.kubeclient.AppsV1().RESTClient().Get().AbsPath(v1alpha1.ResourceURL).DoRaw(r.context)
+	rawResponse, err := r.kubeclient.Discovery().RESTClient().Get().AbsPath(v1alpha1.ResourceURL).DoRaw(r.context)
 
 	if err != nil {
 		log.Print("Failed to get users from k8s CRUD api", err)
@@ -54,7 +55,7 @@ func (r *V1Alpha1PermissionManagerUser) Create(username string) (User, error) {
 
 	createUserRequest := v1alpha1.PermissionManagerUser{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: "permissionmanager.PermissionManagerUser/v1alpha1",
+			APIVersion: "permissionmanager.user/v1alpha1",
 			Kind:       "Permissionmanageruser",
 		},
 		Metadata: metav1.ObjectMeta{
@@ -71,7 +72,7 @@ func (r *V1Alpha1PermissionManagerUser) Create(username string) (User, error) {
 		return User{}, err
 	}
 
-	_, err = r.kubeclient.AppsV1().RESTClient().Post().AbsPath(v1alpha1.ResourceURL).Body([]byte(jsonPayload)).DoRaw(r.context)
+	_, err = r.kubeclient.Discovery().RESTClient().Post().AbsPath(v1alpha1.ResourceURL).Body(jsonPayload).DoRaw(r.context)
 
 	if err != nil {
 		log.Printf("Failed to create PermissionManagerUser:%s\n %v\n", username, err)
@@ -86,7 +87,7 @@ func (r *V1Alpha1PermissionManagerUser) Create(username string) (User, error) {
 func (r *V1Alpha1PermissionManagerUser) Delete(username string) error {
 	metadataName := v1alpha1.ResourcePrefix + username
 
-	_, err := r.kubeclient.AppsV1().RESTClient().Delete().AbsPath(v1alpha1.ResourceURL + "/" + metadataName).DoRaw(r.context)
+	_, err := r.kubeclient.Discovery().RESTClient().Delete().AbsPath(v1alpha1.ResourceURL + "/" + metadataName).DoRaw(r.context)
 
 	if err == nil {
 		return nil
