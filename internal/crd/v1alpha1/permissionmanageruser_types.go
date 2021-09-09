@@ -3,8 +3,8 @@ package v1alpha1
 import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 const (
-	ResourceURL    = "apis/permissionmanager.PermissionManagerUser/v1alpha1/permissionmanagerusers"
-	ResourcePrefix = "permissionmanager.PermissionManagerUser."
+	ResourceURL    = "apis/permissionmanager.user/v1alpha1/permissionmanagerusers"
+	ResourcePrefix = "permissionmanagerusers.permissionmanager.user."
 )
 
 type PermissionManagerUserSpec struct {
@@ -21,5 +21,5 @@ type PermissionManagerUser struct {
 type PermissionManagerUserList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items      []PermissionManagerUser `json:"items"`
+	Items           []PermissionManagerUser `json:"items"`
 }
