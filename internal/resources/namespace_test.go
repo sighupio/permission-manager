@@ -5,23 +5,24 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 func TestListNamespaces(t *testing.T) {
-	kc := fake.NewSimpleClientset()
-	svc := NewResourcesService(kc)
-
+	kc := NewFakeKubeClient()
 	ctx := context.Background()
-	names, err := svc.GetAllNamespaces(ctx)
+
+	svc := NewManager(kc, ctx)
+
+	names, err := svc.NamespaceList()
+
 	got := names
 	want := []string{}
 	if assert.NoError(t, err) {
 		assert.ElementsMatch(t, want, got)
 	}
 
-	// svc.CreateUser("jaga")
-	// svc.CreateUser("jacopo")
+	// svc.UserCreate("jaga")
+	// svc.UserCreate("jacopo")
 
 	// names, err = svc.GetNamespaces()
 	// got = names
