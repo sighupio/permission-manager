@@ -1,4 +1,4 @@
-FROM golang:1.14
+FROM golang:1.16
 
 RUN apt-get update && apt-get install -y npm=5.8.0+ds6-4+deb10u2
 
