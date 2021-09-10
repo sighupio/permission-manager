@@ -18,7 +18,7 @@ steps:
       - git fetch --tags
 
   - name: unit-test
-    image: golang:1.14.2
+    image: golang:1.16
     pull: always
     commands:
       - apt-get update && apt-get install -y npm=5.8.0+ds6-4+deb10u2
