@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 BASIC_AUTH_PASSWORD ?= admin
+KIND_CLUSTER_NAME = "kind"
 
 local-container = permission-manager:$(shell git rev-parse HEAD)
 
@@ -67,7 +68,7 @@ test:
 
 # test-e2e: Run e2e test in the kubectl current-context. Used in the pipeline.
 .PHONY: test-e2e
-test-e2e:
+test-e2e: build
 	@bats -t tests/setup.sh && bats -t tests/create-user.sh
 	@cd e2e-test && yarn install && yarn test
 
@@ -97,7 +98,7 @@ seed:
 # build: local deployment of the current sha
 build:
 	@docker build . -t ${local-container}
-	@kind load docker-image ${local-container}
+	@kind load docker-image ${local-container} --name $(KIND_CLUSTER_NAME)
 
 # deploy: Install deployment for permission-manager
 .PHONY: deploy
@@ -105,6 +106,7 @@ deploy:
 	@yq w deployments/kubernetes/deploy.yml -d1  \
 		spec.template.spec.containers.[0].image ${local-container} \
 		| kubectl apply -f -
+	@kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
 
 # port-forward: Connect port 4000 to pod permission-manager
 .PHONY: port-forward
