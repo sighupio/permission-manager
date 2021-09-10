@@ -1,9 +1,15 @@
 #kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
-kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
-kubeadmConfigPatchesJSON6902:
-  - group: kubeadm.k8s.io
-    version: v1beta2
+kind: Cluster
+networking:
+  apiServerAddress: "0.0.0.0"
+
+nodes:
+- role: control-plane
+  kubeadmConfigPatches:
+  - |
+    group: kubeadm.k8s.io
+    version: v1beta1
     kind: ClusterConfiguration
     patch: |
       - op: add
@@ -13,4 +19,11 @@ kubeadmConfigPatchesJSON6902:
         path: /apiServer/certSANs/-
         value: kind-control-plane
 
-
+containerdConfigPatches:
+- |-
+    [debug]
+      level = "debug"
+    [plugins."io.containerd.grpc.v1.cri".registry]
+      [plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+        [plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+          endpoint = ["https://mirror.gcr.io", "https://registry-1.docker.io"]
