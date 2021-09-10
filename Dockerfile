@@ -3,8 +3,8 @@ FROM golang:1.16 as builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
-RUN apt-get update && apt-get install -y npm=5.8.0+ds6-4+deb10u2
-RUN npm install -g yarn@1.22.10
+RUN apt-get update && apt-get install -y npm=7.5.2+ds-2
+RUN npm install -g yarn@1.22.11
 COPY ./ /app/
 RUN make clean dependencies ui permission-manager
 
