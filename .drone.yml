@@ -87,8 +87,9 @@ trigger:
   ref:
     include:
       - refs/heads/master
-      - refs/heads/minor-fixes
       - refs/tags/**
+      - refs/heads/dependabot/*
+      - refs/heads/renovate/*
 
 environment:
   KIND_VERSION: v0.11.1
@@ -166,8 +167,9 @@ trigger:
   ref:
     include:
       - refs/heads/master
-      - refs/heads/minor-fixes
       - refs/tags/**
+      - refs/heads/dependabot/*
+      - refs/heads/renovate/*
 
 environment:
   KIND_VERSION: v0.11.1
@@ -245,8 +247,9 @@ trigger:
   ref:
     include:
       - refs/heads/master
-      - refs/heads/minor-fixes
       - refs/tags/**
+      - refs/heads/dependabot/*
+      - refs/heads/renovate/*
 
 environment:
   KIND_VERSION: v0.11.1
