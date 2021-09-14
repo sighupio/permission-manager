@@ -38,7 +38,7 @@ export default function NewUserWizard() {
     
     if (
       !username.match(/^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)$/)) {
-      setUsernameError(`user can only contain lowercase letters, dots and dashes and numbers`)
+      setUsernameError(`user can only contain lowercase letters, dots, dashes and numbers`)
       return false
     }
     
