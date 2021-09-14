@@ -8,7 +8,7 @@ RUN npm install -g yarn@1.22.11
 COPY ./ /app/
 RUN make clean dependencies ui permission-manager
 
-FROM alpine:3.9
+FROM alpine:3.13
 WORKDIR /root/
 COPY --from=builder /app/permission-manager .
 EXPOSE 4000
