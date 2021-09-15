@@ -1,12 +1,5 @@
 #!/usr/bin/env bats
 
-if [[ -f .kubeconfig ]]; then
-  source .env-cluster
-else
-  echo ".kubeconfig file is needed in the root of the project"
-  exit 1
-fi
-
 apply (){
   kustomize build $1 >&2
   kustomize build $1 | kubectl apply -f - 2>&3

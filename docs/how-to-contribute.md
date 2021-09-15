@@ -26,7 +26,7 @@ Note that in a future version of the software, the current naming convention wil
 - make 4.1
 - go 1.14.2
 - npm 6.14.4
-- yarn 1.22.10
+- yarn 1.22.11
 - yq 3.3.0
 - kubectl 1.16.6
 - curl 7.58.0
