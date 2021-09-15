@@ -37,8 +37,8 @@ export default function NewUserWizard() {
     }
     
     if (
-      !username.match(/^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*)$/)) {
-      setUsernameError(`user can only contain lowercase letters, dots, dashes and numbers`)
+      !username.match(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/)) {
+      setUsernameError(`username must be DNS-1123 compliant, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'jane.doe')`)
       return false
     }
     
@@ -127,7 +127,7 @@ export default function NewUserWizard() {
               Username
               <input
                 autoFocus
-                placeholder="Jane Doe"
+                placeholder="jane.doe"
                 className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${
                   usernameError && formTouched ? 'border-red-500' : ''
                 }`}
