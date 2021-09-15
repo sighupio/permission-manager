@@ -88,8 +88,8 @@ trigger:
     include:
       - refs/heads/master
       - refs/tags/**
-      - refs/heads/dependabot/*
-      - refs/heads/renovate/*
+      - refs/heads/dependabot/**
+      - refs/heads/renovate/**
 
 environment:
   KIND_VERSION: v0.11.1
@@ -168,8 +168,8 @@ trigger:
     include:
       - refs/heads/master
       - refs/tags/**
-      - refs/heads/dependabot/*
-      - refs/heads/renovate/*
+      - refs/heads/dependabot/**
+      - refs/heads/renovate/**
 
 environment:
   KIND_VERSION: v0.11.1
@@ -248,8 +248,8 @@ trigger:
     include:
       - refs/heads/master
       - refs/tags/**
-      - refs/heads/dependabot/*
-      - refs/heads/renovate/*
+      - refs/heads/dependabot/**
+      - refs/heads/renovate/**
 
 environment:
   KIND_VERSION: v0.11.1
