@@ -1,9 +1,11 @@
 package server
 
 import (
+	"fmt"
 	"github.com/labstack/echo"
 	rbacv1 "k8s.io/api/rbac/v1"
 	"net/http"
+	"sighupio/permission-manager/internal/resources"
 )
 
 
@@ -90,8 +92,98 @@ func createKubeconfig(c echo.Context) error {
 		r.Namespace = "default"
 	}
 
+	// Check subject for rolebindings and clusterrolebindings
+	roleBindings, err := ac.ResourceManager.RoleBindingList("permission-manager")
+
+	if err != nil {
+		return err
+	}
+
+	clusterRoleBindings, err := ac.ResourceManager.ClusterRoleBindingList()
+
+	if err != nil {
+		return err
+	}
+
+	var roleBindingToMigrate *rbacv1.RoleBinding
+	var clusterRoleBindingToMigrate *rbacv1.ClusterRoleBinding
+
+	fmt.Println("Searching for roleBinding")
+
+	for _, roleBinding := range (*roleBindings).Items {
+		for _, rbSubjects := range roleBinding.Subjects {
+			if rbSubjects.Name == r.Username && rbSubjects.Kind == "User" {
+				roleBindingToMigrate = &roleBinding
+			}
+		}
+	}
+
+	fmt.Println("Searching for clusterRoleBinding")
+
+	for _, clusterRoleBinding := range (*clusterRoleBindings).Items {
+		for _, crbSubjects := range clusterRoleBinding.Subjects {
+			if crbSubjects.Name == r.Username && crbSubjects.Kind == "User" {
+				clusterRoleBindingToMigrate = &clusterRoleBinding
+			}
+		}
+	}
+
+	if roleBindingToMigrate != nil {
+
+		fmt.Println("roleBinding found")
+
+		err = ac.ResourceManager.RoleBindingDelete(r.Namespace, (*roleBindingToMigrate).Name)
+
+		if err != nil {
+			return err
+		}
+
+		var subjects []rbacv1.Subject
+
+		subjects = append(subjects, rbacv1.Subject{
+			Kind: "ServiceAccount",
+			Namespace: "permission-manager",
+			Name: r.Username,
+		})
+
+		_, err = ac.ResourceManager.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
+			RoleKind:        (*roleBindingToMigrate).RoleRef.Kind,
+			RoleName:        (*roleBindingToMigrate).RoleRef.Name,
+			RolebindingName: (*roleBindingToMigrate).Name,
+			Subjects:        subjects,
+		})
+
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+
+	if clusterRoleBindingToMigrate != nil {
+		fmt.Println("clusterRoleBinding found")
+
+		err = ac.ResourceManager.ClusterRoleBindingDelete((*clusterRoleBindingToMigrate).Name)
+
+		if err != nil {
+			return err
+		}
+
+		var subjects []rbacv1.Subject
+
+		subjects = append(subjects, rbacv1.Subject{
+			Kind: "ServiceAccount",
+			Namespace: "permission-manager",
+			Name: r.Username,
+		})
+
+		_, err = ac.ResourceManager.ClusterRoleBindingCreate((*clusterRoleBindingToMigrate).Name, r.Username, (*clusterRoleBindingToMigrate).RoleRef.Name, subjects)
+
+		if err != nil {
+			return err
+		}
+	}
+
 	kubeCfg := ac.ResourceManager.ServiceAccountCreateKubeConfigForUser(ac.Config.Cluster, r.Username, r.Namespace)
 
 	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 }
-
