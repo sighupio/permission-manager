@@ -9,7 +9,7 @@ interface ClusterAccessRadioParameters {
 export default function ClusterAccessRadio({clusterAccess, setClusterAccess}: ClusterAccessRadioParameters) {
   return (
     <div>
-      <div>
+      <div data-testid="nonnamespaced-select">
         <div className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
           access to cluster resouces (non-namespaced):
         </div>

@@ -50,7 +50,7 @@ export default function EditUser({user}: EditUserParameters) {
   const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState<ClusterAccess>(null)
-  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState(extractedPairItems)
+  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState([])
   
   useEffect(() => {
     
