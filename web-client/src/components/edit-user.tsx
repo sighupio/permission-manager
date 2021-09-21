@@ -55,7 +55,6 @@ export default function EditUser({user}: EditUserParameters) {
   const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
   const [canCheckLegacyUser, setCanCheckLegacyUser] = useState(false);
   const [showLegacyMigrationModal, setShowLegacyMigrationModal] = useState(false);
-  const [upgradingUser, setUpgradingUser] = useState(true);
 
   useEffect(() => {
     // means that aggragatedRoleBindings is already bootstrapped
@@ -121,16 +120,6 @@ export default function EditUser({user}: EditUserParameters) {
   }, [aggregatedRoleBindings, username, canCheckLegacyUser])
 
 
-  useEffect(() => {
-    if (showLegacyMigrationModal) {
-      setUpgradingUser(true);
-      handleSubmit(null, false).then(() => {
-        setUpgradingUser(false);
-      })
-    }
-  }, [showLegacyMigrationModal])
-
-
   async function handleUserDeletion() {
     setShowLoader(true)
 
@@ -189,45 +178,10 @@ export default function EditUser({user}: EditUserParameters) {
   return (
     <div>
       {showLoader && <FullScreenLoader/>}
-      <Dialog
-        className="max-w-4xl mx-auto bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4"
-        isOpen={showLegacyMigrationModal}
-      >
-        <div>
-          <div>
-            <div className="flex justify-between">
-              <h2 className="text-3xl mb-4 text-gray-800">
-                Legacy user detected
-              </h2>
-            </div>
-            <div>
-              <p>Users from versions older than 1.6.0 have to be upgraded in order to work with the new kubeconfig.</p>
-              <p>Upgrading user <strong>{username}</strong>...</p>
-              {
-                !upgradingUser &&
-                <p>Done!</p>
-              }
-            </div>
-            <div className="flex mt-4">
-              <div>
-                <button
-                  className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
-                    upgradingUser ? ' opacity-50 cursor-not-allowed' : ''
-                  }`}
-                  disabled={upgradingUser}
-                  onClick={() => {
-                    setShowLegacyMigrationModal(false)
-                  }}>
-                  Ok
-                </button>
-              </div>
-              <div className="ml-4">
-                <CreateKubeconfigButton user={user} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </Dialog>
+      {showLegacyMigrationModal && <LegacyUserModal user={user} upgradeUser={handleSubmit}
+                                                    close={() => setShowLegacyMigrationModal(false)}
+                                                    username={username}></LegacyUserModal>
+      }
       <div className="flex content-between items-center mb-4">
         <h2 className="text-3xl text-gray-800">
           User: <span data-testid="username-heading">{username}</span>
@@ -296,5 +250,69 @@ export default function EditUser({user}: EditUserParameters) {
         </>
       ) : null}
     </div>
+  )
+}
+
+interface LegacyUserModalProps {
+  close();
+  upgradeUser(event, reload);
+  username: string;
+  user: User;
+}
+
+function LegacyUserModal({close, user, username, upgradeUser}: LegacyUserModalProps) {
+  const [upgradingUser, setUpgradingUser] = useState(true);
+
+  useEffect(() => {
+    async function handleUpgradeUser() {
+      await upgradeUser(null, false)
+    }
+
+    setUpgradingUser(true);
+    handleUpgradeUser().then(() => {
+      setUpgradingUser(false);
+    })
+  }, [upgradeUser])
+
+  return (
+    <Dialog
+      className="max-w-4xl mx-auto bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4"
+      isOpen={true}
+    >
+      <div>
+        <div>
+          <div className="flex justify-between">
+            <h2 className="text-3xl mb-4 text-gray-800">
+              Legacy user detected
+            </h2>
+          </div>
+          <div>
+            <p>Users from versions older than 1.6.0 have to be upgraded in order to work with the new kubeconfig.</p>
+            <p>Upgrading user <strong>{username}</strong>...</p>
+            {
+              !upgradingUser &&
+              <p>Done!</p>
+            }
+          </div>
+          <div className="flex mt-4">
+            <div>
+              <button
+                className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
+                  upgradingUser ? ' opacity-50 cursor-not-allowed' : ''
+                }`}
+                disabled={upgradingUser}
+                onClick={() => {
+                  close();
+                }}>
+                Ok
+              </button>
+            </div>
+            <div className="ml-4">
+              <CreateKubeconfigButton user={user}/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Dialog>
   )
 }
