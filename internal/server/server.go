@@ -101,4 +101,5 @@ func addRoutes(e *echo.Echo) {
 	api.POST("/delete-user", deleteUser)
 
 	api.POST("/create-kubeconfig", createKubeconfig)
+	api.POST("/check-legacy-user", checkLegacyUser)
 }

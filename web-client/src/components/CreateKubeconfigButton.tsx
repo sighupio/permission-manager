@@ -56,7 +56,7 @@ export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonPar
   }, [kubeconfig, showModal, user.name, chosenNamespace, validNamespaces])
   
   return (
-    <span>
+    <span className="flex">
       <Dialog
         className="max-w-4xl	mx-auto bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4"
         isOpen={showModal}
@@ -117,7 +117,7 @@ export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonPar
         </div>
       </Dialog>
       <button
-        className="bg-transparent hover:bg-teal-500 text-teal-700 font-semibold hover:text-white py-2 px-4 border border-teal-500 hover:border-transparent rounded"
+        className="bg-transparent hover:bg-teal-500 text-teal-700 font-semibold hover:text-white py-2 px-4 border border-teal-500 hover:border-transparent rounded whitespace-no-wrap"
         onClick={() => setShowModal(true)}
         type="button"
       >
