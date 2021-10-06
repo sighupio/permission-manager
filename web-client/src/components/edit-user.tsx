@@ -311,6 +311,11 @@ function LegacyUserModal({close, user, username, upgradeUser}: LegacyUserModalPr
               <CreateKubeconfigButton user={user}/>
             </div>
           </div>
+
+        </div>
+        <div className="flex w-full mt-4 flex-col" style={{backgroundColor: "#fff9e8", padding: 8, borderRadius: 4, border: "1px solid #8a6a0a"}}>
+          <h3 className="mb-1" style={{color: "#8a6a0a"}}><strong>Notice</strong></h3>
+          <p style={{color: "#343741"}}>The old kubeconfig file won't work anymore</p>
         </div>
       </div>
     </Dialog>
