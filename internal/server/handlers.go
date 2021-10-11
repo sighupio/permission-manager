@@ -6,7 +6,6 @@ import (
 	"net/http"
 )
 
-
 func ListNamespaces(c echo.Context) error {
 	ac := c.(*AppContext)
 
@@ -67,6 +66,55 @@ func listRbac(c echo.Context) error {
 
 }
 
+func checkLegacyUser(c echo.Context) error {
+	type Request struct {
+		Username string `json:"username"`
+		Namespaces []string `json:"namespaces"`
+	}
+
+	type Response struct {
+		Ok bool `json:"ok"`
+		LegacyUserDetected bool `json:"legacyUserDetected"`
+	}
+
+	ac := c.(*AppContext)
+	r := new(Request)
+
+	err := ac.validateAndBindRequest(r)
+
+	if err != nil {
+		return err
+	}
+
+	// if no namespace is set we set the value ["default"]
+	if len(r.Namespaces) == 0 {
+		r.Namespaces = []string{"default"}
+	}
+
+	legacyRoleBindingFound := false
+
+	for _, namespace := range r.Namespaces {
+		legacyRoleBinding, err := ac.ResourceManager.RoleBindingLegacyCheck(namespace, r.Username)
+
+		if err != nil {
+			return err
+		}
+
+		if legacyRoleBinding != nil {
+			legacyRoleBindingFound = true
+			break
+		}
+	}
+
+	legacyClusterRoleBinding, err := ac.ResourceManager.ClusterRoleBindingLegacyCheck(r.Username)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, Response{Ok: true, LegacyUserDetected: legacyRoleBindingFound || legacyClusterRoleBinding != nil})
+}
+
 func createKubeconfig(c echo.Context) error {
 	type Request struct {
 		Username  string `json:"username"`
@@ -94,4 +142,3 @@ func createKubeconfig(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, Response{Ok: true, Kubeconfig: kubeCfg})
 }
-

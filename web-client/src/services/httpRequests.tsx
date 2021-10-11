@@ -6,6 +6,7 @@ import {httpClientFactory} from "./httpClient";
 import {RolebindingCreateRequests} from "./rolebindingCreateRequests";
 import {RolebindingDeleteRequests} from "./rolebindingDeleteRequests";
 import {UserRequests} from "./userRequests";
+import {AggregatedRoleBindingNamespace} from "./role";
 
 
 /**
@@ -44,6 +45,16 @@ class HttpRequests {
   public kubeconfigCreate(username: string, chosenNamespace: string) {
     return this.httpClient.post('/api/create-kubeconfig', {
       username: username, namespace: chosenNamespace
+    })
+  }
+
+  public checkLegacyUser(username: string, namespaces: AggregatedRoleBindingNamespace) {
+    if (namespaces === "ALL_NAMESPACES") {
+      namespaces = []
+    }
+
+    return this.httpClient.post('/api/check-legacy-user', {
+      username: username, namespaces: namespaces
     })
   }
 }

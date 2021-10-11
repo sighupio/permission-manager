@@ -48,3 +48,21 @@ func (r *Manager) RoleBindingDelete(namespace, roleBindingName string) error {
 func (r *Manager) RoleBindingList(namespace string) (*rbacv1.RoleBindingList, error) {
 	return r.kubeclient.RbacV1().RoleBindings(namespace).List(r.context, metav1.ListOptions{})
 }
+
+func (r *Manager) RoleBindingLegacyCheck(namespace string, username string) (roleBindingToMigrate *rbacv1.RoleBinding, err error) {
+	roleBindings, err := r.RoleBindingList(namespace)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, roleBinding := range (*roleBindings).Items {
+		for _, rbSubjects := range roleBinding.Subjects {
+			if rbSubjects.Name == username && rbSubjects.Kind == "User" {
+				roleBindingToMigrate = &roleBinding
+			}
+		}
+	}
+
+	return roleBindingToMigrate, nil
+}
