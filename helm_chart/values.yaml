@@ -25,9 +25,11 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  fsGroup: 2000
 
+# Default values should not be used currently. It will result in a startup-error.
+# TODO: correct default values should be placed here.
 securityContext: {}
   # capabilities:
   #   drop:
@@ -40,31 +42,38 @@ service:
   type: ClusterIP
   port: 80 
 
+#
+# Ingress:
+# - If you want to use a specific ingress controller, just uncomment "kubernetes.io/ingress.class" and type the name of your ingress class.
+# - If you want to use TLS (https) for the web interface, just uncomment the "tls" part and add create the secret in the correct namespace.
+# - If you're using cert-manager.io to provision your certificates, just uncomment "cert-manager.io/cluster-issuer" and type the name of your cluster-issuer. Please also uncomment the "tls" part with default values.
 ingress:
   enabled: false 
   annotations: 
    # kubernetes.io/ingress.class: nginx
+   # cert-manager.io/cluster-issuer: my-cluster-issuer
   hosts:
-    - host: domain.com 
+    - host: permission-manager.domain.com 
       paths:
         - path: /
           pathType: ImplementationSpecific
  # tls:  
- #   - secretName: permission-tls
+ #   - secretName: permission-manager-tls
  #     hosts:
- #       - domain.com 
+ #       - permission-manager.domain.com 
 
+#
+# Ressources:
+# The values already adjusted for a small permission-manager setup. Increase value if needed.
+# It's recommended to use ressource limits, just uncomment and try out. To use autosacling, ressources are required.
 resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # Adjust lines as necessary, and remove the curly braces after 'resources:'.
   # limits:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   cpu: 10m
+  #   memory: 80Mi
   # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  #   cpu: 10m
+  #   memory: 80Mi
 
 autoscaling:
   enabled: false
@@ -78,7 +87,16 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+#
+# Application configuration:
 config: 
+
+  # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> name
   clusterName: "" 
+  
+  # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
   controlePlaneAddress: "" 
+
+  # Random password to login to web-app. PLEASE CHANGE!
   basicAuthPassword: RrXwZSBdTXhQL6 
