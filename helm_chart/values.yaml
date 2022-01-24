@@ -76,7 +76,102 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
 config: 
-  clusterName: "" 
-  controlePlaneAddress: "" 
+  clusterName: "test" 
+  controlePlaneAddress: "test" 
   basicAuthPassword: RrXwZSBdTXhQL6 
+
+  templates: 
+    - name: operation
+      apiGroups:
+        - "*"
+      resources:
+        - "*"
+      verbs:
+        - "*"
+
+    - name: developer
+      apiGroups:
+        - "*"
+      resources: 
+        - "configmaps"
+        - "endpoints"
+        - "persistentvolumeclaims"
+        - "pods"
+        - "pods/log"
+        - "pods/portforward"
+        - "podtemplates"
+        - "replicationcontrollers"
+        - "resourcequotas"
+        - "secrets"
+        - "services"
+        - "events"
+        - "daemonsets"
+        - "deployments"
+        - "replicasets"
+        - "ingresses"
+        - "networkpolicies"
+        - "poddisruptionbudgets" 
+      verbs:
+        - "*"
+
+    - name: read-only
+      apiGroups:
+        - "*"
+      resources:
+        - "componentstatuses"
+        - "namespaces"
+        - "nodes"
+        - "persistentvolumes"
+        - "mutatingwebhookconfigurations"
+        - "validatingwebhookconfigurations"
+        - "customresourcedefinitions"
+        - "apiservices"
+        - "tokenreviews"
+        - "selfsubjectaccessreviews"
+        - "selfsubjectrulesreviews"
+        - "subjectaccessreviews"
+        - "certificatesigningrequests"
+        - "runtimeclasses"
+        - "podsecuritypolicies"
+        - "clusterrolebindings"
+        - "clusterroles"
+        - "priorityclasses"
+        - "csidrivers"
+        - "csinodes"
+        - "storageclasses"
+        - "volumeattachment"
+      verbs: 
+        - "get"
+        - "list"
+        - "watch"
+
+    - name: admin
+      apiGroups:
+      - "*"
+      resources:
+        - "componentstatuses"
+        - "namespaces"
+        - "nodes"
+        - "persistentvolumes"
+        - "mutatingwebhookconfigurations"
+        - "validatingwebhookconfigurations"
+        - "customresourcedefinitions"
+        - "apiservices"
+        - "tokenreviews"
+        - "selfsubjectaccessreviews"
+        - "selfsubjectrulesreviews"
+        - "subjectaccessreviews"
+        - "certificatesigningrequests"
+        - "runtimeclasses"
+        - "podsecuritypolicies"
+        - "clusterrolebindings"
+        - "clusterroles"
+        - "priorityclasses"
+        - "csidrivers"
+        - "csinodes"
+        - "storageclasses"
+        - "volumeattachment"
+      verbs: 
+        - "*"
