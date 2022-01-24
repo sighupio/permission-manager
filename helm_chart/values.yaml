@@ -78,8 +78,8 @@ tolerations: []
 affinity: {}
 
 config: 
-  clusterName: "test" 
-  controlePlaneAddress: "test" 
+  clusterName: "" 
+  controlePlaneAddress: "" 
   basicAuthPassword: RrXwZSBdTXhQL6 
 
   templates: 
