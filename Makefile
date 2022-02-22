@@ -97,7 +97,7 @@ seed:
 
 # build: local deployment of the current sha
 build:
-	@docker build . -t ${local-container}
+	@docker build . --target release -t ${local-container}
 	@kind load docker-image ${local-container} --name $(KIND_CLUSTER_NAME)
 
 # deploy: Install deployment for permission-manager

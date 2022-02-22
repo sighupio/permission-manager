@@ -1,0 +1,31 @@
+# Copyright (c) 2021 SIGHUP s.r.l All rights reserved.
+# Use of this source code is governed by a BSD-style
+# license that can be found in the LICENSE file.
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: permission-manager
+  name: permission-manager
+  labels:
+    app: permission-manager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: permission-manager
+  template:
+    metadata:
+      labels:
+        app: permission-manager
+    spec:
+      serviceAccountName: permission-manager
+      containers:
+        - name: permission-manager
+          image: permission-manager
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - secretRef:
+                name: permission-manager
