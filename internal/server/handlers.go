@@ -1,9 +1,10 @@
 package server
 
 import (
-	"github.com/labstack/echo"
-	rbacv1 "k8s.io/api/rbac/v1"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
+	rbacv1 "k8s.io/api/rbac/v1"
 )
 
 func ListNamespaces(c echo.Context) error {
@@ -68,12 +69,12 @@ func listRbac(c echo.Context) error {
 
 func checkLegacyUser(c echo.Context) error {
 	type Request struct {
-		Username string `json:"username"`
+		Username   string   `json:"username"`
 		Namespaces []string `json:"namespaces"`
 	}
 
 	type Response struct {
-		Ok bool `json:"ok"`
+		Ok                 bool `json:"ok"`
 		LegacyUserDetected bool `json:"legacyUserDetected"`
 	}
 

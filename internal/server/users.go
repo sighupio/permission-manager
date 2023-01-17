@@ -1,8 +1,9 @@
 package server
 
 import (
-	"github.com/labstack/echo"
 	"sighupio/permission-manager/internal/resources"
+
+	"github.com/labstack/echo/v4"
 )
 
 func listUsers(c echo.Context) error {

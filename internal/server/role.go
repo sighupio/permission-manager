@@ -1,9 +1,10 @@
 package server
 
 import (
-	"github.com/labstack/echo"
-	rbacv1 "k8s.io/api/rbac/v1"
 	"sighupio/permission-manager/internal/resources"
+
+	"github.com/labstack/echo/v4"
+	rbacv1 "k8s.io/api/rbac/v1"
 )
 
 func deleteRole(c echo.Context) error {

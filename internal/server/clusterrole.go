@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 

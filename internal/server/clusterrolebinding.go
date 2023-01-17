@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
 
@@ -30,7 +30,6 @@ func createClusterRolebinding(c echo.Context) error {
 
 	return ac.okResponse()
 }
-
 
 func deleteClusterRolebinding(c echo.Context) error {
 	ac := c.(*AppContext)

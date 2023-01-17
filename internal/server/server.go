@@ -1,19 +1,18 @@
 package server
 
 import (
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/go-playground/validator"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 
 	"sighupio/permission-manager/internal/config"
 	"sighupio/permission-manager/internal/resources"
-	_ "sighupio/permission-manager/statik"
-
-	"github.com/rakyll/statik/fs"
+	"sighupio/permission-manager/static"
 )
 
 func New(cfg config.Config) *echo.Echo {
@@ -24,11 +23,6 @@ func New(cfg config.Config) *echo.Echo {
 	addMiddlewareStack(e, cfg)
 
 	addRoutes(e)
-
-	//workaround to avoid breaking changes in production. We disable the react bundle in local testing
-	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
-		addStaticFileServe(e)
-	}
 
 	return e
 }
@@ -57,6 +51,20 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
+	//workaround to avoid breaking changes in production. We disable the react bundle in local testing
+	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
+		fsys, err := fs.Sub(static.WebClient, "web-client")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
+			Root:       ".",
+			Filesystem: http.FS(fsys),
+			HTML5:      true,
+		}))
+	}
+
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			customContext := &AppContext{
@@ -68,17 +76,6 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 		}
 	})
 
-}
-
-func addStaticFileServe(e *echo.Echo) {
-	statikFS, err := fs.New()
-	if err != nil {
-		e.Logger.Fatal(err)
-	}
-
-	spaHandler := http.FileServer(statikFS)
-	/* allow every call to unknown paths to return index.html, this necessary when refreshing the browser at an url that is not backed by a real file but only a client route*/
-	e.Any("*", echo.WrapHandler(addFallbackHandler(spaHandler.ServeHTTP, statikFS)))
 }
 
 func addRoutes(e *echo.Echo) {
