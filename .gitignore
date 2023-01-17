@@ -11,3 +11,4 @@ chore.sh
 tmp
 .kubeconfig-backend.bak
 .envrc
+static/build
