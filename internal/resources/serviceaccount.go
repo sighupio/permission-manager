@@ -16,10 +16,6 @@ func (r *Manager) ServiceAccountGet(namespace, name string) (*v1.ServiceAccount,
 	return r.kubeclient.CoreV1().ServiceAccounts(namespace).Get(r.context, name, metav1.GetOptions{})
 }
 
-// func (r *Manager) ServiceAccountCreateToken(namespace string, tokenRequest *v1.TokenRequest, name string) (*v1.TokenRequest, error) {
-// 	return r.kubeclient.CoreV1().ServiceAccounts(namespace).CreateToken(r.context, name, tokenRequest, metav1.CreateOptions{})
-// }
-
 func (r *Manager) ServiceAccountCreate(namespace, name string) (*v1.ServiceAccount, error) {
 	return r.kubeclient.CoreV1().ServiceAccounts(namespace).Create(r.context, &v1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
@@ -137,68 +133,3 @@ users:
 		accountSecret.Data["token"],
 	)
 }
-
-//todo refactor
-// func (r *Manager) serviceAccountGetToken(ns string, name string, shouldWaitServiceAccountCreation bool) (tokenName string, token string, err error) {
-
-// 	findToken := func() (bool, error) {
-// 		user, err := r.ServiceAccountGet(ns, name)
-
-// 		if apierrors.IsNotFound(err) {
-// 			return false, nil
-// 		}
-
-// 		if err != nil {
-// 			return false, err
-// 		}
-
-// 		for _, ref := range user.Secrets {
-
-// 			secret, err := r.SecretGet(ns, ref.Name)
-
-// 			if apierrors.IsNotFound(err) {
-// 				continue
-// 			}
-
-// 			if err != nil {
-// 				return false, err
-// 			}
-
-// 			if secret.Type != v1.SecretTypeServiceAccountToken {
-// 				continue
-// 			}
-
-// 			name := secret.Annotations[v1.ServiceAccountNameKey]
-// 			uid := secret.Annotations[v1.ServiceAccountUIDKey]
-// 			tokenData := secret.Data[v1.ServiceAccountTokenKey]
-
-// 			if name == user.Name && uid == string(user.UID) && len(tokenData) > 0 {
-// 				tokenName = secret.Name
-// 				token = string(tokenData)
-
-// 				return true, nil
-// 			}
-// 		}
-
-// 		return false, nil
-// 	}
-
-// 	if shouldWaitServiceAccountCreation {
-// 		err := wait.Poll(time.Second, 10*time.Second, findToken)
-
-// 		if err != nil {
-// 			return "", "", err
-// 		}
-// 	} else {
-// 		ok, err := findToken()
-// 		if err != nil {
-// 			return "", "", err
-// 		}
-
-// 		if !ok {
-// 			return "", "", fmt.Errorf("No token found for %s/%s", ns, name)
-// 		}
-// 	}
-
-// 	return tokenName, token, nil
-// }
