@@ -1,0 +1,20 @@
+{{- range .Values.config.templates }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: template-namespaced-resources___{{ .name }}
+rules:
+  - apiGroups: 
+      {{- range .apiGroups }}
+        - {{ . | quote }}
+      {{- end }}
+    resources:
+      {{- range .resources }}
+        - {{ . | quote }}
+      {{- end }}
+    verbs:
+      {{- range .verbs }}
+        - {{ . | quote }}
+      {{- end }}
+{{- end }}
