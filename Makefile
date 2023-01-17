@@ -28,7 +28,7 @@ endif
 ## development-up: Brings up local development environment
 .PHONY: development-up
 development-up:
-	@./development/dev-up.sh
+	@./development/dev-up.sh $(CLUSTER_VERSION)
 
 ## development-down: Tears down the local development environment
 .PHONY: development-down
@@ -41,9 +41,6 @@ development-down:
 .PHONY: dependencies
 dependencies:
 	@yarn --cwd ./web-client install
-	@go get github.com/rakyll/statik
-	@go mod download
-
 
 # test-dependencies: Install test dependecies
 .PHONY: test-dependencies
@@ -54,7 +51,7 @@ test-dependencies:
 .PHONY: ui
 ui:
 	@yarn --cwd ./web-client build
-	@statik -f -src=./web-client/build
+	@cp -r ./web-client/build ./static/
 
 # permission-manager: Build go binary
 .PHONY: permission-manager

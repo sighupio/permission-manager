@@ -1,5 +1,5 @@
 # this docker file is used for the release
-FROM golang:1.16 as builder
+FROM golang:1.19 as builder
 
 WORKDIR /app
 COPY go.mod go.sum ./
