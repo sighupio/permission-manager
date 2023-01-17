@@ -11,5 +11,10 @@ spec:
       targetPort: 4000
       protocol: TCP
       name: http
+      {{- if .Values.service.nodePort }}
+      nodePort: {{ .Values.service.nodePort }}
+      {{- else }}
+      nodePort: null
+      {{- end }}
   selector:
     {{- include "permission-manager.selectorLabels" . | nindent 4 }}
