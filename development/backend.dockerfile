@@ -1,12 +1,12 @@
-FROM golang:1.16
+FROM golang:1.19
 
-RUN go get -u github.com/cosmtrek/air
+RUN go install github.com/cosmtrek/air@v1.41.0
 
 WORKDIR /app
 
 COPY ./go.mod go.sum ./
 
-RUN go mod download
+RUN go mod tidy
 
 ENTRYPOINT air -c ./development/air.toml
 
