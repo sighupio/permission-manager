@@ -254,6 +254,7 @@ volumes:
 
 ---
 kind: pipeline
+type: docker
 name: e2e-kubernetes-1.22
 
 depends_on:
