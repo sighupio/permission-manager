@@ -1,10 +1,11 @@
 ---
 kind: pipeline
+type: docker
 name: release
 
 platform:
   os: linux
-  arch: arm64
+  arch: amd64
 
 clone:
   disable: true
@@ -30,31 +31,47 @@ steps:
         - tag
 
   - name: registry-sha
-    image: plugins/docker
-    settings:
-      username:
+    image: docker:dind
+    pull: always
+    environment:
+      USER:
         from_secret: quay_username
-      password:
+      TOKEN:
         from_secret: quay_password
-      registry: quay.io
-      repo: quay.io/sighup/permission-manager
-      tags:
-        - ${DRONE_COMMIT_SHA}
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker login -p $TOKEN -u $USER quay.io
+      - apk add git
+      - docker run --rm --privileged tonistiigi/binfmt --install all
+      - docker buildx create --name sighup-builder
+      - docker buildx use sighup-builder
+      - docker buildx inspect --bootstrap
+      - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t "quay.io/sighup/permission-manager:${DRONE_COMMIT_SHA}" --push .
     when:
       event:
         - push
 
   - name: registry-tag
-    image: plugins/docker
-    settings:
-      username:
+    image: docker:dind
+    pull: always
+    environment:
+      USER:
         from_secret: quay_username
-      password:
+      TOKEN:
         from_secret: quay_password
-      registry: quay.io
-      repo: quay.io/sighup/permission-manager
-      tags:
-        - ${DRONE_TAG}
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      - docker login -p $TOKEN -u $USER quay.io
+      - apk add git
+      - docker run --rm --privileged tonistiigi/binfmt --install all
+      - docker buildx create --name sighup-builder
+      - docker buildx use sighup-builder
+      - docker buildx inspect --bootstrap
+      - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t "quay.io/sighup/permission-manager:${DRONE_TAG}" --push .
     when:
       event:
         - tag
@@ -71,9 +88,15 @@ steps:
     when:
       event:
         - tag
-
+        
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+      
 ---
 kind: pipeline
+type: docker
 name: e2e-kubernetes-1.20
 
 depends_on:
@@ -152,6 +175,7 @@ volumes:
 
 ---
 kind: pipeline
+type: docker
 name: e2e-kubernetes-1.21
 
 depends_on:
