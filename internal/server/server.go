@@ -53,7 +53,7 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 
 	//workaround to avoid breaking changes in production. We disable the react bundle in local testing
 	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
-		fsys, err := fs.Sub(static.WebClient, "web-client")
+		fsys, err := fs.Sub(static.WebClient, "build")
 		if err != nil {
 			log.Fatal(err)
 		}

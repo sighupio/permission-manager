@@ -5,8 +5,6 @@ load "./lib/helper"
 @test "[SETUP] Deploy Permission manager Requirements" {
     info
     deploy(){
-        kubectl delete namespace permission-manager
-
         kubectl create namespace permission-manager
 
         cat tests/manifests/permission-manager-secret.yml | envsubst | kubectl apply -f -
@@ -22,7 +20,7 @@ load "./lib/helper"
 
 }
 
-@test "[SETUP] Build and Deploy Permission manager. It may take some time." {
+@test "[SETUP] Deploy Permission manager. It may take some time." {
     info
 
     deploy(){

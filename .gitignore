@@ -12,3 +12,7 @@ tmp
 .kubeconfig-backend.bak
 .envrc
 static/build
+
+.vscode/
+
+.e2e/

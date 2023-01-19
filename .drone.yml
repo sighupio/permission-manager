@@ -1,7 +1,6 @@
----
 kind: pipeline
 type: docker
-name: release
+name: build
 
 platform:
   os: linux
@@ -9,6 +8,14 @@ platform:
 
 clone:
   disable: true
+
+trigger:
+  event:
+    - push
+    - pull_request
+  action:
+    exclude:
+      - synchronized
 
 steps:
   - name: clone
@@ -25,10 +32,41 @@ steps:
       - apt-get update && apt-get install -y npm=7.5.2+ds-2
       - npm install -g yarn@1.22.11
       - make dependencies ui test
-    when:
-      event:
-        - push
-        - tag
+
+---
+kind: pipeline
+type: docker
+name: preview
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  disable: true
+
+trigger:
+  branch:
+    - main
+  action:
+    exclude:
+      - synchronized
+
+steps:
+  - name: clone
+    image: alpine/git
+    commands:
+      - git clone https://github.com/sighupio/permission-manager .
+      - git checkout $DRONE_COMMIT
+      - git fetch --tags
+
+  - name: unit-test
+    image: golang:1.19
+    pull: always
+    commands:
+      - apt-get update && apt-get install -y npm=7.5.2+ds-2
+      - npm install -g yarn@1.22.11
+      - make dependencies ui test
 
   - name: registry-sha
     image: docker:dind
@@ -49,10 +87,33 @@ steps:
       - docker buildx use sighup-builder
       - docker buildx inspect --bootstrap
       - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t "quay.io/sighup/permission-manager:${DRONE_COMMIT_SHA}" --push .
-    when:
-      event:
-        - push
+    depends_on:
+      - unit-test
 
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
+---
+kind: pipeline
+type: docker
+name: release
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  disable: true
+
+trigger:
+  branch:
+    - main
+  event:
+    - tag
+
+steps:
   - name: registry-tag
     image: docker:dind
     pull: always
@@ -72,9 +133,6 @@ steps:
       - docker buildx use sighup-builder
       - docker buildx inspect --bootstrap
       - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t "quay.io/sighup/permission-manager:${DRONE_TAG}" --push .
-    when:
-      event:
-        - tag
 
   - name: release
     image: golang
@@ -85,243 +143,95 @@ steps:
       - git checkout .
       - git clean -f
       - curl -sL https://git.io/goreleaser | bash
-    when:
-      event:
-        - tag
-        
-volumes:
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
-      
+
 ---
 kind: pipeline
 type: docker
-name: e2e-kubernetes-1.20
-
-depends_on:
-  - release
+name: e2e
 
 platform:
   os: linux
   arch: amd64
 
 trigger:
-  ref:
-    include:
-      - refs/heads/master
-      - refs/tags/**
-
-environment:
-  KIND_VERSION: v0.11.1
-  CLUSTER_VERSION: v1.20.7
-  CLUSTER_NAME: ${DRONE_REPO_NAME}-${DRONE_BUILD_NUMBER}-${DRONE_STAGE_NUMBER}
-  KUBECONFIG: /tmp/kubeconfig.yml
-
-steps:
-  - name: kind
-    image: docker:dind
-    pull: always
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - wget -qO /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/$${KIND_VERSION}/kind-$(uname)-amd64"
-      - wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/$${CLUSTER_VERSION}/bin/linux/amd64/kubectl"
-      - chmod +x /usr/local/bin/kind /usr/local/bin/kubectl
-      - kind create cluster --name $${CLUSTER_NAME} --image registry.sighup.io/fury/kindest/node:$${CLUSTER_VERSION} --config development/kind-config.yml
-      - kind get kubeconfig --name $${CLUSTER_NAME} > kubeconfig.yml
-
-      - apk add util-linux bash make git
-      - make KIND_CLUSTER_NAME=$${CLUSTER_NAME} build
-
-  - name: tests
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.22.0_3.8.7_2.4.1
-    pull: always
-    network_mode: host
-    commands:
-      - apt-get update && apt-get install -yqq gettext
-      - cp kubeconfig.yml $${KUBECONFIG}
-      - export CONTROL_PLANE_ADDRESS=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
-      - bats -t tests/setup.sh
-      - bats -t tests/create-user.sh
-
-  - name: kind-destroy
-    image: docker:dind
-    pull: always
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - wget -qO /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/$${KIND_VERSION}/kind-$(uname)-amd64"
-      - chmod +x /usr/local/bin/kind
-      - kind delete cluster --name $${CLUSTER_NAME}
-    when:
-      status:
-        - success
-        - failure
-
-volumes:
-  - name: dockerconfig
-    host:
-      path: /root/.docker/config.json
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
-
----
-kind: pipeline
-type: docker
-name: e2e-kubernetes-1.21
-
-depends_on:
-  - release
-
-platform:
-  os: linux
-  arch: amd64
-
-trigger:
-  ref:
-    include:
-      - refs/heads/master
-      - refs/tags/**
-
-environment:
-  KIND_VERSION: v0.11.1
-  CLUSTER_VERSION: v1.21.2
-  CLUSTER_NAME: ${DRONE_REPO_NAME}-${DRONE_BUILD_NUMBER}-${DRONE_STAGE_NUMBER}
-  KUBECONFIG: /tmp/kubeconfig.yml
+  event:
+    - pull_request
+    - push
+  action:
+    exclude:
+      - synchronized
+  branch:
+    exclude:
+      - dependabot/**
 
 steps:
-  - name: kind
-    image: docker:dind
-    pull: always
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - wget -qO /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/$${KIND_VERSION}/kind-$(uname)-amd64"
-      - wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/$${CLUSTER_VERSION}/bin/linux/amd64/kubectl"
-      - chmod +x /usr/local/bin/kind /usr/local/bin/kubectl
-      - kind create cluster --name $${CLUSTER_NAME} --image registry.sighup.io/fury/kindest/node:$${CLUSTER_VERSION} --config development/kind-config.yml
-      - kind get kubeconfig --name $${CLUSTER_NAME} > kubeconfig.yml
-
-      - apk add util-linux bash make git
-      - make KIND_CLUSTER_NAME=$${CLUSTER_NAME} build
-
-  - name: tests
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.22.0_3.8.7_2.4.1
+  - name: Kubernetes v1.23
+    image: docker:23.0.0-rc.2-dind-alpine3.17
     pull: always
     network_mode: host
-    commands:
-      - apt-get update && apt-get install -yqq gettext
-      - cp kubeconfig.yml $${KUBECONFIG}
-      - export CONTROL_PLANE_ADDRESS=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
-      - bats -t tests/setup.sh
-      - bats -t tests/create-user.sh
-
-  - name: kind-destroy
-    image: docker:dind
-    pull: always
     volumes:
       - name: dockerconfig
         path: /root/.docker/config.json
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - wget -qO /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/$${KIND_VERSION}/kind-$(uname)-amd64"
-      - chmod +x /usr/local/bin/kind
-      - kind delete cluster --name $${CLUSTER_NAME}
-    when:
-      status:
-        - success
-        - failure
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.23 tests
+      - CLUSTER_NAME=e2e CLUSTER_VERSION=1.23.13 KIND_VERSION=0.17.0 make test-e2e-ci
 
-volumes:
-  - name: dockerconfig
-    host:
-      path: /root/.docker/config.json
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
-
----
-kind: pipeline
-type: docker
-name: e2e-kubernetes-1.22
-
-depends_on:
-  - release
-
-platform:
-  os: linux
-  arch: amd64
-
-trigger:
-  ref:
-    include:
-      - refs/heads/master
-      - refs/tags/**
-
-environment:
-  KIND_VERSION: v0.11.1
-  CLUSTER_VERSION: v1.22.0
-  CLUSTER_NAME: ${DRONE_REPO_NAME}-${DRONE_BUILD_NUMBER}-${DRONE_STAGE_NUMBER}
-  KUBECONFIG: /tmp/kubeconfig.yml
-
-steps:
-  - name: kind
-    image: docker:dind
-    pull: always
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      - wget -qO /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/$${KIND_VERSION}/kind-$(uname)-amd64"
-      - wget -qO /usr/local/bin/kubectl "https://storage.googleapis.com/kubernetes-release/release/$${CLUSTER_VERSION}/bin/linux/amd64/kubectl"
-      - chmod +x /usr/local/bin/kind /usr/local/bin/kubectl
-      - kind create cluster --name $${CLUSTER_NAME} --image registry.sighup.io/fury/kindest/node:$${CLUSTER_VERSION} --config development/kind-config.yml
-      - kind get kubeconfig --name $${CLUSTER_NAME} > kubeconfig.yml
-
-      - apk add util-linux bash make git
-      - make KIND_CLUSTER_NAME=$${CLUSTER_NAME} build
-
-  - name: tests
-    image: quay.io/sighup/e2e-testing:1.1.0_0.2.2_2.16.1_1.9.4_1.22.0_3.8.7_2.4.1
+  - name: Kubernetes v1.24
+    image: docker:23.0.0-rc.2-dind-alpine3.17
     pull: always
     network_mode: host
-    commands:
-      - apt-get update && apt-get install -yqq gettext
-      - cp kubeconfig.yml $${KUBECONFIG}
-      - export CONTROL_PLANE_ADDRESS=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
-      - bats -t tests/setup.sh
-      - bats -t tests/create-user.sh
-
-  - name: kind-destroy
-    image: docker:dind
-    pull: always
     volumes:
       - name: dockerconfig
         path: /root/.docker/config.json
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - wget -qO /usr/local/bin/kind "https://kind.sigs.k8s.io/dl/$${KIND_VERSION}/kind-$(uname)-amd64"
-      - chmod +x /usr/local/bin/kind
-      - kind delete cluster --name $${CLUSTER_NAME}
-    when:
-      status:
-        - success
-        - failure
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.24 tests
+      - CLUSTER_NAME=e2e CLUSTER_VERSION=1.24.7 KIND_VERSION=0.17.0 make test-e2e-ci
+
+  - name: Kubernetes v1.25
+    image: docker:23.0.0-rc.2-dind-alpine3.17
+    pull: always
+    network_mode: host
+    volumes:
+      - name: dockerconfig
+        path: /root/.docker/config.json
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.25 tests
+      - CLUSTER_NAME=e2e CLUSTER_VERSION=1.25.3 KIND_VERSION=0.17.0 make test-e2e-ci
+
+  - name: Kubernetes v1.26
+    image: docker:23.0.0-rc.2-dind-alpine3.17
+    pull: always
+    network_mode: host
+    volumes:
+      - name: dockerconfig
+        path: /root/.docker/config.json
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.26 tests
+      - CLUSTER_NAME=e2e CLUSTER_VERSION=1.26.2 KIND_VERSION=0.17.0 make test-e2e-ci
 
 volumes:
   - name: dockerconfig

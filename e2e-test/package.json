@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "cypress open"
+    "test": "cypress run --headless"
   },
   "devDependencies": {
     "@testing-library/cypress": "^5.0.2",
