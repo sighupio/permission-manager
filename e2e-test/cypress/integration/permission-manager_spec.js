@@ -9,7 +9,7 @@ it("Create use and save kubeconfig YAML to disk", function() {
 
   /* INDEX PAGE */
   //todo hardcoded password coming from the tests folder
-  cy.visit("http://admin:1v2d1e2e67dS@localhost:4000");
+  cy.visit(`${Cypress.env("BASE_URL")}`);
 
   cy.contains(/create new user/i).click();
 
@@ -92,7 +92,7 @@ it("Cluster resources after save check", () => {
 
   /* INDEX PAGE */
   //todo hardcoded password coming from the tests folder
-  cy.visit("http://admin:1v2d1e2e67dS@localhost:4000");
+  cy.visit(`${Cypress.env("BASE_URL")}`);
 
   cy.contains(/create new user/i).click();
 

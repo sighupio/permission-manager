@@ -49,7 +49,7 @@ load "./lib/helper"
 
 @test "[USERS] Modify kubeconfig (insecure-skip-tls-verify" {
     info
-    cat test.kubeconfig | yq d - clusters[0].cluster.certificate-authority-data | yq w - clusters[0].cluster.insecure-skip-tls-verify true > test.insecure.kubeconfig
+    cat test.kubeconfig | yq 'del(.clusters[0].cluster.certificate-authority-data)' - | yq e '.clusters[0].cluster.insecure-skip-tls-verify = true' - > test.insecure.kubeconfig
 }
 
 @test "[USERS] Test generated kubeconfig - test-user can not deploy pods in kube-system" {

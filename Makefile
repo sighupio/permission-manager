@@ -1,7 +1,6 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 BASIC_AUTH_PASSWORD ?= admin
-KIND_CLUSTER_NAME = "kind"
 
 local-container = permission-manager:$(shell git rev-parse HEAD)
 
@@ -63,21 +62,15 @@ permission-manager:
 test:
 	@go test -v sighupio/permission-manager/...
 
-# test-e2e: Run e2e test in the kubectl current-context. Used in the pipeline.
+# test-e2e: Run e2e test in the kubectl current-context. Used for local development.
 .PHONY: test-e2e
-test-e2e: build
-	@bats -t tests/setup.sh && bats -t tests/create-user.sh
-	@cd e2e-test && yarn install && yarn test
-
-## test-e2e-local: Runs e2e test on the local machine
-.PHONY: test-e2e-local
-test-e2e-local:
+test-e2e:
 	@./development/e2e-up.sh
 
-## test-e2e-local-down: Tears down the e2e environment once the tests are done
-.PHONY: test-e2e-local-down
-test-e2e-local-down:
-	@./development/e2e-down.sh
+# test-e2e-ci: Run e2e test designed for CI.
+.PHONY: test-e2e-ci
+test-e2e-ci:
+	@./development/e2e-ci-up.sh
 
 # test-release: Check dist folder and next tag for the release build
 test-release:
@@ -100,15 +93,14 @@ build:
 # deploy: Install deployment for permission-manager
 .PHONY: deploy
 deploy: 
-	@yq w deployments/kubernetes/deploy.yml -d1  \
-		spec.template.spec.containers.[0].image ${local-container} \
-		| kubectl apply -f -
+	@echo "Deploying ${local-container}"
+	@cat deployments/kubernetes/deploy.yml | yq e 'select(document_index == 1).spec.template.spec.containers[0].image |= "${local-container}"' - | kubectl apply -f -
 	@kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
 
 # port-forward: Connect port 4000 to pod permission-manager
 .PHONY: port-forward
 port-forward:
-	@kubectl port-forward svc/permission-manager 4000 --namespace permission-manager
+	@kubectl port-forward svc/permission-manager "${FORWARD_PORT}:4000" --namespace permission-manager
 
 # clean: Remove artifacts
 .PHONY: clean
