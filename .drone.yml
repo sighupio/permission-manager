@@ -16,6 +16,9 @@ trigger:
   action:
     exclude:
       - synchronized
+  branch: 
+    exclude:
+      - main
 
 steps:
   - name: clone
@@ -163,6 +166,7 @@ trigger:
   branch:
     exclude:
       - dependabot/**
+      - main
 
 steps:
   - name: Kubernetes v1.23
