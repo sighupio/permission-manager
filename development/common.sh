@@ -9,14 +9,11 @@ SOURCE="$(pwd)/.e2e"
 
 function cleanup {
     echo "Stop e2e test and clean up..."
-
+    
     CLUSTER_ID=${1}
-    CYPRESS_ID=${2}
 
     echo "Destroying the cluster ${CLUSTER_ID}"
     kind delete cluster --name "${CLUSTER_ID}"
-    # echo "Removing cypress image ${CYPRESS_ID}"
-    # docker rmi "${CYPRESS_ID}"
     echo "Removing source folder ${SOURCE}"
     rm -rf "${SOURCE}"
 }

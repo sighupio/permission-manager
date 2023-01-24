@@ -231,7 +231,7 @@ steps:
       # Cypress dependencies
       - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.26 tests
-      - CLUSTER_NAME=e2e CLUSTER_VERSION=1.26.2 KIND_VERSION=0.17.0 make test-e2e-ci
+      - CLUSTER_NAME=e2e CLUSTER_VERSION=1.26.0 KIND_VERSION=0.17.0 make test-e2e-ci
 
 volumes:
   - name: dockerconfig

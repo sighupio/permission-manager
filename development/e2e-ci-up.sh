@@ -15,8 +15,8 @@ XVFB_PORT=$((RANDOM_XVFB_PORT + 80))
 CLUSTER_NAME=${CLUSTER_NAME}-${RANDOM_ID}
 CYPRESS_IMAGE_NAME=cypress-${RANDOM_ID}
 
-trap 'cleanup $(echo ${CLUSTER_NAME}) $(echo ${CYPRESS_IMAGE_NAME})' EXIT
-trap 'cleanup $(echo ${CLUSTER_NAME}) $(echo ${CYPRESS_IMAGE_NAME})' ERR
+trap 'cleanup $(echo ${CLUSTER_NAME})' EXIT
+trap 'cleanup $(echo ${CLUSTER_NAME})' ERR
 
 # Set up environment
 echo "Set up environment for kind ${KIND_VERSION} and kubectl ${CLUSTER_VERSION}"
