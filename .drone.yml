@@ -19,7 +19,10 @@ trigger:
   branch: 
     exclude:
       - main
-
+  paths: 
+    exclude:
+      - "helm_chart/**"
+      
 steps:
   - name: clone
     image: alpine/git
@@ -54,6 +57,9 @@ trigger:
   action:
     exclude:
       - synchronized
+  paths: 
+    exclude:
+      - "helm_chart/**"
 
 steps:
   - name: clone
@@ -115,6 +121,9 @@ trigger:
     - main
   event:
     - tag
+  paths: 
+    exclude:
+      - "helm_chart/**"
 
 steps:
   - name: registry-tag
@@ -146,7 +155,7 @@ steps:
       - git checkout .
       - git clean -f
       - curl -sL https://git.io/goreleaser | bash
-      
+
 ---
 name: release-helm-chart
 kind: pipeline
@@ -211,6 +220,9 @@ trigger:
     exclude:
       - dependabot/**
       - main
+  paths: 
+    exclude:
+      - "helm_chart/**"
 
 steps:
   - name: Kubernetes v1.23
