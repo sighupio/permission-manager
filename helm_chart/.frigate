@@ -1,0 +1,13 @@
+# Permission Manager Helm Chart - v{{ version }}
+
+{{ description }}
+
+## Configuration options
+
+The following table lists the configurable parameters of the Permission Manager chart and their default values.
+
+| Parameter | Description | Default |
+| --------- | ----------- | ------- |
+{% for (param, comment, default) in values -%}
+| `{{ param }}` | {{comment}} | {{ default }} |
+{% endfor -%}
