@@ -98,7 +98,7 @@ config:
   clusterName: "" 
   
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
-  controlePlaneAddress: "" 
+  controlPlaneAddress: "" 
 
   # Random password to login to web-app. PLEASE CHANGE!
   basicAuthPassword: RrXwZSBdTXhQL6 
