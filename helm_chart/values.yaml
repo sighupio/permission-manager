@@ -100,9 +100,6 @@ config:
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
   controlPlaneAddress: "" 
 
-  # Random password to login to web-app. PLEASE CHANGE!
-  basicAuthPassword: RrXwZSBdTXhQL6 
-
   templates: 
     - name: operation
       apiGroups:
