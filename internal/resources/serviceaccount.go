@@ -27,7 +27,7 @@ func (r *Manager) ServiceAccountCreate(namespace, name string) (*v1.ServiceAccou
 // ServiceAccountCreateKubeConfigForUser Creates a ServiceAccount for the user and returns the KubeConfig with its token
 func (r *Manager) ServiceAccountCreateKubeConfigForUser(cluster config.ClusterConfig, username, kubeConfigNamespace string) (kubeconfigYAML string) {
 
-	serviceAccountNamespace := "permission-manager" // TODO: must be received externally to this func?
+	serviceAccountNamespace := cluster.Namespace
 
 	var serviceAccount *v1.ServiceAccount = nil
 	var accountSecret *v1.Secret = nil

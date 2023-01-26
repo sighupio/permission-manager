@@ -76,11 +76,19 @@ func createRoleBinding(c echo.Context) error {
 		return err
 	}
 
+	// This is only a workaround for the current implementation of the rolebinding:
+	// We need to set the namespace of the subject to the namespace of the rolebinding
+	var subjs []rbacv1.Subject
+	for _, s := range r.Subjects {
+		s.Namespace = ac.Config.Cluster.Namespace
+		subjs = append(subjs, s)
+	}
+
 	_, err = ac.ResourceManager.RoleBindingCreate(r.Namespace, r.Username, resources.RoleBindingRequirements{
 		RoleKind:        r.RoleKind,
 		RoleName:        r.RoleName,
 		RolebindingName: r.RolebindingName,
-		Subjects:        r.Subjects,
+		Subjects:        subjs,
 	})
 
 	if err != nil {
