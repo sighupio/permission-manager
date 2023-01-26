@@ -30,7 +30,8 @@ podSecurityContext:
 
 # Default values should not be used currently. It will result in a startup-error.
 # TODO: correct default values should be placed here.
-securityContext: {}
+securityContext:
+  {}
   # capabilities:
   #   drop:
   #   - ALL
@@ -40,7 +41,7 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80 
+  port: 80
   nodePort: null
 
 #
@@ -49,25 +50,26 @@ service:
 # - If you want to use TLS (https) for the web interface, just uncomment the "tls" part and add create the secret in the correct namespace.
 # - If you're using cert-manager.io to provision your certificates, just uncomment "cert-manager.io/cluster-issuer" and type the name of your cluster-issuer. Please also uncomment the "tls" part with default values.
 ingress:
-  enabled: false 
-  annotations: 
-   # kubernetes.io/ingress.class: nginx
-   # cert-manager.io/cluster-issuer: my-cluster-issuer
+  enabled: false
+  annotations:
+    # kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: my-cluster-issuer
   hosts:
-    - host: permission-manager.domain.com 
+    - host: permission-manager.domain.com
       paths:
         - path: /
           pathType: ImplementationSpecific
- # tls:  
- #   - secretName: permission-manager-tls
- #     hosts:
- #       - permission-manager.domain.com 
+  # tls:
+  #   - secretName: permission-manager-tls
+  #     hosts:
+  #       - permission-manager.domain.com
 
 #
 # Ressources:
 # The values already adjusted for a small permission-manager setup. Increase value if needed.
 # It's recommended to use ressource limits, just uncomment and try out. To use autosacling, ressources are required.
-resources: {}
+resources:
+  {}
   # Adjust lines as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 10m
@@ -89,18 +91,19 @@ tolerations: []
 
 affinity: {}
 
-
 #
 # Application configuration:
-config: 
-
+config:
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> name
-  clusterName: "" 
-  
-  # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
-  controlPlaneAddress: "" 
+  clusterName: ""
 
-  templates: 
+  # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
+  controlPlaneAddress: ""
+
+  # Password for basic auth to access the UI
+  basicAuthPassword: ""
+
+  templates:
     - name: operation
       apiGroups:
         - "*"
@@ -112,7 +115,7 @@ config:
     - name: developer
       apiGroups:
         - "*"
-      resources: 
+      resources:
         - "configmaps"
         - "endpoints"
         - "persistentvolumeclaims"
@@ -130,66 +133,92 @@ config:
         - "replicasets"
         - "ingresses"
         - "networkpolicies"
-        - "poddisruptionbudgets" 
+        - "poddisruptionbudgets"
       verbs:
         - "*"
 
     - name: read-only
       apiGroups:
-        - "*"
+        - ""
       resources:
-        - "componentstatuses"
-        - "namespaces"
-        - "nodes"
-        - "persistentvolumes"
-        - "mutatingwebhookconfigurations"
-        - "validatingwebhookconfigurations"
-        - "customresourcedefinitions"
-        - "apiservices"
-        - "tokenreviews"
-        - "selfsubjectaccessreviews"
-        - "selfsubjectrulesreviews"
-        - "subjectaccessreviews"
-        - "certificatesigningrequests"
-        - "runtimeclasses"
-        - "podsecuritypolicies"
-        - "clusterrolebindings"
-        - "clusterroles"
-        - "priorityclasses"
-        - "csidrivers"
-        - "csinodes"
-        - "storageclasses"
-        - "volumeattachment"
-      verbs: 
+        - bindings
+        - componentstatuses
+        - configmaps
+        - endpoints
+        - events
+        - limitranges
+        - namespaces
+        - namespaces/finalize
+        - namespaces/status
+        - nodes
+        - nodes/proxy
+        - nodes/status
+        - persistentvolumeclaims
+        - persistentvolumeclaims/status
+        - persistentvolumes
+        - persistentvolumes/status
+        - pods
+        - pods/attach
+        - pods/binding
+        - pods/eviction
+        - pods/exec
+        - pods/log
+        - pods/proxy
+        - pods/status
+        - podtemplates
+        - replicationcontrollers
+        - replicationcontrollers/scale
+        - replicationcontrollers/status
+        - resourcequotas
+        - resourcequotas/status
+        - serviceaccounts
+        - services
+        - services/proxy
+        - services/status
+      verbs:
         - "get"
         - "list"
         - "watch"
 
     - name: admin
       apiGroups:
-      - "*"
-      resources:
-        - "componentstatuses"
-        - "namespaces"
-        - "nodes"
-        - "persistentvolumes"
-        - "mutatingwebhookconfigurations"
-        - "validatingwebhookconfigurations"
-        - "customresourcedefinitions"
-        - "apiservices"
-        - "tokenreviews"
-        - "selfsubjectaccessreviews"
-        - "selfsubjectrulesreviews"
-        - "subjectaccessreviews"
-        - "certificatesigningrequests"
-        - "runtimeclasses"
-        - "podsecuritypolicies"
-        - "clusterrolebindings"
-        - "clusterroles"
-        - "priorityclasses"
-        - "csidrivers"
-        - "csinodes"
-        - "storageclasses"
-        - "volumeattachment"
-      verbs: 
         - "*"
+      resources:
+        - bindings
+        - componentstatuses
+        - configmaps
+        - endpoints
+        - events
+        - limitranges
+        - namespaces
+        - namespaces/finalize
+        - namespaces/status
+        - nodes
+        - nodes/proxy
+        - nodes/status
+        - persistentvolumeclaims
+        - persistentvolumeclaims/status
+        - persistentvolumes
+        - persistentvolumes/status
+        - pods
+        - pods/attach
+        - pods/binding
+        - pods/eviction
+        - pods/exec
+        - pods/log
+        - pods/proxy
+        - pods/status
+        - podtemplates
+        - replicationcontrollers
+        - replicationcontrollers/scale
+        - replicationcontrollers/status
+        - resourcequotas
+        - resourcequotas/status
+        - serviceaccounts
+        - services
+        - services/proxy
+        - services/status
+      verbs:
+        - get
+        - list
+        - watch
