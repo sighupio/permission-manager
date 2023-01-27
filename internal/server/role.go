@@ -76,8 +76,7 @@ func createRoleBinding(c echo.Context) error {
 		return err
 	}
 
-	// This is only a workaround for the current implementation of the rolebinding:
-	// We need to set the namespace of the subject to the namespace of the rolebinding
+	// This is only a workaround: https://github.com/sighupio/permission-manager/issues/140
 	var subjs []rbacv1.Subject
 	for _, s := range r.Subjects {
 		s.Namespace = ac.Config.Cluster.Namespace
