@@ -5,16 +5,8 @@ kind: ClusterRole
 metadata:
   name: template-namespaced-resources___{{ .name }}
 rules:
-  - apiGroups: 
-      {{- range .apiGroups }}
-        - {{ . | quote }}
-      {{- end }}
-    resources:
-      {{- range .resources }}
-        - {{ . | quote }}
-      {{- end }}
-    verbs:
-      {{- range .verbs }}
-        - {{ . | quote }}
-      {{- end }}
+{{.rules | toYaml}}
+- {{ . | toYaml }}
+{{ else }}
+[]
 {{- end }}

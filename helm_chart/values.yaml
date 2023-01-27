@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: quay.io/sighup/permission-manager 
+  repository: quay.io/sighup/permission-manager
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "1.8.0-rc1"
@@ -95,130 +95,482 @@ affinity: {}
 # Application configuration:
 config:
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> name
-  clusterName: ""
+  clusterName: "kind"
 
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
-  controlPlaneAddress: ""
+  controlPlaneAddress: "https://127.0.0.1:61394"
 
   # Password for basic auth to access the UI
-  basicAuthPassword: ""
+  basicAuthPassword: "pass"
 
   templates:
     - name: operation
-      apiGroups:
-        - "*"
-      resources:
-        - "*"
-      verbs:
-        - "*"
+      rules:
+        - apiGroups:
+            - "*"
+          resources:
+            - "*"
+          verbs:
+            - "*"
 
     - name: developer
-      apiGroups:
-        - "*"
-      resources:
-        - "configmaps"
-        - "endpoints"
-        - "persistentvolumeclaims"
-        - "pods"
-        - "pods/log"
-        - "pods/portforward"
-        - "podtemplates"
-        - "replicationcontrollers"
-        - "resourcequotas"
-        - "secrets"
-        - "services"
-        - "events"
-        - "daemonsets"
-        - "deployments"
-        - "replicasets"
-        - "ingresses"
-        - "networkpolicies"
-        - "poddisruptionbudgets"
-      verbs:
-        - "*"
+      rules:
+        - apiGroups:
+            - "*"
+          resources:
+            - "configmaps"
+            - "endpoints"
+            - "persistentvolumeclaims"
+            - "pods"
+            - "pods/log"
+            - "pods/portforward"
+            - "podtemplates"
+            - "replicationcontrollers"
+            - "resourcequotas"
+            - "secrets"
+            - "services"
+            - "events"
+            - "daemonsets"
+            - "deployments"
+            - "replicasets"
+            - "ingresses"
+            - "networkpolicies"
+            - "poddisruptionbudgets"
+          verbs:
+            - "*"
 
     - name: read-only
-      apiGroups:
-        - ""
-      resources:
-        - bindings
-        - componentstatuses
-        - configmaps
-        - endpoints
-        - events
-        - limitranges
-        - namespaces
-        - namespaces/finalize
-        - namespaces/status
-        - nodes
-        - nodes/proxy
-        - nodes/status
-        - persistentvolumeclaims
-        - persistentvolumeclaims/status
-        - persistentvolumes
-        - persistentvolumes/status
-        - pods
-        - pods/attach
-        - pods/binding
-        - pods/eviction
-        - pods/exec
-        - pods/log
-        - pods/proxy
-        - pods/status
-        - podtemplates
-        - replicationcontrollers
-        - replicationcontrollers/scale
-        - replicationcontrollers/status
-        - resourcequotas
-        - resourcequotas/status
-        - serviceaccounts
-        - services
-        - services/proxy
-        - services/status
-      verbs:
-        - "get"
-        - "list"
-        - "watch"
+      rules:
+        - apiGroups:
+            - ""
+          resources:
+            - bindings
+            - componentstatuses
+            - configmaps
+            - endpoints
+            - events
+            - limitranges
+            - namespaces
+            - namespaces/finalize
+            - namespaces/status
+            - nodes
+            - nodes/proxy
+            - nodes/status
+            - persistentvolumeclaims
+            - persistentvolumeclaims/status
+            - persistentvolumes
+            - persistentvolumes/status
+            - pods
+            - pods/attach
+            - pods/binding
+            - pods/eviction
+            - pods/exec
+            - pods/log
+            - pods/proxy
+            - pods/status
+            - podtemplates
+            - replicationcontrollers
+            - replicationcontrollers/scale
+            - replicationcontrollers/status
+            - resourcequotas
+            - resourcequotas/status
+            - serviceaccounts
+            - services
+            - services/proxy
+            - services/status
+          verbs:
+            - "get"
+            - "list"
+            - "watch"
+        - apiGroups:
+            - apps
+          resources:
+            - controllerrevisions
+            - daemonsets
+            - daemonsets/status
+            - deployments
+            - deployments/scale
+            - deployments/status
+            - replicasets
+            - replicasets/scale
+            - replicasets/status
+            - statefulsets
+            - statefulsets/scale
+            - statefulsets/status
+          verbs:
+            - list
+            - get
+            - watch
+        - apiGroups:
+            - batch
+          resources:
+            - jobs
+            - jobs/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - autoscaling
+          resources:
+            - horizontalpodautoscalers
+            - horizontalpodautoscalers/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - storage.k8s.io
+          resources:
+            - csidrivers
+            - csinodes
+            - storageclasses
+            - volumeattachments
+            - volumeattachments/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - networking.k8s.io
+          resources:
+            - networkpolicies
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - scheduling.k8s.io
+          resources:
+            - priorityclasses
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - node.k8s.io
+          resources:
+            - runtimeclasses
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - extensions
+          resources:
+            - ingresses
+            - ingresses/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - events.k8s.io
+          resources:
+            - events
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - apiextensions.k8s.io
+          resources:
+            - customresourcedefinitions
+            - customresourcedefinitions/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - apiregistration.k8s.io
+          resources:
+            - apiservices
+            - apiservices/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - discovery.k8s.io
+          resources:
+            - endpointslices
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - metrics.k8s.io
+          resources:
+            - pods
+            - nodes
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - policy
+          resources:
+            - poddisruptionbudgets
+            - poddisruptionbudgets/status
+            - podsecuritypolicies
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - rbac.authorization.k8s.io
+          resources:
+            - clusterrolebindings
+            - clusterroles
+            - rolebindings
+            - roles
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - "*"
+          resources:
+            - "componentstatuses"
+            - "namespaces"
+            - "nodes"
+            - "persistentvolumes"
+            - "mutatingwebhookconfigurations"
+            - "validatingwebhookconfigurations"
+            - "customresourcedefinitions"
+            - "apiservices"
+            - "tokenreviews"
+            - "selfsubjectaccessreviews"
+            - "selfsubjectrulesreviews"
+            - "subjectaccessreviews"
+            - "certificatesigningrequests"
+            - "runtimeclasses"
+            - "podsecuritypolicies"
+            - "clusterrolebindings"
+            - "clusterroles"
+            - "priorityclasses"
+            - "csidrivers"
+            - "csinodes"
+            - "storageclasses"
+            - "volumeattachment"
+          verbs:
+            - "get"
+            - "list"
+            - "watch"
 
     - name: admin
-      apiGroups:
-        - "*"
-      resources:
-        - bindings
-        - componentstatuses
-        - configmaps
-        - endpoints
-        - events
-        - limitranges
-        - namespaces
-        - namespaces/finalize
-        - namespaces/status
-        - nodes
-        - nodes/proxy
-        - nodes/status
-        - persistentvolumeclaims
-        - persistentvolumeclaims/status
-        - persistentvolumes
-        - persistentvolumes/status
-        - pods
-        - pods/attach
-        - pods/binding
-        - pods/eviction
-        - pods/exec
-        - pods/log
-        - pods/proxy
-        - pods/status
-        - podtemplates
-        - replicationcontrollers
-        - replicationcontrollers/scale
-        - replicationcontrollers/status
-        - resourcequotas
-        - resourcequotas/status
-        - serviceaccounts
-        - services
-        - services/proxy
-        - services/status
-      verbs:
-        - get
-        - list
-        - watch
+      rules:
+        - apiGroups:
+            - ""
+          resources:
+            - bindings
+            - componentstatuses
+            - configmaps
+            - endpoints
+            - events
+            - limitranges
+            - namespaces
+            - namespaces/finalize
+            - namespaces/status
+            - nodes
+            - nodes/proxy
+            - nodes/status
+            - persistentvolumeclaims
+            - persistentvolumeclaims/status
+            - persistentvolumes
+            - persistentvolumes/status
+            - pods
+            - pods/attach
+            - pods/binding
+            - pods/eviction
+            - pods/exec
+            - pods/log
+            - pods/proxy
+            - pods/status
+            - podtemplates
+            - replicationcontrollers
+            - replicationcontrollers/scale
+            - replicationcontrollers/status
+            - resourcequotas
+            - resourcequotas/status
+            - serviceaccounts
+            - services
+            - services/proxy
+            - services/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - apps
+          resources:
+            - controllerrevisions
+            - daemonsets
+            - daemonsets/status
+            - deployments
+            - deployments/scale
+            - deployments/status
+            - replicasets
+            - replicasets/scale
+            - replicasets/status
+            - statefulsets
+            - statefulsets/scale
+            - statefulsets/status
+          verbs:
+            - list
+            - get
+            - watch
+        - apiGroups:
+            - batch
+          resources:
+            - jobs
+            - jobs/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - autoscaling
+          resources:
+            - horizontalpodautoscalers
+            - horizontalpodautoscalers/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - storage.k8s.io
+          resources:
+            - csidrivers
+            - csinodes
+            - storageclasses
+            - volumeattachments
+            - volumeattachments/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - networking.k8s.io
+          resources:
+            - networkpolicies
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - scheduling.k8s.io
+          resources:
+            - priorityclasses
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - node.k8s.io
+          resources:
+            - runtimeclasses
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - extensions
+          resources:
+            - ingresses
+            - ingresses/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - events.k8s.io
+          resources:
+            - events
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - apiextensions.k8s.io
+          resources:
+            - customresourcedefinitions
+            - customresourcedefinitions/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - apiregistration.k8s.io
+          resources:
+            - apiservices
+            - apiservices/status
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - discovery.k8s.io
+          resources:
+            - endpointslices
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - metrics.k8s.io
+          resources:
+            - pods
+            - nodes
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - policy
+          resources:
+            - poddisruptionbudgets
+            - poddisruptionbudgets/status
+            - podsecuritypolicies
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - rbac.authorization.k8s.io
+          resources:
+            - clusterrolebindings
+            - clusterroles
+            - rolebindings
+            - roles
+          verbs:
+            - get
+            - list
+            - watch
+        - apiGroups:
+            - "*"
+          resources:
+            - "componentstatuses"
+            - "namespaces"
+            - "nodes"
+            - "persistentvolumes"
+            - "mutatingwebhookconfigurations"
+            - "validatingwebhookconfigurations"
+            - "customresourcedefinitions"
+            - "apiservices"
+            - "tokenreviews"
+            - "selfsubjectaccessreviews"
+            - "selfsubjectrulesreviews"
+            - "subjectaccessreviews"
+            - "certificatesigningrequests"
+            - "runtimeclasses"
+            - "podsecuritypolicies"
+            - "clusterrolebindings"
+            - "clusterroles"
+            - "priorityclasses"
+            - "csidrivers"
+            - "csinodes"
+            - "storageclasses"
+            - "volumeattachment"
+          verbs:
+            - "*"
