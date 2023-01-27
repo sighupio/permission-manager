@@ -141,6 +141,14 @@ config:
 
     - name: read-only
       rules:
+        # INIT: Copied from https://github.com/lensapp/lens/pull/644/files#diff-e8fd9c95df786da51f13c3a7442a1d88b3ac4294b786bc268ac92a4072bf50e7R5-R198
+        # Solves issue #43 with the PR #45
+        - nonResourceURLs:
+            - /metrics
+          verbs:
+            - get
+            - list
+            - watch
         - apiGroups:
             - ""
           resources:
@@ -360,6 +368,14 @@ config:
 
     - name: admin
       rules:
+        # INIT: Copied from https://github.com/lensapp/lens/pull/644/files#diff-e8fd9c95df786da51f13c3a7442a1d88b3ac4294b786bc268ac92a4072bf50e7R5-R198
+        # Solves issue #43 with the PR #45
+        - nonResourceURLs:
+            - /metrics
+          verbs:
+            - get
+            - list
+            - watch
         - apiGroups:
             - ""
           resources:
