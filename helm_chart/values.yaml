@@ -95,13 +95,13 @@ affinity: {}
 # Application configuration:
 config:
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> name
-  clusterName: "kind"
+  clusterName: ""
 
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
-  controlPlaneAddress: "https://127.0.0.1:61394"
+  controlPlaneAddress: ""
 
   # Password for basic auth to access the UI
-  basicAuthPassword: "pass"
+  basicAuthPassword: ""
 
   templates:
     - name: operation
