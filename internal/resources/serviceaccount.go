@@ -4,9 +4,10 @@ import (
 	b64 "encoding/base64"
 	"fmt"
 	"log"
-	"sighupio/permission-manager/internal/config"
 	"strings"
 	"time"
+
+	"sighupio/permission-manager/internal/config"
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -53,7 +54,7 @@ func (r *Manager) ServiceAccountCreateKubeConfigForUser(cluster config.ClusterCo
 	/****  handle service account end ****/
 
 	/****  handle service account's secret ****/
-	accountSecret, err = r.SecretGet(serviceAccountNamespace, username)
+	accountSecret, err = r.SecretGet(serviceAccountNamespace, serviceAccount.Secrets[0].Name)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			accountSecret = nil
