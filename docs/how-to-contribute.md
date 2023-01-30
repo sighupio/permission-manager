@@ -8,37 +8,46 @@ Permission Manager consists of two main components:
 
 - A backend server, written in Go, providing a users access management API built on top fo the K8s APIs
   - users are modeled as CRD objects stored, using the K8s APIs, into ETCD
-- An single-page web application, built using the ReactJS framework compiled to a go file using
-  [statik](https://github.com/rakyll/statik), so that a single binary can be deployed to the K8s cluster.
+- A single-page web application, built using the ReactJS framework compiled to a go file using
+  [embed](https://pkg.go.dev/embed), so that a single binary can be deployed to the K8s cluster.
 
 Operators of the cluster can define permissions templates to be used by Permission Manager to create new Users
 declaring in the cluster `ClusterRole` objects with the following naming convention:
 `template-namespaced-resources___<template-name>`.
 
 Note that in a future version of the software, the current naming convention will be replaced by CRDs and/or labels
-
 ## Development environment
-
-### Requirements
-
-- nodejs (developed on v13.1.0)
-- [kind](https://github.com/kubernetes-sigs/kind) (v0.9.0)
+### Setup the development environment
+In order to setup the development environment you need to install the requirements listed above.
+- bats 1.8.2
+- go 1.19
+- kind 0.17.0
+- kubectl >= 1.23
 - make 4.1
-- go 1.14.2
-- npm 6.14.4
+- nodejs 18.0.0
 - yarn 1.22.11
-- yq 3.3.0
-- kubectl 1.16.6
-- curl 7.58.0
-- bats
+- yq 4.30.8
 
+You can use your preferred package manager to install the requirements but we recommend to use [asdf](https://asdf-vm.com/#/) and [direnv](https://direnv.net/) that we actually use to manage the development environment.
 
-### Setup a local development cluster
+### Use asdf and direnv
+0. Install and configure asdf and direnv as described in the [official documentation](https://asdf-vm.com/#/core-manage-asdf-vm?id=install) and [this article](https://direnv.net/docs/installation.html)
+1. Add the required asdf plugins to your asdf installation
+``` shell
+asdf plugin-add bats
+asdf plugin-add direnv
+asdf plugin-add golang
+asdf plugin-add helm
+asdf plugin-add jq
+asdf plugin-add kind
+asdf plugin-add kubectl
+asdf plugin-add make
+asdf plugin-add nodejs
+asdf plugin-add yarn
+```
+2. Run ```asdf install```, it will install all the required versions of the tools listed in the ```.tool-versions``` file that we provide.
 
-Permission Manager development requires access to a K8s cluster.
-The easiest way to create a local Kubernetes cluster is to use [kind](https://github.com/kubernetes-sigs/kind).
-
-To create a local kind cluster, run the `make kind-cluster` command. 
+3. Run ```direnv allow``` to load the local environment from the ```.envrc``` file
 
 ### Approach A: Local development
 
@@ -49,7 +58,8 @@ To create a local kind cluster, run the `make kind-cluster` command.
 #### How to start
 
 ```shell script
-make development-up
+# this will create a kind cluster, source envs from .env-cluster file and loads the images with docker-compose
+make development-up CLUSTER_VERSION=<k8s-version>
 ```
 
 Please note that the frontend container will install node_modules after the boot, so it could take some time to spin completely
@@ -65,7 +75,7 @@ make development-down
 #### TL;DR
 ```
 kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
-source .env-cluster
+source .env-cluster # if you don't use direnv
 make seed build deploy 
 make port-forward &
 ```
@@ -89,27 +99,25 @@ cd web-client
 npm start
 ```
 
-The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000, e.g. with `make kind`.
+The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000.
 In order to authenticate with the server, use the development credentials: `admin:admin`.
 
 ## Testing
 
-### Permission Manager server Unit Tests
+### Unit Tests
 
 In order to run the server unit tests run `make test`.
 
-### Permission Manager frontend E2E Tests
-
-[Cypress](https://cypress.io) is used to run frontend e2e tests.
-Make sure to run the server on the default port, http://localhost:4000, in order for them to work properly.
+### E2E Tests
 
 The tests creates a user and save a kubeconfig file to disk at e2e-test/data/kubeconfig/[username-template-timestamp]
-Use `make test-e2e-local` to run them once you are done with the cypress tests run `make test-e2e-local-down`
-
-![e2e](./assets/e2e.gif)
-
+``` shell
+CLUSTER_NAME=<your cluster name> \ 
+CLUSTER_VERSION=<your cluster version> \ 
+KIND_VERSION=<your kind version> \ 
+make test-e2e
+``` 
 ## Publish a new release
-
 To build and publish a new Permission Manager release run
 
 ```
