@@ -1,0 +1,15 @@
+use asdf;
+
+# Default
+export KUBECONFIG=$(pwd)/.kubeconfig
+export GOOS="$(go env GOOS)"
+export GOARCH="$(go env GOARCH)"
+export PATH=${PATH}:$(go env GOROOT)/bin:$(go env GOPATH)/bin
+export CA_CRT_PATH=~/.kind/ca.crt
+export CLUSTER_NAME=$(kubectl config current-context)
+export CONTROL_PLANE_ADDRESS=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
+
+# Custom
+export BASIC_AUTH_PASSWORD="<the basic auth password to access to ui>"
+export NAMESPACE="<namespace where the app is deployed>"
+export PORT="<port where the app is exposed>"
