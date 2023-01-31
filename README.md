@@ -2,7 +2,12 @@
 
 ![flow](./docs/assets/flow.gif)
 
-Welcome to the Permission Manager! :tada: :tada:
+Welcome to the **Permission Manager**! :tada: :tada:
+
+[![Build Status](https://ci.sighup.io/api/badges/sighupio/permission-manager/status.svg)](https://ci.sighup.io/sighupio/permission-manager)
+![Release](https://img.shields.io/github/v/release/sighupio/permission-manager?label=PM)
+![Slack](https://img.shields.io/badge/slack-@kubernetes/fury-yellow.svg?logo=slack)
+![License](https://img.shields.io/github/license/sighupio/permission-manager)
 
 Permission Manager is an application developed by [SIGHUP](https://sighup.io) that enables a super-easy and user-friendly **RBAC management for Kubernetes**. If you are looking for a simple and intuitive way of managing your users within a Kubernetes cluster, this is the right place.
 
@@ -62,11 +67,7 @@ Create a clusterrole starting with `template-namespaced-resources___` and apply 
 
 #### Default templates
 
-`developer` and `operation` default templates can be created by applying the manifest located at _k8s/k8s-seeds/seed.yml_
-
-```sh
-kubectl apply -f k8s/k8s-seeds
-```
+`developer` and `operation` default templates are located at deployments/kubernetes/seeds/seed.yml
 
 ### What is a user
 

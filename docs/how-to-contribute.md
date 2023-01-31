@@ -110,7 +110,13 @@ In order to run the server unit tests run `make test`.
 
 ### E2E Tests
 
-The tests creates a user and save a kubeconfig file to disk at e2e-test/data/kubeconfig/[username-template-timestamp]
+The E2E tests provide to create a k8s cluster using `kubectl` and `kind` to the version that you specify the `CLUSTER_VERSION` and `KIND_VERSION` variables.
+
+So, Executing the `make test-e2e` command will create a kind cluster, install the CRDs, deploy the Permission Manager and run the E2E tests.
+
+
+> All dependencies and configurations we'll be installed and removed automatically.
+
 ``` shell
 CLUSTER_NAME=<your cluster name> \ 
 CLUSTER_VERSION=<your cluster version> \ 
