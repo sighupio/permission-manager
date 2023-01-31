@@ -43,8 +43,6 @@ The application allows us to define and select permission standard templates (th
 
 The template system is an abstraction over Cluster-Roles, RoleBinding, and ClusterRolesBindigs.
 
-Do we plan to use CRDs and custom labels? Sure, it's in the product roadmap.
-
 ### What is a template
 
 A template is a ClusterRole with a prefix

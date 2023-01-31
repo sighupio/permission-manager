@@ -96,7 +96,7 @@ In order to run the UI locally run the following commands
 
 ```
 cd web-client
-npm start
+yarn start
 ```
 
 The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000.
