@@ -22,7 +22,14 @@ func createClusterRolebinding(c echo.Context) error {
 		return err
 	}
 
-	_, err = ac.ResourceManager.ClusterRoleBindingCreate(r.ClusterRolebindingName, r.Username, r.RoleName, r.Subjects)
+	// This is only a workaround: https://github.com/sighupio/permission-manager/issues/140
+	var subjs []rbacv1.Subject
+	for _, s := range r.Subjects {
+		s.Namespace = ac.Config.Cluster.Namespace
+		subjs = append(subjs, s)
+	}
+
+	_, err = ac.ResourceManager.ClusterRoleBindingCreate(r.ClusterRolebindingName, r.Username, r.RoleName, subjs)
 
 	if err != nil {
 		return err
