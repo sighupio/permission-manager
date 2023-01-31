@@ -12,4 +12,3 @@ export CONTROL_PLANE_ADDRESS=$(kubectl config view --minify | grep server | cut 
 # Custom
 export BASIC_AUTH_PASSWORD="<the basic auth password to access to ui>"
 export NAMESPACE="<namespace where the app is deployed>"
-export PORT="<port where the app is exposed>"

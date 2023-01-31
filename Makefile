@@ -1,6 +1,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/bash
 BASIC_AUTH_PASSWORD ?= admin
+KIND_CLUSTER_NAME := permission-manager
 
 local-container = permission-manager:$(shell git rev-parse HEAD)
 
@@ -88,11 +89,11 @@ seed:
 # build: local deployment of the current sha
 build:
 	@docker build . -t ${local-container}
-	@kind load docker-image ${local-container} --name $(KIND_CLUSTER_NAME)
+	@kind load docker-image ${local-container} --name ${KIND_CLUSTER_NAME}
 
 # deploy: Install deployment for permission-manager
 .PHONY: deploy
-deploy: 
+deploy:
 	@echo "Deploying ${local-container}"
 	@cat deployments/kubernetes/deploy.yml | yq e 'select(document_index == 1).spec.template.spec.containers[0].image |= "${local-container}"' - | kubectl apply -f -
 	@kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
@@ -106,7 +107,6 @@ port-forward:
 .PHONY: clean
 clean:
 	-@rm -rf permission-manager
-	-@rm -rf statik/*
 
 # wipe:
 .PHONY: wipe

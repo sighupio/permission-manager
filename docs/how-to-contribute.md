@@ -59,6 +59,15 @@ asdf plugin-add yarn
 
 ```shell script
 # this will create a kind cluster, source envs from .env-cluster file and loads the images with docker-compose
+
+# STEP 1: Create and customize the .envrc file
+cp .envrc.example .envrc
+direnv allow
+
+# STEP 2: build the ui
+make dependencies ui
+
+# STEP 3: start the kind cluster and the permission manager containers
 make development-up CLUSTER_VERSION=<k8s-version>
 ```
 
@@ -71,12 +80,12 @@ make development-down
 ```
 
 ### Approach B: Build Docker Image and deploy it on kind
- 
+
 #### TL;DR
 ```
 kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
 source .env-cluster # if you don't use direnv
-make seed build deploy 
+make seed build deploy
 make port-forward &
 ```
 #### Step explanation
@@ -86,21 +95,15 @@ make port-forward &
 - Then you should load permission-manager by running `make seed`. It will take information for your current context.
 - You must create a container image with local code wit `make build`. It will push it to kind with the commit_sha.
 - Once it's in kind you update the deploy.yml with the image tag and publish it in k8s with `make deploy` command.
-- finally exposing the project with `make port-forward` will allow you to connect to the permission-manager 
+- finally exposing the project with `make port-forward` will allow you to connect to the permission-manager
   in localhost:4000 with default credentials `admin:admin`.
 
 ### Develop the Permission Manager frontend
 
 The UI frontend source code is stored in the `web-client` folder.
-In order to run the UI locally run the following commands
 
-```
-cd web-client
-yarn start
-```
-
-The UI will be accessible at http://localhost:3000, the server must be available at http://localhost:4000.
-In order to authenticate with the server, use the development credentials: `admin:admin`.
+The UI will be accessible at http://localhost:4001, while the backend will be available at http://localhost:4002.
+In order to authenticate to the service using http auth, use `admin:admin`.
 
 ## Testing
 
@@ -118,16 +121,16 @@ So, Executing the `make test-e2e` command will create a kind cluster, install th
 > All dependencies and configurations we'll be installed and removed automatically.
 
 ``` shell
-CLUSTER_NAME=<your cluster name> \ 
-CLUSTER_VERSION=<your cluster version> \ 
-KIND_VERSION=<your kind version> \ 
+CLUSTER_NAME=<your cluster name> \
+CLUSTER_VERSION=<your cluster version> \
+KIND_VERSION=<your kind version> \
 make test-e2e
-``` 
+```
 ## Publish a new release
 To build and publish a new Permission Manager release run
 
 ```
 bumpversion {mayor,minor,patch}
-git push 
+git push
 git push --tags
 ```

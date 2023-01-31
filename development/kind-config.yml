@@ -17,7 +17,7 @@ nodes:
         value: host.docker.internal
       - op: add
         path: /apiServer/certSANs/-
-        value: kind-control-plane
+        value: permission-manager-control-plane
 
 containerdConfigPatches:
 - |-
