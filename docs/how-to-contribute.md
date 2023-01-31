@@ -65,13 +65,14 @@ cp .envrc.example .envrc
 direnv allow
 
 # STEP 2: build the ui
+export NODE_OPTIONS=--openssl-legacy-provider # Run this if you are using node 18 on macos and the following command fails
 make dependencies ui
 
 # STEP 3: start the kind cluster and the permission manager containers
 make development-up CLUSTER_VERSION=<k8s-version>
 ```
 
-Please note that the frontend container will install node_modules after the boot, so it could take some time to spin completely
+IMPORTANT: The frontend container will install node_modules after the boot, so it could take some time before it's ready.
 
 #### Teardown
 
@@ -79,7 +80,7 @@ Please note that the frontend container will install node_modules after the boot
 make development-down
 ```
 
-### Approach B: Build Docker Image and deploy it on kind
+### Approach B: Build Docker Image and deploy it to kind
 
 #### TL;DR
 ```
@@ -88,7 +89,7 @@ source .env-cluster # if you don't use direnv
 make seed build deploy
 make port-forward &
 ```
-#### Step explanation
+#### Steps explanation
 
 - The `kind create cluster` command can be used to quickly bootstrap a local Kubernetes cluster.
 - Load the environment variables with `source .env-cluster`
@@ -102,6 +103,7 @@ make port-forward &
 
 The UI frontend source code is stored in the `web-client` folder.
 
+Once the container is done building, you can start developing the UI: the page will refresh automatically after every change.
 The UI will be accessible at http://localhost:4001, while the backend will be available at http://localhost:4002.
 In order to authenticate to the service using http auth, use `admin:admin`.
 
