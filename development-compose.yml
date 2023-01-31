@@ -23,7 +23,7 @@ services:
       NAMESPACE: ${NAMESPACE}
       PORT: 4005
     ports:
-    - "4002:4005"
+      - "4002:4005"
     build:
       dockerfile: development/backend.dockerfile
       context: .
