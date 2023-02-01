@@ -1,7 +1,6 @@
 import {ClusterRoleBinding, useRbac} from '../hooks/useRbac'
 import {useUsers} from '../hooks/useUsers'
 import React, {useCallback, useEffect, useState} from 'react'
-import uuid from 'uuid'
 import ClusterAccessRadio from './ClusterAccessRadio'
 import {templateClusterResourceRolePrefix} from '../constants'
 import Templates from './Templates'
@@ -26,7 +25,6 @@ interface EditUserParameters {
  * @return ClusterAccess|null - null if no state change needed.
  */
 function getClusterBindindingAccessValue(clusterRoleBinding: ClusterRoleBinding): ClusterAccess | null {
-
   if (clusterRoleBinding.roleRef.name.endsWith('admin')) {
     return 'write'
   }
@@ -45,11 +43,6 @@ export default function EditUser({user}: EditUserParameters) {
   const history = useHistory()
   const {refreshUsers} = useUsers()
 
-  useEffect(() => {
-    refreshRbacData()
-  }, [refreshRbacData])
-
-  const {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [initialClusterAccess, setInitialClusterAccess] = useState<ClusterAccess>(null)
   const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
@@ -57,23 +50,27 @@ export default function EditUser({user}: EditUserParameters) {
   const [showLegacyMigrationModal, setShowLegacyMigrationModal] = useState(false);
 
   useEffect(() => {
-    // means that aggragatedRoleBindings is already bootstrapped
-    if (aggregatedRoleBindings.length !== 0) {
-      return;
-    }
+    refreshRbacData()
+  }, [refreshRbacData])
 
-    // we proceed to bootstrap aggragatedRoleBindings
+  useEffect(() => {
+    let {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
+
+    // we proceed to bootstrap aggregatedRoleBindings
     setAggregatedRoleBindings(extractedPairItems)
+  }, [roleBindings, clusterRoleBindings])
+
+  useEffect(() => {
     setCanCheckLegacyUser(true);
+
+    let {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
     // we bootstrap clusterRoleBinding value.
     const clusterRoleBinding = crbs.find(crb => crb.metadata.name.includes(templateClusterResourceRolePrefix))
 
-
     if (!clusterRoleBinding) {
       return;
     }
-
 
     const clusterBindingAccessValue = getClusterBindindingAccessValue(clusterRoleBinding)
 
@@ -88,7 +85,7 @@ export default function EditUser({user}: EditUserParameters) {
     }
 
     setClusterAccess(clusterBindingAccessValue)
-  }, [crbs, initialClusterAccess, aggregatedRoleBindings.length, extractedPairItems])
+  }, [roleBindings, clusterRoleBindings, initialClusterAccess])
 
   useEffect(() => {
     async function checkLegacyUser(): Promise<boolean> {
@@ -119,7 +116,6 @@ export default function EditUser({user}: EditUserParameters) {
     }
   }, [aggregatedRoleBindings, username, canCheckLegacyUser])
 
-
   async function handleUserDeletion() {
     setShowLoader(true)
 
@@ -132,6 +128,7 @@ export default function EditUser({user}: EditUserParameters) {
    * delete all the user-resources currently in the k8s cluster
    */
   async function deleteUserResources() {
+    let {rbs, crbs, extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
     await httpRequests.rolebindingRequests.delete.rolebinding(rbs);
     await httpRequests.rolebindingRequests.delete.clusterRolebinding(crbs);
@@ -147,6 +144,8 @@ export default function EditUser({user}: EditUserParameters) {
       username,
       clusterAccess
     );
+
+    setAggregatedRoleBindings(aggregatedRoleBindings)
 
     if (reloadAfterSubmit) {
       window.location.reload()
@@ -166,14 +165,14 @@ export default function EditUser({user}: EditUserParameters) {
   }, [])
 
   const addEmptyPair = useCallback(() => {
-    setAggregatedRoleBindings(state => [...state, {id: uuid.v4(), namespaces: [], template: ''}])
+    setAggregatedRoleBindings(state => [...state, {id: '', namespaces: [], template: ''}])
   }, [])
 
   const saveButtonDisabled = aggregatedRoleBindings.length === 0 || aggregatedRoleBindings.some(p => p.namespaces.length === 0)
 
-  if (crbs && crbs.length === 0 && rbs && rbs.length === 0) {
-    return <div>...loading</div>
-  }
+  // if (crbs && crbs.length === 0 && rbs && rbs.length === 0) {
+  //   return <div>...loading</div>
+  // }
 
   return (
     <div>
