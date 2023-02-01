@@ -51,8 +51,7 @@ Execute the following command to start environment:
 make development-up CLUSTER_VERSION=<k8s-version>
 ```
 
-> ⚠️ IMPORTANT
-> If you are not using direnv, you must load the environment variables with `source .env-cluster` before running the command.
+> ⚠️ IMPORTANT: If you are not using direnv, you must load the environment variables with `source .env-cluster` before running the command.
 
 
 The `make development-up` command will create a kind cluster, load the images with docker-compose and start the development environment.
