@@ -27,9 +27,9 @@ stringData:
 ```
 ### Deploy the application
 ```
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.1-rc1/crd.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.1-rc1/seed.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.1-rc1/deploy.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/crd.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/seed.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/deploy.yml
 ```
 
 ### Visit the application

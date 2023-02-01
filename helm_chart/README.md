@@ -1,4 +1,4 @@
-# Permission Manager Helm Chart - v1.8.0-rc1
+# Permission Manager Helm Chart - v1.8.0
 
 A Helm chart for Permission Manager, a simple to use, web application that enables a super-easy and user-friendly RBAC management for Kubernetes.
 
@@ -11,7 +11,7 @@ The following table lists the configurable parameters of the Permission Manager 
 | `replicaCount` |  | 1 |
 | `image.repository` |  | "quay.io/sighup/permission-manager" |
 | `image.pullPolicy` |  | "IfNotPresent" |
-| `image.tag` |  | "1.8.0-rc1" |
+| `image.tag` |  | "1.8.0" |
 | `imagePullSecrets` |  | [] |
 | `nameOverride` |  | "" |
 | `fullnameOverride` |  | "" |
