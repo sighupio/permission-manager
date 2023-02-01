@@ -27,10 +27,13 @@ _Creating a user - Summary_
 
 ![Create user Sumary](docs/assets/create-user-summary.png)
 
-- User's Kubeconfig\*
+_User's Kubeconfig_
 
 ![User's Kubeconfig](docs/assets/users-kubeconfig.png)
 
+_Deleting a user_
+
+![Deleting a user](docs/assets/delete-user.png)
 ## Installation
 
 To deploy and run the Permission Manager on your cluster, follow the [installation guide](docs/installation.md)
