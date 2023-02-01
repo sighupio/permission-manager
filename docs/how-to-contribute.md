@@ -1,23 +1,7 @@
 # How to contribute
 
 This guide is for contributors to the Permission Manager development.
-
-## Core concepts
-
-Permission Manager consists of two main components:
-
-- A backend server, written in Go, providing a users access management API built on top fo the K8s APIs
-  - users are modeled as CRD objects stored, using the K8s APIs, into ETCD
-- A single-page web application, built using the ReactJS framework compiled to a go file using
-  [embed](https://pkg.go.dev/embed), so that a single binary can be deployed to the K8s cluster.
-
-Operators of the cluster can define permissions templates to be used by Permission Manager to create new Users
-declaring in the cluster `ClusterRole` objects with the following naming convention:
-`template-namespaced-resources___<template-name>`.
-
-Note that in a future version of the software, the current naming convention will be replaced by CRDs and/or labels
-## Development environment
-### Setup the development environment
+## Install Requirements
 In order to setup the development environment you need to install the requirements listed above.
 - bats 1.8.2
 - go 1.19
@@ -31,8 +15,8 @@ In order to setup the development environment you need to install the requiremen
 You can use your preferred package manager to install the requirements but we recommend to use [asdf](https://asdf-vm.com/#/) and [direnv](https://direnv.net/) that we actually use to manage the development environment.
 
 ### Use asdf and direnv
-0. Install and configure asdf and direnv as described in the [official documentation](https://asdf-vm.com/#/core-manage-asdf-vm?id=install) and [this article](https://direnv.net/docs/installation.html)
-1. Add the required asdf plugins to your asdf installation
+1. Install and configure asdf and direnv as described in the [official documentation](https://asdf-vm.com/#/core-manage-asdf-vm?id=install) and [this article](https://direnv.net/docs/installation.html)
+2. Add the required asdf plugins to your asdf installation
 ``` shell
 asdf plugin-add bats
 asdf plugin-add direnv
@@ -45,36 +29,36 @@ asdf plugin-add make
 asdf plugin-add nodejs
 asdf plugin-add yarn
 ```
-2. Run ```asdf install```, it will install all the required versions of the tools listed in the ```.tool-versions``` file that we provide.
+3. Run ```asdf install```, it will install all the required versions of the tools listed in the ```.tool-versions``` file that we provide.
 
-3. Run ```direnv allow``` to load the local environment from the ```.envrc``` file
+4. Run ```direnv allow``` to load the local environment from the ```.envrc``` file. We provide a ```.envrc.example``` file that you can use as a template
 
-### Approach A: Local development
+## Start the development environment
 
-#### Limitations
+### Build the UI static files
+In order to start the development environment we have at first bundle the UI static files that will be served by the backend.
 
-- backend doesn't serve react bundle
+```
+make dependencies ui
+```
 
-#### How to start
+This will update all frontend dependencies and generate the UI files in the `static/build` folder.
+
+### Start the Development Environment
+Execute the following command to start environment:
 
 ```shell script
-# this will create a kind cluster, source envs from .env-cluster file and loads the images with docker-compose
-
-# STEP 1: Create and customize the .envrc file
-cp .envrc.example .envrc
-direnv allow
-
-# STEP 2: build the ui
-export NODE_OPTIONS=--openssl-legacy-provider # Run this if you are using node 18 on macos and the following command fails
-make dependencies ui
-
-# STEP 3: start the kind cluster and the permission manager containers
 make development-up CLUSTER_VERSION=<k8s-version>
 ```
 
-IMPORTANT: The frontend container will install node_modules after the boot, so it could take some time before it's ready.
+> ⚠️ If you are not using direnv, you must load the environment variables with `source .env-cluster` before running the command.
 
-#### Teardown
+
+The `make development-up` command will create a kind cluster, load the images with docker-compose and start the development environment.
+
+⚠️ IMPORTANT: The frontend container will install node_modules after the boot, so it could take some time before it's ready.
+
+### Teardown
 
 ```shell script
 make development-down
