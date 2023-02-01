@@ -91,10 +91,14 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
         }
       }
     } else {
+      const tpl = item.template
+      const nss = item.namespace === 'ALL_NAMESPACES' ? 'ALL_NAMESPACES' : [item.namespace]
+      const id = tpl + '-' + (nss === 'ALL_NAMESPACES' ? 'all' : nss.join('-'))
+
       acc.push({
-        id: uuid.v4(),
-        namespaces: item.namespace === 'ALL_NAMESPACES' ? 'ALL_NAMESPACES' : [item.namespace],
-        template: item.template
+        id: id,
+        namespaces: nss,
+        template: tpl,
       })
     }
 
