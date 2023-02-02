@@ -20,4 +20,4 @@ curl -sSL \
   -H "Authorization: Bearer ${CR_TOKEN}" \
   -H "X-GitHub-Api-Version: 2022-11-28" \
   "https://api.github.com/repos/sighupio/permission-manager/releases/${RELEASE_ID}" \
-  -d '{"name":"Helm Chart v0.1.0"}'
+  -d "{\"name\":\"Helm Chart v${HELM_TAG}\"}"

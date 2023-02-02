@@ -210,6 +210,7 @@ steps:
       # Update the index.yaml and push it to GitHub Pages
       - cr index --release-name-template "helm-chart-v{{ .Version }}" --push
       # Assign a nicer-looking name to the release
+      - apk add jq yq
       - ./scripts/rename-helm-release.sh
 
 ---
