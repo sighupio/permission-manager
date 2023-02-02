@@ -123,11 +123,9 @@ clone:
 trigger:
   branch:
     - main
-  event:
-    - tag
-  paths:
-    exclude:
-      - "helm_chart/**"
+  ref:
+    # Trigger the Permission Manager release only when tagging
+    - refs/tags/v*.*.*
 
 steps:
   - name: clone
@@ -136,7 +134,7 @@ steps:
       - git clone https://github.com/sighupio/permission-manager .
       - git checkout $DRONE_COMMIT
       - git fetch --tags
-      
+
   - name: registry-tag
     image: docker:23.0.0-rc.2-dind-alpine3.17
     pull: always
@@ -178,19 +176,12 @@ kind: pipeline
 type: docker
 
 trigger:
-  ref:
-    include:
-      # Trigger the Helm Chart Releaser only when tagging
-      - refs/tags/helm-chart-*
+  branch:
+    - main
+  paths:
+    - helm_chart/**
 
 steps:
-  - name: check-version
-    image: alpine:3.17
-    commands:
-      - apk add yq
-      # Check if the tag version matches the chart version. This is to avoid publishing a chart with a wrong version.
-      - '[[ $(echo "${DRONE_TAG}" | sed "s/^helm-chart-//") = $(yq ".version" helm_chart/Chart.yaml) ]]'
-
   # We need to manually fetch the gh-pages branch because Drone by default
   # only checksout the current branch with a minimal depth
   # see: https://docs.drone.io/pipeline/docker/syntax/cloning/
@@ -215,7 +206,7 @@ steps:
       # Package the chart into a tar.gz
       - cr package ./helm_chart
       # Upload the tar.gz to a GitHub release
-      - cr upload --release-name-template "${DRONE_TAG}"
+      - cr upload --skip-existing --release-name-template "helm-chart-{{ .Version }}"
       # Update the index.yaml and push it to GitHub Pages
       - cr index --push
 
