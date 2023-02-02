@@ -208,7 +208,7 @@ steps:
       # Upload the tar.gz to a GitHub release
       - cr upload --skip-existing --release-name-template "helm-chart-{{ .Version }}"
       # Update the index.yaml and push it to GitHub Pages
-      - cr index --push
+      - cr index --release-name-template "helm-chart-{{ .Version }}" --push
 
 ---
 kind: pipeline
