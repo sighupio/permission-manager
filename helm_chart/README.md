@@ -1,4 +1,5 @@
 # Permission Manager Helm Chart - v0.1.0
+
 A Helm chart for Permission Manager, a simple to use, web application that enables a super-easy and user-friendly RBAC management for Kubernetes.
 
 ## Configuration options
