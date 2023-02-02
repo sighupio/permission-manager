@@ -44,7 +44,6 @@ service:
   port: 80
   nodePort: null
 
-#
 # Ingress:
 # - If you want to use a specific ingress controller, just uncomment "kubernetes.io/ingress.class" and type the name of your ingress class.
 # - If you want to use TLS (https) for the web interface, just uncomment the "tls" part and add create the secret in the correct namespace.
