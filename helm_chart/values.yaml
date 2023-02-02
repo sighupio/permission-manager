@@ -63,7 +63,6 @@ ingress:
   #     hosts:
   #       - permission-manager.domain.com
 
-#
 # Ressources:
 # The values already adjusted for a small permission-manager setup. Increase value if needed.
 # It's recommended to use ressource limits, just uncomment and try out. To use autosacling, ressources are required.
