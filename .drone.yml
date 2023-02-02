@@ -156,6 +156,11 @@ steps:
       - git clean -f
       - curl -sL https://git.io/goreleaser | bash
 
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
 ---
 name: release-helm-chart
 kind: pipeline
@@ -194,7 +199,7 @@ steps:
       # see: https://github.com/helm/chart-releaser/issues/187
       - mkdir -p .cr-index
       # Package the chart into a tar.gz
-      - cr package ./chart
+      - cr package ./helm_chart
       # Upload the tar.gz to a GitHub release
       - cr upload --skip-existing
       # Update the index.yaml and push it to GitHub Pages
