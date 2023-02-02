@@ -15,7 +15,7 @@ In order to setup the development environment you need to install the requiremen
 You can use your preferred package manager to install the requirements but we recommend to use [asdf](https://asdf-vm.com/#/) and [direnv](https://direnv.net/) that we actually use to manage the development environment.
 
 ### Use asdf and direnv
-1. Install and configure asdf and direnv as described in the [official documentation](https://asdf-vm.com/#/core-manage-asdf-vm?id=install) and [this article](https://direnv.net/docs/installation.html)
+1. Install and configure asdf and direnv as described in the [official documentation](https://asdf-vm.com/#/core-manage-asdf-vm?id=install) and [this article](https://blog.sighup.io/manage-tools-with-ease-direnv-asdf/)
 2. Add the required asdf plugins to your asdf installation
 ``` shell
 asdf plugin-add bats
