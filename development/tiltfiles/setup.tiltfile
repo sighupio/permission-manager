@@ -1,0 +1,27 @@
+# Set default trigger mode to manual
+trigger_mode(TRIGGER_MODE_MANUAL)
+
+# Disable analytics
+analytics_settings(False)
+
+# Disable secrets scrubbing
+secret_settings(disable_scrub=True)
+
+# Allow only kind-permission-manager k8s context
+allow_k8s_contexts("kind-permission-manager")
+
+# Install Tilt extensions
+load("ext://namespace", "namespace_create")
+load("ext://namespace", "namespace_inject")
+
+# Create k8s namespaces
+namespace_create("permission-manager-control-plane")
+
+# Create tls secrets
+permission_manager_tls = read_file("../manifests/permission-manager.dev-tls.yaml")
+permission_manager_wildcard_tls = read_file("../manifests/wildcard.permission-manager.dev-tls.yaml")
+k8s_yaml(namespace_inject(permission_manager_tls, "permission-manager-control-plane"))
+k8s_yaml(namespace_inject(permission_manager_wildcard_tls, "permission-manager-control-plane"))
+
+# Load Ingress Controller
+load_dynamic("../tiltfiles/ingress-nginx.tiltfile")

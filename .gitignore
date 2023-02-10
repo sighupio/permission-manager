@@ -7,12 +7,15 @@ test.*
 .DS_Store
 chore.sh
 .kubeconfig
-.kubeconfig-backend
 tmp
-.kubeconfig-backend.bak
 .envrc
 static/build
 
 .vscode/
 
 .e2e/
+# Certificate files
+development/certs/*
+permission-manager.dev-tls.yaml
+wildcard.permission-manager.dev-tls.yaml
+

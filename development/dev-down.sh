@@ -1,9 +1,13 @@
 #!/usr/bin/env bash
-set -e
 
-kind delete cluster --name permission-manager
+FORCE="${1}"
 
-# we remove the temporary kubeconfig
-rm .kubeconfig .kubeconfig-backend
+echo "Deleting cluster..."
+docker rm -f permission-manager-kind-control-plane
 
-docker-compose -f development-compose.yml down
+if [[ "${FORCE}" -eq "1" ]]; then
+	echo "Deleting local registry..."
+	docker rm -f permission-manager-kind-registry
+fi
+
+echo "Done."
