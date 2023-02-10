@@ -1,0 +1,16 @@
+apiVersion: ctlptl.dev/v1alpha1
+kind: Cluster
+product: kind
+registry: permission-manager-kind-registry
+kindV1Alpha4Cluster:
+  name: permission-manager-kind
+  nodes:
+    - role: control-plane
+      # image: kindest/node:v1.21.2
+      extraPortMappings:
+        - containerPort: 30080
+          hostPort: 80
+          protocol: TCP
+        - containerPort: 30443
+          hostPort: 443
+          protocol: TCP

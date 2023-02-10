@@ -1,0 +1,31 @@
+# nginx (https://github.com/kubernetes/ingress-nginx/blob/master/charts/ingress-nginx/Chart.yaml)
+
+load("ext://helm_remote", "helm_remote")
+
+helm_remote(
+  "ingress-nginx",
+  repo_name="ingress-nginx",
+  repo_url="https://kubernetes.github.io/ingress-nginx",
+  version="4.1.1",
+  namespace="permission-manager-control-plane",
+  release_name="ingress-nginx",
+  values="../helm/ingress-nginx.yaml",
+)
+
+k8s_resource(
+  workload="ingress-nginx-controller",
+  links=[
+    link("http://permission-manager.dev", "http (80)"),
+    link("https://permission-manager.dev", "https (443)"),
+  ],
+  objects=[
+    "ingress-nginx-controller:configmap",
+    "ingress-nginx:clusterrole",
+    "ingress-nginx:clusterrolebinding",
+    "ingress-nginx:role",
+    "ingress-nginx:rolebinding",
+    "ingress-nginx:serviceaccount",
+    "nginx:ingressclass",
+  ],
+  new_name="ingress-nginx"
+)

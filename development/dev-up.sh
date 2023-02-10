@@ -1,23 +1,26 @@
 #!/usr/bin/env bash
-set -e
-# we create the kind cluster with some specific configurations, ex: we allow 'host.docker.internal' on the kubeconf
-# we also save the .kubeconfig on the root folder
-CLUSTER_VERSION="${1}"
-kind create cluster \
-    --config=./development/kind-config.yml \
-    --kubeconfig=./.kubeconfig \
-    --image kindest/node:v"${CLUSTER_VERSION}" \
-    --name permission-manager
-# we make the kubeconfig for the local backend
-cp .kubeconfig .kubeconfig-backend
-# containers reach the host on the 'host.docker.internal' dns instead of 127.0.0.1
-# this line is needed for cross compatibility between osx and unix
-sed -i.bak "s/server: ${PARTITION_COLUMN}.*/server: https:\/\/permission-manager-control-plane:6443/" .kubeconfig-backend && rm -f .kubeconfig-backend.bak
 
-# now that there is the .kubeconfig we can evaluate the .env-cluster
-source .env-cluster
+# Load utils
+source ./development/utils.sh
 
-make seed
+# Variables
+WORKING_DIR=$(pwd)
+CERTS_DIR="${WORKING_DIR}/development/certs"
+FORCE="${1}"
 
-# we spin up the containers
-docker-compose -f development-compose.yml up -d --build
+# Setup self-signed TLS certificates for the ingress to work (it install the CA certificate to your browser's trusted certificates).
+setup_certs "${FORCE}"
+
+# Start dev environment
+if [ "$(docker ps -q -a -f name=permission-manager-kind-registry)" ] && [ "$(docker ps -q -a -f name=permission-manager-kind-control-plane)" ]; then
+	start
+else
+	create
+fi
+
+echo "Starting Tilt's dev environment..."
+kind get kubeconfig --name permission-manager-kind >"${WORKING_DIR}/development/.kubeconfig"
+kubectl --kubeconfig "${WORKING_DIR}/development/.kubeconfig" config set-context permission-manager-kind
+export KUBECONFIG=${WORKING_DIR}/development/.kubeconfig && tilt up -f "${WORKING_DIR}/Tiltfile"
+
+echo "Done."
