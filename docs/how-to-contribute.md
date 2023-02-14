@@ -4,11 +4,15 @@ This guide is for contributors to the Permission Manager development.
 ## Install Requirements
 In order to setup the development environment you need to install the requirements listed above.
 - bats 1.8.2
-- go 1.19
+- ctlptl 0.8.16
+- golang 1.19
+- jq 1.6
 - kind 0.17.0
-- kubectl >= 1.23
+- kubectl 1.26.0 
 - make 4.1
+- mkcert 1.4.4
 - nodejs 18.0.0
+- tilt 0.31.1
 - yarn 1.22.11
 - yq 4.30.8
 
@@ -19,6 +23,7 @@ You can use your preferred package manager to install the requirements but we re
 2. Add the required asdf plugins to your asdf installation
 ``` shell
 asdf plugin-add bats
+asdf plugin-add ctlptl
 asdf plugin-add direnv
 asdf plugin-add golang
 asdf plugin-add helm
@@ -26,8 +31,11 @@ asdf plugin-add jq
 asdf plugin-add kind
 asdf plugin-add kubectl
 asdf plugin-add make
+asdf plugin-add mkcert
 asdf plugin-add nodejs
+asdf plugin-add tilt
 asdf plugin-add yarn
+asdf plugin-add yq
 ```
 3. Run ```asdf install```, it will install all the required versions of the tools listed in the ```.tool-versions``` file that we provide.
 
