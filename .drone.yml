@@ -36,6 +36,8 @@ steps:
     image: golang:1.19
     pull: always
     commands:
+      - apt-get update && apt-get install -y npm=7.5.2+ds-2      
+      - npm install -g yarn@1.22.11
       - make build-ui
       - cp -r ./web-client/build ./static/
       - make test
