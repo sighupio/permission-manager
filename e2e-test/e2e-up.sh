@@ -37,7 +37,7 @@ trap 'cleanup "${CLUSTER_NAME}" "${CYPRESS_IMAGE_NAME}" "${DEPS_SOURCE}"' ERR
 echo -e "Using kind v${KIND_VERSION} and kubectl v${CLUSTER_VERSION}"
 echo -e "Cluster version: ${CLUSTER_VERSION}\n"
 mkdir -p "${DEPS_SOURCE}"
-install_dependencies "${DEPS_SOURCE}" "${KIND_VERSION}" "${CLUSTER_VERSION}"
+install_dependencies "${DEPS_SOURCE}" "${KIND_VERSION}" "${HELM_VERSION}" "${CLUSTER_VERSION}"
 export PATH="${DEPS_SOURCE}:$PATH"
 # Create the cluster and set the kubeconfig
 create_kind_cluster "${CLUSTER_NAME}" "${CLUSTER_VERSION}" "${WORKING_DIR}/e2e-test/kubernetes/config/kind-config.yml"

@@ -1,6 +1,7 @@
 bats 1.8.2
 ctlptl 0.8.16
 golang 1.19
+helm 3.11.1
 jq 1.6
 kind 0.17.0
 kubectl 1.26.0 

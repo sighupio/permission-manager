@@ -6,7 +6,8 @@
 function install_dependencies {
     DEST=$1
     KIND_VERSION=$2
-    CLUSTER_VERSION=$3
+    HELM_VERSION=$3
+    CLUSTER_VERSION=$4
     
     OS=$(uname -s | tr '[:upper:]' '[:lower:]')
     ARCH=$(uname -m | sed 's/x86_64/amd64/')
@@ -16,6 +17,9 @@ function install_dependencies {
     echo "Downloading kubectl v${CLUSTER_VERSION}"
     wget -qO "${DEST}/kubectl" "https://storage.googleapis.com/kubernetes-release/release/v${CLUSTER_VERSION}/bin/${OS}/${ARCH}/kubectl"
     chmod +x "${DEST}/kind" "${DEST}/kubectl"
+    echo "Downloading helm v${HELM_VERSION}"
+    wget -qO "${DEST}/helm.tar.gz" "https://get.helm.sh/helm-v${HELM_VERSION}-${OS}-${ARCH}.tar.gz"
+    tar -xzf "${DEST}/helm.tar.gz" -C "${DEST}" --strip-components=1
 }
 
 function create_kind_cluster {

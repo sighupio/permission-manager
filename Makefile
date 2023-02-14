@@ -71,7 +71,7 @@ test:
 
 # test-e2e: Run e2e test in the kubectl current-context. Used for local development.
 .PHONY: test-e2e
-test-e2e: check-variable-CLUSTER_VERSION check-variable-KIND_VERSION
+test-e2e: check-variable-CLUSTER_VERSION check-variable-KIND_VERSION check-variable-HELM_VERSION
 	@./e2e-test/e2e-up.sh
 
 # test-release: Check dist folder and next tag for the release build
