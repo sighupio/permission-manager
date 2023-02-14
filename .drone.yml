@@ -77,9 +77,7 @@ steps:
     image: golang:1.19
     pull: always
     commands:
-      - apt-get update && apt-get install -y npm=7.5.2+ds-2
-      - npm install -g yarn@1.22.11
-      - make dependencies ui test
+      - make test
 
   - name: registry-sha
     image: docker:23.0.0-rc.2-dind-alpine3.17
