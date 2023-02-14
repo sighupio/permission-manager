@@ -73,8 +73,8 @@ echo "Running the e2e tests..."
 bats -t "$WORKING_DIR/e2e-test/kubernetes/create-user/run.sh" && sleep 15
 
 # run the cypress tests
-kubectl port-forward -n permission-manager-e2e service/permission-manager "${LISTENING_PORT}":4000 &
-export CYPRESS_BASE_URL="http://admin:admin@1v2d1e2e67dS:${LISTENING_PORT}"
+kubectl port-forward -n permission-manager-e2e service/permission-manager "${LISTENING_PORT}":80 &
+export CYPRESS_BASE_URL="http://admin:admin@localhost:${LISTENING_PORT}"
 # if the enviroment is CI, we use the cypress image because we use docker in docker that is based on alpine. Cypress doesn't love it.
 # https://github.com/cypress-io/cypress/issues/419
 if [ -n "${CI}" ]; then
