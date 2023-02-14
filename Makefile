@@ -1,116 +1,93 @@
 .DEFAULT_GOAL := help
-SHELL := /bin/bash
-BASIC_AUTH_PASSWORD ?= admin
-KIND_CLUSTER_NAME := permission-manager
 
-local-container = permission-manager:$(shell git rev-parse HEAD)
+### UTILS ###
 
-# Helpers
+# check-variable-%: Check if the variable is defined.
+check-variable-%:
+	@[[ "${${*}}" ]] || (echo '*** Please define variable `${*}` ***' && exit 1)
 
 .PHONY: help
 help: Makefile
 	@printf "\nChoose a command run in $(shell basename ${PWD}):\n"
 	@sed -n 's/^##//p' $< | column -t -s ":" |  sed -e 's/^/ /'
 	@echo
+	
+### LOCAL DEVELOPMENT ###
 
-#branch-%: Prevents to launch a command if is not in the correct branch
-branch-%:
-	$(if $(filter-out $(shell git rev-parse --abbrev-ref HEAD), $*), $(error Please swith to branch `$*` ***))
+# dev-up: Start the local development environment with Tilt. Use FORCE=true to recreate the self-signed TLS certificates.
+.PHONY: dev-up
 
-#gitclean: Prevents to launch a command if git has untracked modifications
-gitclean:
-ifndef GIT_UNCLEAN
-	$(if $(shell git status -s), $(error Git is tainted:: $(shell git status -s) ***),)
-endif
+dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
+	@./development/dev-up.sh $(FORCE)
 
-# Local Development
+# dev-down: Tears down the local development environment. Use FORCE=true to delete local kind registry.
+.PHONY: dev-down
+dev-down:
+	@./development/dev-down.sh $(FORCE)
+	
+### RUN ###
 
-## development-up: Brings up local development environment
-.PHONY: development-up
-development-up:
-	@./development/dev-up.sh $(CLUSTER_VERSION)
-
-## development-down: Tears down the local development environment
-.PHONY: development-down
-development-down:
-	@./development/dev-down.sh
-
-# Targets
-
-# dependencies: Install node packages for the ui
-.PHONY: dependencies
-dependencies:
-	@yarn --cwd ./web-client install
-
-# test-dependencies: Install test dependecies
-.PHONY: test-dependencies
-test-dependencies:
-	@yarn --cwd ./e2e-test install
-
-# ui: Build ui and statify it
-.PHONY: ui
-ui:
-	@yarn --cwd ./web-client build
+# run: Run the permission-manager in local with the ui build
+.PHONY: run
+run: 
 	@cp -r ./web-client/build ./static/
+	@go run ./cmd/run-server.go
 
-# permission-manager: Build go binary
-.PHONY: permission-manager
-permission-manager:
-	@CGO_ENABLED=0 GOOS=linux go build -a -o permission-manager ./cmd/run-server.go
+# run-ui: Run the permission-manager ui in local
+.PHONY: run-ui
+run-ui: 
+	@yarn --cwd ./web-client start
 
-## test: Run server unit tests
+### BUILD ###
+
+# build: Build the permission-manager binary
+.PHONY: build
+build:
+	@CGO_ENABLED=0 go build --tags=release -a -o permission-manager ./cmd/run-server.go
+
+# build-ui: Build the permission-manager ui
+.PHONY: build-ui
+build-ui:
+	@yarn --cwd ./web-client build
+
+.PHONY: build-docker
+build-docker: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
+	@docker build \
+	--build-arg BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD} \
+	--build-arg CLUSTER_NAME=${CLUSTER_NAME} \
+	--build-arg CONTROL_PLANE_ADDRESS=${CONTROL_PLANE_ADDRESS} \
+	--build-arg NAMESPACE=${NAMESPACE} \
+	--build-arg PORT=${PORT} \
+	--target release \
+	-t permission-manager:${IMAGE_TAG_NAME} \
+	.
+
+### TEST ###
+
+# test: Run server unit tests
 .PHONY: test
 test:
 	@go test -v sighupio/permission-manager/...
 
 # test-e2e: Run e2e test in the kubectl current-context. Used for local development.
 .PHONY: test-e2e
-test-e2e:
-	@./development/e2e-up.sh
-
-# test-e2e-ci: Run e2e test designed for CI.
-.PHONY: test-e2e-ci
-test-e2e-ci:
-	@./development/e2e-ci-up.sh
+test-e2e: check-variable-CLUSTER_VERSION check-variable-KIND_VERSION
+	@./e2e-test/e2e-up.sh
 
 # test-release: Check dist folder and next tag for the release build
 test-release:
 	@goreleaser --snapshot --skip-publish --rm-dist
 	@bumpversion --allow-dirty --dry-run --verbose minor
 
-# seed: configure permission-manager
-.PHONY: seed
-seed:
-	-@kubectl create namespace permission-manager
-	@cat ./development/manifests/permission-manager-secret.yml | envsubst | kubectl apply -f -
-	@kubectl apply -f deployments/kubernetes/seeds/crd.yml
-	@kubectl apply -f deployments/kubernetes/seeds/seed.yml
-
-# build: local deployment of the current sha
-build:
-	@docker build . -t ${local-container}
-	@kind load docker-image ${local-container} --name ${KIND_CLUSTER_NAME}
-
-# deploy: Install deployment for permission-manager
+### DEPLOY ###
+# deploy: Install deployment for permission-manager using helm
 .PHONY: deploy
-deploy:
-	@echo "Deploying ${local-container}"
-	@cat deployments/kubernetes/deploy.yml | yq e 'select(document_index == 1).spec.template.spec.containers[0].image |= "${local-container}"' - | kubectl apply -f -
-	@kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
+deploy: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE
+	@helm install permission-manager helm_chart -f helm_chart/values.yaml \
+	 --namespace ${NAMESPACE} \
+	 --set image.repository=permission-manager \
+	 --set image.tag=${IMAGE_TAG_NAME} \
+	 --set config.clusterName=${CLUSTER_NAME} \
+	 --set config.controlPlaneAddress=${CONTROL_PLANE_ADDRESS} \
+	 --set config.basicAuthPassword=${BASIC_AUTH_PASSWORD} \
 
-# port-forward: Connect port 4000 to pod permission-manager
-.PHONY: port-forward
-port-forward:
-	@kubectl port-forward svc/permission-manager "${FORWARD_PORT}:4000" --namespace permission-manager
-
-# clean: Remove artifacts
-.PHONY: clean
-clean:
-	-@rm -rf permission-manager
-
-# wipe:
-.PHONY: wipe
-wipe:
-	-@rm -rf ./web-client/build
-	-@rm -rf ./web-client/node_modules
-	-@rm -rf ./e2e-test/node_modules

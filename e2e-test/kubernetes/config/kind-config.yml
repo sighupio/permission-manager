@@ -18,7 +18,6 @@ nodes:
       - op: add
         path: /apiServer/certSANs/-
         value: permission-manager-control-plane
-
 containerdConfigPatches:
 - |-
     [debug]

@@ -9,6 +9,7 @@ CERTS_DIR="${WORKING_DIR}/development/certs"
 FORCE="${1}"
 
 # Setup self-signed TLS certificates for the ingress to work (it install the CA certificate to your browser's trusted certificates).
+# Remember to add 0.0.0.0 permission-manager.dev line to your /etc/hosts file.
 setup_certs "${FORCE}"
 
 # Start dev environment
