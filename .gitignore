@@ -19,3 +19,5 @@ development/certs/*
 permission-manager.dev-tls.yaml
 wildcard.permission-manager.dev-tls.yaml
 
+
+e2e-test/ui/data/kubeconfigs/
