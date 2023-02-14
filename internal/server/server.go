@@ -35,10 +35,7 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 	}
 
 	// enable cors in local development
-	if os.Getenv("IS_LOCAL_DEVELOPMENT") == "true" {
-		e.Use(middleware.CORS())
-
-	}
+	e.Use(middleware.CORS())
 
 	e.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
 		if username == "admin" && password == basicAuthPassword {
@@ -51,19 +48,16 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
 
-	//workaround to avoid breaking changes in production. We disable the react bundle in local testing
-	if os.Getenv("IS_LOCAL_DEVELOPMENT") != "true" {
-		fsys, err := fs.Sub(static.WebClient, "build")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
-			Root:       ".",
-			Filesystem: http.FS(fsys),
-			HTML5:      true,
-		}))
+	fsys, err := fs.Sub(static.WebClient, "build")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
+		Root:       ".",
+		Filesystem: http.FS(fsys),
+		HTML5:      true,
+	}))
 
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
