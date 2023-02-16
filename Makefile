@@ -18,12 +18,12 @@ help: Makefile
 .PHONY: dev-up
 
 dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CLUSTER_VERSION check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
-	@./development/dev-up.sh $(CLUSTER_VERSION) $(FORCE)
+	@./development/up.sh $(CLUSTER_VERSION) $(FORCE)
 
 # dev-down: Tears down the local development environment. Use FORCE=true to delete local kind registry.
 .PHONY: dev-down
 dev-down:
-	@./development/dev-down.sh $(FORCE)
+	@./development/down.sh $(FORCE)
 	
 ### RUN ###
 
