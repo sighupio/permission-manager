@@ -17,8 +17,8 @@ help: Makefile
 # dev-up: Start the local development environment with Tilt. Use FORCE=true to recreate the self-signed TLS certificates.
 .PHONY: dev-up
 
-dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
-	@./development/dev-up.sh $(FORCE)
+dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CLUSTER_VERSION check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
+	@./development/dev-up.sh $(CLUSTER_VERSION) $(FORCE)
 
 # dev-down: Tears down the local development environment. Use FORCE=true to delete local kind registry.
 .PHONY: dev-down
