@@ -1,8 +1,10 @@
 # This function will create the ctlptl registry (which is local registry used by Tilt) and the kind cluster.
 function create {
+	CLUSTER_VERSION=$1
+	
 	echo "Creating cluster and local registry..."
 	ctlptl apply -f "${WORKING_DIR}/development/manifests/ctlptl-registry.yml"
-	ctlptl apply -f "${WORKING_DIR}/development/manifests/kind-config.yml" -o template --template '{{.image}} '
+	KIND_IMAGE="kindest/node:v$CLUSTER_VERSION" yq e '.kindV1Alpha4Cluster.nodes[0].image |= strenv(KIND_IMAGE)' <"${WORKING_DIR}/development/manifests/kind-config.yml" | ctlptl apply -f -
 }
 
 # This function will create and inject self-signed TLS certificates into the cluster, using mkcert(it install the CA certificate to your browser's trusted certificates). This is necessary for the ingress to work.

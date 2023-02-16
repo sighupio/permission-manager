@@ -6,7 +6,8 @@ source ./development/utils.sh
 # Variables
 WORKING_DIR=$(pwd)
 CERTS_DIR="${WORKING_DIR}/development/certs"
-FORCE="${1}"
+CLUSTER_VERSION="${1}"
+FORCE="${2}"
 
 # Setup self-signed TLS certificates for the ingress to work (it install the CA certificate to your browser's trusted certificates).
 # Remember to add 0.0.0.0 permission-manager.dev line to your /etc/hosts file.
@@ -16,7 +17,7 @@ setup_certs "${FORCE}"
 if [ "$(docker ps -q -a -f name=permission-manager-kind-registry)" ] && [ "$(docker ps -q -a -f name=permission-manager-kind-control-plane)" ]; then
 	start
 else
-	create
+	create "${CLUSTER_VERSION}"
 fi
 
 echo "Starting Tilt's dev environment..."

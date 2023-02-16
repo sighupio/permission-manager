@@ -251,7 +251,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
       - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.23 tests
@@ -268,7 +268,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
       - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.24 tests
@@ -285,7 +285,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
       - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.25 tests
@@ -302,7 +302,7 @@ steps:
         path: /var/run/docker.sock
     commands:
       # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r1 gettext
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
       - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.26 tests
