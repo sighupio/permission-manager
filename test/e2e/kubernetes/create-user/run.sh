@@ -5,7 +5,7 @@ load "../helper"
 @test "[USERS] Create test-user" {
 	info
 	test() {
-		kubectl apply -f e2e-test/kubernetes/create-user/create-user.yaml -n permission-manager-e2e
+		kubectl apply -f test/e2e/kubernetes/create-user/create-user.yaml -n permission-manager-e2e
 		kubectl wait --for=condition=complete --timeout=30s job/create-user -n permission-manager-e2e
 		kubectl logs job/create-user -n permission-manager-e2e >&3
 	}
@@ -16,7 +16,7 @@ load "../helper"
 @test "[USERS] Create role-binding to test-user" {
 	info
 	test() {
-		kubectl apply -f e2e-test/kubernetes/create-user/create-rolebinding.yaml -n permission-manager-e2e
+		kubectl apply -f test/e2e/kubernetes/create-user/create-rolebinding.yaml -n permission-manager-e2e
 		kubectl wait --for=condition=complete --timeout=30s job/create-rolebinding -n permission-manager-e2e
 		kubectl logs job/create-rolebinding -n permission-manager-e2e >&3
 	}
@@ -27,7 +27,7 @@ load "../helper"
 @test "[USERS] Create cluster-role-binding to test-user" {
 	info
 	test() {
-		kubectl apply -f e2e-test/kubernetes/create-user/create-cluster-rolebinding.yaml -n permission-manager-e2e
+		kubectl apply -f test/e2e/kubernetes/create-user/create-cluster-rolebinding.yaml -n permission-manager-e2e
 		kubectl wait --for=condition=complete --timeout=30s job/create-cluster-rolebinding -n permission-manager-e2e
 		kubectl logs job/create-cluster-rolebinding -n permission-manager-e2e >&3 
 	}
@@ -38,7 +38,7 @@ load "../helper"
 @test "[USERS] Create kubeconfig to test-user" {
 	info
 	test() {
-		kubectl apply -f e2e-test/kubernetes/create-user/create-kubeconfig.yaml -n permission-manager-e2e
+		kubectl apply -f test/e2e/kubernetes/create-user/create-kubeconfig.yaml -n permission-manager-e2e
 		kubectl wait --for=condition=complete --timeout=30s job/create-kubeconfig -n permission-manager-e2e
 		kubectl logs job/create-kubeconfig -n permission-manager-e2e | jq .kubeconfig -r >test.kubeconfig
 		kubectl logs job/create-kubeconfig -n permission-manager-e2e >&3
@@ -49,7 +49,7 @@ load "../helper"
 
 @test "[USERS] Modify kubeconfig (insecure-skip-tls-verify" {
 	info
-	cat test.kubeconfig | yq 'del(.clusters[0].cluster.certificate-authority-data)' - | yq e '.clusters[0].cluster.insecure-skip-tls-verify = true' - >test.insecure.kubeconfig
+	yq 'del(.clusters[0].cluster.certificate-authority-data)' <test.kubeconfig | yq e '.clusters[0].cluster.insecure-skip-tls-verify = true' - >test.insecure.kubeconfig
 }
 
 @test "[USERS] Test generated kubeconfig - test-user can not deploy pods in kube-system" {

@@ -27,7 +27,7 @@ function create_kind_cluster {
     CLUSTER_VERSION=$2
     CONFIG_FILE="$3"
     
-    kind create cluster --name "${CLUSTER_NAME}" --image kindest/node:"v${CLUSTER_VERSION}" --config "$3"
+    kind create cluster --name "${CLUSTER_NAME}" --image kindest/node:"v${CLUSTER_VERSION}" --config "${CONFIG_FILE}"
 }
 
 function cleanup {

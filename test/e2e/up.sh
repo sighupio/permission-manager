@@ -40,7 +40,7 @@ mkdir -p "${DEPS_SOURCE}"
 install_dependencies "${DEPS_SOURCE}" "${KIND_VERSION}" "${HELM_VERSION}" "${CLUSTER_VERSION}"
 export PATH="${DEPS_SOURCE}:$PATH"
 # Create the cluster and set the kubeconfig
-create_kind_cluster "${CLUSTER_NAME}" "${CLUSTER_VERSION}" "${WORKING_DIR}/e2e-test/kubernetes/config/kind-config.yml"
+create_kind_cluster "${CLUSTER_NAME}" "${CLUSTER_VERSION}" "${WORKING_DIR}/test/e2e/kubernetes/config/kind-config.yml"
 kind get kubeconfig --name "${CLUSTER_NAME}" >"${DEPS_SOURCE}/kubeconfig.yml"
 export KUBECONFIG="${DEPS_SOURCE}/kubeconfig.yml"
 
@@ -49,28 +49,28 @@ echo "Starting e2e test..."
 CONTROL_PLANE_ADDRESS=$(kubectl config view --minify | grep server | cut -f 2- -d ":" | tr -d " ")
 
 echo "Building the local permission-manager image..."
-make build-docker CLUSTER_NAME=${CLUSTER_NAME} \
+make build-docker CLUSTER_NAME="${CLUSTER_NAME}" \
 IMAGE_TAG_NAME=e2e \
 NAMESPACE=permission-manager-e2e \
 BASIC_AUTH_PASSWORD=admin \
 PORT=4000 \
-CONTROL_PLANE_ADDRESS=${CONTROL_PLANE_ADDRESS}
+CONTROL_PLANE_ADDRESS="${CONTROL_PLANE_ADDRESS}"
 kind load docker-image permission-manager:e2e --name "${CLUSTER_NAME}"
 
 echo "Deploying the permission-manager..."
 kubectl create namespace permission-manager-e2e
-make deploy CLUSTER_NAME=${CLUSTER_NAME} \
+make deploy-helm CLUSTER_NAME="${CLUSTER_NAME}" \
 IMAGE_TAG_NAME=e2e \
 NAMESPACE=permission-manager-e2e \
 BASIC_AUTH_PASSWORD=admin \
-CONTROL_PLANE_ADDRESS=${CONTROL_PLANE_ADDRESS}
+CONTROL_PLANE_ADDRESS="${CONTROL_PLANE_ADDRESS}"
 
 
 echo "Waiting for the permission-manager to be ready..."
 kubectl wait --for=condition=available --timeout=20s deployment/permission-manager -n permission-manager-e2e
 
 echo "Running the e2e tests..."
-bats -t "$WORKING_DIR/e2e-test/kubernetes/create-user/run.sh" && sleep 15
+bats -t "$WORKING_DIR/test/e2e/kubernetes/create-user/run.sh" && sleep 15
 
 # run the cypress tests
 kubectl port-forward -n permission-manager-e2e service/permission-manager "${LISTENING_PORT}":80 &
@@ -79,11 +79,11 @@ export CYPRESS_BASE_URL="http://admin:admin@localhost:${LISTENING_PORT}"
 # https://github.com/cypress-io/cypress/issues/419
 if [ -n "${CI}" ]; then
     docker run -it -e CYPRESS_BASE_URL -e CYPRESS_VIDEO -e DISPLAY=:${XVFB_PORT} --entrypoint=bash -d --network host --name="${CYPRESS_IMAGE_NAME}" cypress/browsers:node18.12.0-chrome107
-    docker cp $PWD/e2e-test/ui "${CYPRESS_IMAGE_NAME}":e2e
+    docker cp $PWD/test/e2e/ui "${CYPRESS_IMAGE_NAME}":e2e
     docker exec -i -w /e2e "${CYPRESS_IMAGE_NAME}" 'yarn' 'install'
     docker exec -i -d -w /e2e "${CYPRESS_IMAGE_NAME}" 'Xvfb' ":${XVFB_PORT}"
     docker exec -i -w /e2e "${CYPRESS_IMAGE_NAME}" 'yarn' 'test'
 else
-    cd e2e-test/ui && yarn install && yarn test
+    cd test/e2e/ui && yarn install && yarn test
 fi
 
