@@ -15,4 +15,5 @@ release:
   extra_files:
     - glob: deployments/kubernetes/seeds/crd.yml
     - glob: deployments/kubernetes/seeds/seed.yml
+    - glob: deployments/kubernetes/secret.yml
     - glob: deployments/kubernetes/deploy.yml

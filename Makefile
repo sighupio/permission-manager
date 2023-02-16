@@ -72,7 +72,7 @@ test:
 # test-e2e: Run e2e test in the kubectl current-context. Used for local development.
 .PHONY: test-e2e
 test-e2e: check-variable-CLUSTER_VERSION check-variable-KIND_VERSION check-variable-HELM_VERSION
-	@./e2e-test/e2e-up.sh
+	@./test/e2e/up.sh
 
 # test-release: Check dist folder and next tag for the release build
 test-release:
@@ -80,9 +80,21 @@ test-release:
 	@bumpversion --allow-dirty --dry-run --verbose minor
 
 ### DEPLOY ###
-# deploy: Install deployment for permission-manager using helm
+
+# deploy: Install deployment for permission-manager
 .PHONY: deploy
 deploy: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE
+	@kubectl create namespace permission-manager
+	@cat deployments/kubernetes/secret.yml | envsubst | kubectl apply -f -
+	@kubectl apply -f deployments/kubernetes/seeds/crd.yml
+	@kubectl apply -f deployments/kubernetes/seeds/seed.yml
+	@echo "Deploying permission-manager:${IMAGE_TAG_NAME}"
+	@cat deployments/kubernetes/deploy.yml | yq e 'select(document_index == 1).spec.template.spec.containers[0].image |= "permission-manager:${IMAGE_TAG_NAME}"' - | kubectl apply -f -
+	@kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
+
+# deploy-helm: Install deployment for permission-manager using helm
+.PHONY: deploy-helm
+deploy-helm: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE
 	@helm install permission-manager helm_chart -f helm_chart/values.yaml \
 	 --namespace ${NAMESPACE} \
 	 --set image.repository=permission-manager \
