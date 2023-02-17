@@ -7,9 +7,6 @@ platform:
   os: linux
   arch: amd64
 
-clone:
-  disable: true
-
 trigger:
   event:
     - push
@@ -23,12 +20,6 @@ trigger:
       - gh-pages
 
 steps:
-  - name: clone
-    image: alpine/git
-    commands:
-      - git clone https://github.com/sighupio/permission-manager .
-      - git checkout $DRONE_COMMIT
-      - git fetch --tags
   - name: lint files
     image: cytopia/file-lint:latest-0.8
     commands:
@@ -52,11 +43,11 @@ steps:
     commands:
       - apk update
       - apk add make
-      - ls -la
       - make lint-jsons
   - name: lint markdowns
     image: davidanson/markdownlint-cli2:v0.6.0
     commands:
+      # We can't install make because we need root permissions
       - markdownlint-cli2-config ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
   - name: lint makefile
     image: cytopia/checkmake:latest-0.5
@@ -77,79 +68,111 @@ steps:
       - apk add make
       - make lint-helm-chart
 
-  # - name: unit-test
-  #   image: golang:1.19
-  #   pull: always
-  #   commands:
-  #     - apt-get update && apt-get install -y npm=7.5.2+ds-2
-  #     - npm install -g yarn@1.22.11
-  #     - cd web-client && yarn install && cd ..
-  #     - make build-ui
-  #     - cp -r ./web-client/build ./static/
-  #     - make test
-
 ---
 kind: pipeline
 type: docker
-name: preview
+name: qc
 
 platform:
   os: linux
   arch: amd64
 
-clone:
-  disable: true
-
 trigger:
-  branch:
-    - main
+  event:
+    - push
+    - pull_request
   action:
     exclude:
       - synchronized
-  event:
+  branch:
     exclude:
-      - tag
-  paths:
-    exclude:
-      - "helm_chart/**"
+      - main
+      - gh-pages
+      - dependabot/**
 
 steps:
-  - name: clone
-    image: alpine/git
-    commands:
-      - git clone https://github.com/sighupio/permission-manager .
-      - git checkout $DRONE_COMMIT
-      - git fetch --tags
-
   - name: unit-test
     image: golang:1.19
-    pull: always
     commands:
+      - apt-get update && apt-get install -y npm=7.5.2+ds-2
+      - npm install -g yarn@1.22.11
+      - cd web-client && yarn install && cd ..
+      - make build-ui
+      - cp -r ./web-client/build ./static/
       - make test
 
-  - name: registry-sha
+  - name: e2e-test-k8s-v1.23
     image: docker:23.0.0-rc.2-dind-alpine3.17
     pull: always
-    environment:
-      USER:
-        from_secret: quay_username
-      TOKEN:
-        from_secret: quay_password
+    network_mode: host
     volumes:
+      - name: dockerconfig
+        path: /root/.docker/config.json
       - name: dockersock
         path: /var/run/docker.sock
     commands:
-      - docker login -p $TOKEN -u $USER quay.io
-      - apk add git
-      - docker run --rm --privileged tonistiigi/binfmt --install all
-      - docker buildx create --name sighup-builder
-      - docker buildx use sighup-builder
-      - docker buildx inspect --bootstrap
-      - docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7 -t "quay.io/sighup/permission-manager:${DRONE_COMMIT_SHA}" --push .
-    depends_on:
-      - unit-test
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.23 tests
+      - CLUSTER_VERSION=1.23.13 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
+
+  - name: e2e-test-k8s-v1.24
+    image: docker:23.0.0-rc.2-dind-alpine3.17
+    pull: always
+    network_mode: host
+    volumes:
+      - name: dockerconfig
+        path: /root/.docker/config.json
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.24 tests
+      - CLUSTER_VERSION=1.24.7 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
+
+  - name: e2e-test-k8s-v1.25
+    image: docker:23.0.0-rc.2-dind-alpine3.17
+    pull: always
+    network_mode: host
+    volumes:
+      - name: dockerconfig
+        path: /root/.docker/config.json
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.25 tests
+      - CLUSTER_VERSION=1.25.3 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
+
+  - name: e2e-test-k8s-v1.26
+    image: docker:23.0.0-rc.2-dind-alpine3.17
+    pull: always
+    network_mode: host
+    volumes:
+      - name: dockerconfig
+        path: /root/.docker/config.json
+      - name: dockersock
+        path: /var/run/docker.sock
+    commands:
+      # Core dependencies
+      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
+      # Cypress dependencies
+      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      # Execute 1.26 tests
+      - CLUSTER_VERSION=1.26.0 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
 
 volumes:
+  - name: dockerconfig
+    host:
+      path: /root/.docker/config.json
   - name: dockersock
     host:
       path: /var/run/docker.sock
@@ -258,105 +281,3 @@ steps:
       # Assign a nicer-looking name to the release
       - apk add curl jq yq
       - ./scripts/rename-helm-release.sh $CR_TOKEN
-
----
-kind: pipeline
-type: docker
-name: e2e
-
-platform:
-  os: linux
-  arch: amd64
-
-trigger:
-  event:
-    - pull_request
-    - push
-  action:
-    exclude:
-      - synchronized
-  branch:
-    exclude:
-      - dependabot/**
-      - gh-pages
-      - main
-  paths:
-    exclude:
-      - "helm_chart/**"
-
-steps:
-  - name: Kubernetes v1.23
-    image: docker:23.0.0-rc.2-dind-alpine3.17
-    pull: always
-    network_mode: host
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
-      # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
-      # Execute 1.23 tests
-      - CLUSTER_VERSION=1.23.13 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-
-  - name: Kubernetes v1.24
-    image: docker:23.0.0-rc.2-dind-alpine3.17
-    pull: always
-    network_mode: host
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
-      # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
-      # Execute 1.24 tests
-      - CLUSTER_VERSION=1.24.7 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-
-  - name: Kubernetes v1.25
-    image: docker:23.0.0-rc.2-dind-alpine3.17
-    pull: always
-    network_mode: host
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
-      # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
-      # Execute 1.25 tests
-      - CLUSTER_VERSION=1.25.3 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-
-  - name: Kubernetes v1.26
-    image: docker:23.0.0-rc.2-dind-alpine3.17
-    pull: always
-    network_mode: host
-    volumes:
-      - name: dockerconfig
-        path: /root/.docker/config.json
-      - name: dockersock
-        path: /var/run/docker.sock
-    commands:
-      # Core dependencies
-      - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
-      # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
-      # Execute 1.26 tests
-      - CLUSTER_VERSION=1.26.0 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-
-volumes:
-  - name: dockerconfig
-    host:
-      path: /root/.docker/config.json
-  - name: dockersock
-    host:
-      path: /var/run/docker.sock
