@@ -52,6 +52,7 @@ steps:
     commands:
       - apk update
       - apk add make
+      - ls -la
       - make lint-jsons
   # - name: lint markdowns
   #   image: davidanson/markdownlint-cli2:v0.6.0
