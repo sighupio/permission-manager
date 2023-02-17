@@ -32,10 +32,10 @@ steps:
       - git clone https://github.com/sighupio/permission-manager .
       - git checkout $DRONE_COMMIT
       - git fetch --tags
-  - name: lint-files
-    image: docker:20.10.8-dind
-    pull: always
+  - name: lint files
+    image: cytopia/file-lint:0.4
     commands:
+      - apk update
       - apk add make
       - make lint-files
   - name: unit-test
