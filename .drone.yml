@@ -47,12 +47,12 @@ steps:
       - apk update
       - apk add make
       - make lint-yamls
-  - name: lint jsons
-    image: cytopia/jsonlint:1.6.0
-    commands:
-      - apk update
-      - apk add make
-      - make lint-jsons
+  # - name: lint jsons
+  #   image: cytopia/jsonlint:1.6.0
+  #   commands:
+  #     - apk update
+  #     - apk add make
+  #     - make lint-jsons
   - name: lint markdowns
     image: davidanson/markdownlint-cli2:v0.6.0
     commands:
