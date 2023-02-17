@@ -67,7 +67,7 @@ steps:
       - apk add make
       - make lint-makefile
   - name: lint dockerfile
-    image: hadolint/hadolint:v2.12.0
+    image: hadolint/hadolint:v2.12.0-alpine
     commands:
       - apk update
       - apk add make
