@@ -36,7 +36,7 @@ steps:
       - apk add make
       - make lint-files
   - name: lint shells
-    image: koalaman/shellcheck:v0.9.0
+    image: koalaman/shellcheck-alpine:v0.9.0
     commands:
       - apk update
       - apk add make
