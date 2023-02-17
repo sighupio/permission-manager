@@ -1,7 +1,7 @@
 ---
 kind: pipeline
 type: docker
-name: build
+name: qa
 
 platform:
   os: linux
@@ -32,7 +32,11 @@ steps:
       - git clone https://github.com/sighupio/permission-manager .
       - git checkout $DRONE_COMMIT
       - git fetch --tags
-
+  - name: lint-files
+    image: docker:20.10.8-dind
+    pull: always
+    commands:
+      - make lint-files
   - name: unit-test
     image: golang:1.19
     pull: always
