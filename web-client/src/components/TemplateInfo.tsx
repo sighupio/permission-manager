@@ -17,7 +17,7 @@ export default function TemplateInfo({ruleSets, hideNamespaceCol}: TemplateInfoP
           <col width="60"/>
           {hideNamespaceCol ? null : <col/>}
         </colgroup>
-        
+
         <thead className="text-gray-700 text-xs uppercase">
         <tr>
           <th className="px-3">resource</th>
@@ -26,7 +26,7 @@ export default function TemplateInfo({ruleSets, hideNamespaceCol}: TemplateInfoP
           {hideNamespaceCol ? null : <th className="px-3">namespaces</th>}
         </tr>
         </thead>
-        
+
         <tbody className="text-gray-700 text-xs">
         <tr className="bg-gray-200 h-2"/>
         {ruleSets.map(({rules, namespaces}, index) => {
@@ -65,7 +65,7 @@ export default function TemplateInfo({ruleSets, hideNamespaceCol}: TemplateInfoP
                           </label>
                         </div>
                       </td>
-                      
+
                       <td className="py-0 px-3">
                         <div className="flex items-center justify-center">
                           <label className="my-1 mx-0 block uppercase tracking-wide text-gray-700 text-xs mb-2">
@@ -78,7 +78,7 @@ export default function TemplateInfo({ruleSets, hideNamespaceCol}: TemplateInfoP
                           </label>
                         </div>
                       </td>
-                      
+
                       {hideNamespaceCol ? null : (
                         <td className="py-0 px-3">
                           <div className="flex items-center justify-center">

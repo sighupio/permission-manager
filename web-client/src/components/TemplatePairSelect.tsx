@@ -5,9 +5,9 @@ import {AggregatedRoleBinding, AggregatedRoleBindingNamespace} from "../services
 
 interface TemplatePairSelectParameters {
   readonly index?: number;
-  
+
   onSave(aggregatedRoleBinding: AggregatedRoleBinding): void;
-  
+
   readonly initialValues: AggregatedRoleBinding;
 }
 
@@ -16,19 +16,19 @@ export default function TemplatePairSelect({onSave, initialValues}: TemplatePair
   const [namespaces, setNamespaces] = useState<AggregatedRoleBindingNamespace>(initialValues.namespaces || [])
   const [allNamespace, setAllNamespaces] = useState<boolean>(initialValues.namespaces === 'ALL_NAMESPACES' ? true : null)
   const [template, setTemplate] = useState(initialValues.template)
-  
+
   useEffect(() => {
     if (allNamespace === null) {
       return
     }
-    
+
     if (allNamespace) {
       setNamespaces('ALL_NAMESPACES')
     } else {
       setNamespaces([])
     }
   }, [allNamespace])
-  
+
   useEffect(() => {
     onSave({
       id: initialValues.id,
@@ -36,7 +36,7 @@ export default function TemplatePairSelect({onSave, initialValues}: TemplatePair
       template: template
     })
   }, [initialValues.id, namespaces, onSave, template])
-  
+
   return (
     <div style={{display: 'flex'}}>
       <div style={{flex: 3}} data-testid="template-select">
@@ -53,7 +53,7 @@ export default function TemplatePairSelect({onSave, initialValues}: TemplatePair
           <span className="text-red-400 pr-1">*</span>
           namespaces
         </div>
-        
+
         <NamespaceMultiSelect
           value={Array.isArray(namespaces) ? namespaces : []}
           placeholder={allNamespace ? 'all' : 'my-namespace'}

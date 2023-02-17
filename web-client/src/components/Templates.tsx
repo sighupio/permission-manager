@@ -11,7 +11,7 @@ export default function Templates({pairItems, savePair, setPairItems, addEmptyPa
   const lastPair = pairItems[pairItems.length - 1]
   const addButtonDisabled =
     lastPair && lastPair.template && lastPair.namespaces.length === 0
-  
+
   return (
     <div>
       <div className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">
@@ -36,7 +36,7 @@ export default function Templates({pairItems, savePair, setPairItems, addEmptyPa
                   delete
                 </button>
               </div>
-              
+
               <div className="flex items-center">
                 <div className="flex-auto">
                   <TemplatePairSelect
@@ -46,12 +46,12 @@ export default function Templates({pairItems, savePair, setPairItems, addEmptyPa
                   />
                 </div>
               </div>
-              
+
               <hr className="my-4"/>
             </div>
           )
         })}
-        
+
         <button
           className={`bg-white hover:bg-teal-500 hover:text-white text-gray-800 py-2 px-6 rounded shadow ${
             addButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''

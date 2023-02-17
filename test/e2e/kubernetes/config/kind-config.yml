@@ -1,25 +1,26 @@
-#kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
+# kind create cluster --config=./development/kind-config.yml --kubeconfig=./.kubeconfig
+---
 apiVersion: kind.x-k8s.io/v1alpha4
 kind: Cluster
 networking:
   apiServerAddress: "0.0.0.0"
 
 nodes:
-- role: control-plane
-  kubeadmConfigPatches:
-  - |
-    group: kubeadm.k8s.io
-    version: v1beta1
-    kind: ClusterConfiguration
-    patch: |
-      - op: add
-        path: /apiServer/certSANs/-
-        value: host.docker.internal
-      - op: add
-        path: /apiServer/certSANs/-
-        value: permission-manager-control-plane
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        group: kubeadm.k8s.io
+        version: v1beta1
+        kind: ClusterConfiguration
+        patch: |
+          - op: add
+            path: /apiServer/certSANs/-
+            value: host.docker.internal
+          - op: add
+            path: /apiServer/certSANs/-
+            value: permission-manager-control-plane
 containerdConfigPatches:
-- |-
+  - |-
     [debug]
       level = "debug"
     [plugins."io.containerd.grpc.v1.cri".registry]

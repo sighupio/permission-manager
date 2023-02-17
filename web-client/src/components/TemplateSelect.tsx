@@ -10,7 +10,7 @@ interface TemplateSelectParameters {
    * @param template
    */
   onSelect(template: string): void,
-  
+
   readonly initialValue: string
 }
 
@@ -20,17 +20,17 @@ export default function TemplateSelect({onSelect, initialValue}: TemplateSelectP
     .map(s => s.metadata.name)
     .filter(s => s.startsWith(templateNamespacedResourceRolePrefix))
   const [selected, setSelected] = useState(initialValue || '')
-  
+
   useEffect(() => {
     if (templateNames.length > 0 && selected === '') {
       setSelected(templateNames[0])
     }
   }, [selected, templateNames])
-  
+
   useEffect(() => {
     onSelect(selected)
   }, [onSelect, selected])
-  
+
   const Option = props => {
     return (
       <div className="flex">
@@ -44,7 +44,7 @@ export default function TemplateSelect({onSelect, initialValue}: TemplateSelectP
       </div>
     )
   }
-  
+
   return (
     <Select
       value={{

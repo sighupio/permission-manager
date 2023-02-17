@@ -18,7 +18,7 @@ export function useNamespaceList(): NamespaceProvider {
   const [namespaceList, setNamespaceList] = useState([])
   useEffect(() => {
     let unmounted = false
-    
+
     httpRequests.namespaceList().then(res => {
       if (!unmounted)
         setNamespaceList(
@@ -32,11 +32,11 @@ export function useNamespaceList(): NamespaceProvider {
           })
         )
     })
-    
+
     return () => {
       unmounted = true
     }
   }, [])
-  
+
   return {namespaceList}
 }

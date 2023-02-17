@@ -8,7 +8,7 @@ interface NamespaceMultiSelectArguments {
    * @param namespace
    */
   onSelect(namespace: string[]),
-  
+
   /**
    * namespaces
    */
@@ -19,12 +19,12 @@ interface NamespaceMultiSelectArguments {
 
 export default function NamespaceMultiSelect({onSelect, value, disabled, placeholder}: NamespaceMultiSelectArguments) {
   const {namespaceList} = useNamespaceList()
-  
+
   const options = disabled ? [] : namespaceList
     .map(ns => {
       return {value: ns.metadata.name, label: ns.metadata.name}
     })
-  
+
   return (
     <Select
       value={value.map(ns => ({value: ns, label: ns}))}
