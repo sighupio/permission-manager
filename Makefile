@@ -37,18 +37,18 @@ help: Makefile
 # Lint --------------------------------------------------------------------------------------------
 
 .PHONY: lint
-lint: lint-markdown lint-shell lint-yaml lint-dockerfile lint-makefile lint-json lint-file lint-helm-chart
+lint: lint-markdowns lint-shells lint-yamls lint-dockerfile lint-makefile lint-jsons lint-files lint-helm-chart
 
-.PHONY: lint-markdown
-lint-markdown:
+.PHONY: lint-markdowns
+lint-markdowns:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data --entrypoint markdownlint-cli2-config ${_DOCKER_MARKDOWNLINT_IMAGE} ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
 
-.PHONY: lint-shell
-lint-shell:
+.PHONY: lint-shells
+lint-shells:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_SHELLCHECK_IMAGE} -a -o all -s bash **/*.sh
 
-.PHONY: lint-yaml
-lint-yaml:
+.PHONY: lint-yamls
+lint-yamls:
 	@docker run --rm $$(tty -s && echo "-it" || echo) -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_YAMLLINT_IMAGE} -c .rules/yamllint.yaml .
 
 .PHONY: lint-dockerfile
@@ -56,15 +56,15 @@ lint-dockerfile:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_HADOLINT_IMAGE} hadolint Dockerfile
 
 .PHONY: lint-makefile
-lint-makefile:
+lint-makefiles:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_MAKEFILELINT_IMAGE} --config .rules/checkmake.ini Makefile
 
-.PHONY: lint-json
-lint-json:
+.PHONY: lint-jsons
+lint-jsons:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
 
-.PHONY: lint-file
-lint-file:
+.PHONY: lint-files
+lint-files:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_FILELINT_IMAGE} file-cr \
 	--text \
 	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
@@ -100,9 +100,9 @@ lint-helm-chart:
 # Format ------------------------------------------------------------------------------------------
 
 .PHONY: format
-format: format-file format-shell format-markdown
+format: format-files format-shells format-markdowns
 
-.PHONY: format-file
+.PHONY: format-files
 format-file:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_FILELINT_IMAGE} file-cr \
 	--text \
@@ -135,11 +135,11 @@ format-file:
 	--fix \
 	--path .
 
-.PHONY: format-markdown
+.PHONY: format-markdowns
 format-markdown:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data --entrypoint="markdownlint-cli2-fix" ${_DOCKER_MARKDOWNLINT_IMAGE} "**/*.md" "#web-client/node_modules"
 
-.PHONY: format-shell
+.PHONY: format-shells
 format-shell:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_SHFMT_IMAGE} -i 2 -ci -sr -w .
 
