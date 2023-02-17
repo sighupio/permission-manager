@@ -31,40 +31,85 @@ help: Makefile
 	@echo
 
 # -------------------------------------------------------------------------------------------------
-# Quality Targets
+# QA Targets
 # -------------------------------------------------------------------------------------------------
 
 # Lint --------------------------------------------------------------------------------------------
 
-.PHONY: lint
+.PHONY: lint lint-docker
 lint: lint-markdowns lint-shells lint-yamls lint-dockerfile lint-makefile lint-jsons lint-files lint-helm-chart
+lint-docker: lint-markdowns-docker lint-shells-docker lint-yamls-docker lint-dockerfile-docker lint-makefile-docker lint-jsons-docker lint-files-docker lint-helm-chart-docker
 
-.PHONY: lint-markdowns
+.PHONY: lint-markdowns lint-markdowns-docker
 lint-markdowns:
+	@markdownlint-cli2-config ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
+
+lint-markdowns-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data --entrypoint markdownlint-cli2-config ${_DOCKER_MARKDOWNLINT_IMAGE} ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
 
-.PHONY: lint-shells
+.PHONY: lint-shells lint-shells-docker
 lint-shells:
+	@shellcheck -a -o all -s bash **/*.sh
+
+lint-shells-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_SHELLCHECK_IMAGE} -a -o all -s bash **/*.sh
 
-.PHONY: lint-yamls
+.PHONY: lint-yamls lint-yamls-docker
 lint-yamls:
+	@yamllint -c .rules/yamllint.yaml .
+
+lint-yamls-docker:
 	@docker run --rm $$(tty -s && echo "-it" || echo) -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_YAMLLINT_IMAGE} -c .rules/yamllint.yaml .
 
-.PHONY: lint-dockerfile
+.PHONY: lint-dockerfile lint-dockerfile-docker
 lint-dockerfile:
+	@hadolint Dockerfile
+
+lint-dockerfile-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_HADOLINT_IMAGE} hadolint Dockerfile
 
-.PHONY: lint-makefile
-lint-makefiles:
+.PHONY: lint-makefile lint-makefile-docker
+lint-makefile:
+	@checkmake --config .rules/checkmake.ini Makefile
+
+lint-makefile-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_MAKEFILELINT_IMAGE} --config .rules/checkmake.ini Makefile
 
-.PHONY: lint-jsons
+.PHONY: lint-jsons lint-jsons-docker
 lint-jsons:
+	@jsonlint -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
+
+lint-jsons-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
 
-.PHONY: lint-files
+.PHONY: lint-files lint-files-docker
 lint-files:
+	@file-cr \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--path .
+	file-crlf \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--path .
+	file-trailing-single-newline \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--path .
+	file-trailing-space \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--path .
+	file-utf8 \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--path .
+	file-shfmt \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--path .
+
+lint-files-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_FILELINT_IMAGE} file-cr \
 	--text \
 	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
@@ -90,8 +135,14 @@ lint-files:
 	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
 	--path .
 
-.PHONY: lint-helm-chart
+.PHONY: lint-helm-chart lint-helm-chart-docker
 lint-helm-chart:
+	@ct lint \
+	--charts helm_chart \
+	--validate-maintainers=false \
+	--config .rules/ct.yaml
+
+lint-helm-chart-docker:
 	@docker run -it -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_CHART_TESTING_IMAGE} ct lint \
 	--charts helm_chart \
 	--validate-maintainers=false \
@@ -99,11 +150,44 @@ lint-helm-chart:
 
 # Format ------------------------------------------------------------------------------------------
 
-.PHONY: format
+.PHONY: format format-docker
 format: format-files format-shells format-markdowns
+format-docker: format-files-docker format-shells-docker format-markdowns-docker
 
-.PHONY: format-files
-format-file:
+.PHONY: format-files format-files-docker
+format-files:
+	@file-cr \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--fix \
+	--path .
+	file-crlf \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--fix \
+	--path .
+	file-trailing-single-newline \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--fix \
+	--path .
+	file-trailing-space \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--fix \
+	--path .
+	file-utf8 \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--fix \
+	--path .
+	file-utf8-bom \
+	--text \
+	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
+	--fix \
+	--path .
+
+format-files-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_FILELINT_IMAGE} file-cr \
 	--text \
 	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
@@ -135,15 +219,23 @@ format-file:
 	--fix \
 	--path .
 
-.PHONY: format-markdowns
-format-markdown:
+.PHONY: format-markdowns format-markdowns-docker
+format-markdowns:
+	@markdownlint-cli2-fix "**/*.md" "#web-client/node_modules"
+
+format-markdown-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data --entrypoint="markdownlint-cli2-fix" ${_DOCKER_MARKDOWNLINT_IMAGE} "**/*.md" "#web-client/node_modules"
 
-.PHONY: format-shells
-format-shell:
+.PHONY: format-shells format-shells-docker
+format-shells:
+	@shfmt -i 2 -ci -sr -w .
+
+format-shell-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_SHFMT_IMAGE} -i 2 -ci -sr -w .
 
-# Test -------------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
+# QC Targets
+# -------------------------------------------------------------------------------------------------
 
 # test: Run server unit tests
 .PHONY: test

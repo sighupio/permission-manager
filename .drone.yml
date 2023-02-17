@@ -21,9 +21,6 @@ trigger:
     exclude:
       - main
       - gh-pages
-  paths:
-    exclude:
-      - "helm_chart/**"
 
 steps:
   - name: clone
@@ -33,7 +30,7 @@ steps:
       - git checkout $DRONE_COMMIT
       - git fetch --tags
   - name: lint files
-    image: cytopia/file-lint:0.4
+    image: cytopia/file-lint:latest-0.8
     commands:
       - apk update
       - apk add make
