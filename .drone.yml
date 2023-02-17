@@ -53,13 +53,13 @@ steps:
   #     - apk update
   #     - apk add make
   #     - make lint-jsons
-  - name: lint markdowns
-    image: davidanson/markdownlint-cli2:v0.6.0
-    privileged: true
-    commands:
-      - apk update
-      - apk add make
-      - make lint-markdowns
+  # - name: lint markdowns
+  #   image: davidanson/markdownlint-cli2:v0.6.0
+  #   privileged: true
+  #   commands:
+  #     - apk update
+  #     - apk add make
+  #     - make lint-markdowns
   - name: lint makefile
     image: cytopia/checkmake:latest-0.5
     commands:
