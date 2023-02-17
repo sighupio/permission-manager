@@ -77,7 +77,7 @@ lint-makefile-docker:
 
 .PHONY: lint-jsons lint-jsons-docker
 lint-jsons:
-	@jsonlint -t '  ' -i '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' *.json
+	@jsonlint -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
 
 lint-jsons-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
