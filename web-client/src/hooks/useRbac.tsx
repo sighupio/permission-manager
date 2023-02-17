@@ -5,7 +5,7 @@ import {httpClient} from '../services/httpClient'
  * Kubernetes metadata fields.
  */
 interface Metadata {
-  
+
   readonly annotations: { [key: string]: string }
   readonly creationTimestamp: string
   readonly labels: { [key: string]: string }
@@ -45,7 +45,7 @@ export interface Rule {
 
 export interface RuleWithResourceNames extends Rule {
   readonly  resourceNames: string[]
-  
+
 }
 
 export interface ClusterRoleBinding {
@@ -82,7 +82,7 @@ export interface RbacProvider {
   readonly roleBindings: RoleBinding[] | null
   readonly clusterRoles: ClusterRole[] | null
   readonly clusterRoleBindings: ClusterRoleBinding[] | null
-  
+
   /**
    * requests the RbacProvider data again
    */
@@ -99,17 +99,17 @@ function useRbacFromApi(): RbacProvider {
     clusterRoleBindings: null,
     clusterRoles: null
   })
-  
+
   const fetchData = useCallback(async function fetchData() {
     const {data} = await httpClient.get('/api/rbac')
     //sets the data with the response
     setData(data)
   }, [])
-  
+
   useEffect(() => {
     fetchData()
   }, [fetchData])
-  
+
   return {
     roles: data.roles,
     roleBindings: data.roleBindings,

@@ -4,7 +4,7 @@ import {AxiosInstance} from "axios";
 export class RolebindingDeleteRequests {
   public constructor(private readonly httpClient: AxiosInstance) {
   }
-  
+
   public async rolebinding(rbs: RoleBinding[]) {
     for await (const roleBinding of rbs) {
       await this.httpClient.post('/api/delete-rolebinding', {
@@ -13,7 +13,7 @@ export class RolebindingDeleteRequests {
       })
     }
   }
-  
+
   public async clusterRolebinding(crbs: ClusterRoleBinding[]) {
     for await (const clusterRoleBinding of crbs) {
       await this.httpClient.post('/api/delete-cluster-rolebinding', {
@@ -22,5 +22,3 @@ export class RolebindingDeleteRequests {
     }
   }
 }
-
-

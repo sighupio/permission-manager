@@ -6,8 +6,7 @@ COPY web-client /app
 ENV NODE_OPTIONS=--openssl-legacy-provider
 
 WORKDIR /app
-RUN yarn install
-RUN yarn build
+RUN yarn install && yarn build
 
 ## BACKEND ##
 FROM golang:1.19.5-alpine3.17 as go-base
@@ -29,9 +28,8 @@ ENV NAMESPACE=${NAMESPACE}
 ENV PORT=${PORT}
 ENV BASIC_AUTH_PASSWORD=${BASIC_AUTH_PASSWORD}
 
-RUN mkdir -p /tmp/.go/cache /tmp/.go/modcache /tmp/.go/tmp
+RUN mkdir -p /tmp/.go/cache /tmp/.go/modcache /tmp/.go/tmp /app
 
-RUN mkdir /app
 WORKDIR /app
 
 COPY go.mod go.mod
@@ -54,7 +52,8 @@ RUN go build --tags=release -o permission-manager cmd/run-server.go
 
 FROM scratch as release
 
-COPY --from=builder /app/permission-manager .
+WORKDIR /app
+COPY --from=builder /app/permission-manager /app/permission-manager
 EXPOSE 4000
 
 ENTRYPOINT ["./permission-manager"]

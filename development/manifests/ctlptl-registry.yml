@@ -1,3 +1,4 @@
+---
 apiVersion: ctlptl.dev/v1alpha1
 kind: Registry
 name: permission-manager-kind-registry

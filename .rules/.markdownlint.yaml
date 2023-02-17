@@ -1,0 +1,3 @@
+---
+# Disable line length check
+MD013: false

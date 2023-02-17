@@ -11,7 +11,7 @@ export function httpClientFactory(): AxiosInstance {
     url: process.env.REACT_APP_BACKEND_URL ?? "",
     baseURL: process.env.REACT_APP_BACKEND_URL ?? ""
   })
-  
+
   /**
    * if a BASIC_AUTH_PASSWORD is passed we inject it into {httpClient}
    */
@@ -21,7 +21,7 @@ export function httpClientFactory(): AxiosInstance {
       password: process.env.REACT_APP_BASIC_AUTH_PASSWORD
     }
   }
-  
+
   return httpClient;
 }
 

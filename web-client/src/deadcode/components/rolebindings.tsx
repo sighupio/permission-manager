@@ -10,9 +10,9 @@ import {httpRequests} from "../../services/httpRequests";
 
 export default () => {
   const {refreshRbacData, roleBindings} = useRbac()
-  
+
   if (!roleBindings) return <div>no data</div>
-  
+
   return (
     <div>
       <div style={{display: 'flex'}}>
@@ -38,7 +38,7 @@ export default () => {
 
 function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingType, fetchData(): void }) {
   const [, setShowMore] = useState(false)
-  
+
   async function deleteRoleBinding(e) {
     await httpClient.post('/api/delete-rolebinding', {
       rolebindingName: rb.metadata.name,
@@ -46,7 +46,7 @@ function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingTyp
     })
     fetchData()
   }
-  
+
   return (
     <div
       onMouseEnter={() => setShowMore(true)}
@@ -54,7 +54,7 @@ function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingTyp
       style={{padding: 20, margin: 30, background: 'yellow'}}
     >
       <button onClick={deleteRoleBinding}>delete</button>
-      
+
       <div>name: {rb.metadata.name}</div>
       <div>namespace: {rb.metadata.namespace}</div>
       <div>
@@ -85,17 +85,17 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
   const [roleKind, setRoleKind] = useState<string>('Role')
   const [rolebindingName, setRolebindingName] = useState<string>('')
   const {namespaceList} = useNamespaceList()
-  
+
   function resetForm() {
     setRoleName('')
     setRolebindingName('')
     setNamespace('default')
     setSubjects([])
   }
-  
+
   async function onSubmit(e) {
     e.preventDefault()
-    
+
     await httpRequests.rolebindingRequests.create.rolebinding({
       namespace,
       template: roleName,
@@ -106,11 +106,11 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
         namespace: 'permission-manager'
       })),
     })
-    
+
     fetchData()
     resetForm()
   }
-  
+
   return (
     <form
       onSubmit={onSubmit}
@@ -128,7 +128,7 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
           />
         </label>
       </div>
-      
+
       <div>
         <label>
           namespace
@@ -146,7 +146,7 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
           </select>
         </label>
       </div>
-      
+
       <div>
         Role kind:
         <div>
@@ -178,13 +178,13 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
           </label>
         </div>
       </div>
-      
+
       {roleKind === 'Role' ? (
         <RoleSelect onSelected={r => setRoleName(r.metadata.name)}/>
       ) : (
         <ClusterRoleSelect onSelected={r => setRoleName(r.metadata.name)}/>
       )}
-      
+
       <div>
         <h2>subjects</h2>
         <SubjectList
@@ -192,7 +192,7 @@ function NewRoleBindingForm({fetchData}: { fetchData(): void }) {
           setSubjects={setSubjects}
         ></SubjectList>
       </div>
-      
+
       <button type="submit">submit</button>
     </form>
   )
@@ -208,14 +208,14 @@ function SubjectList({subjects, setSubjects}) {
         if (s.id === sub.id) {
           return s
         }
-        
+
         return sub
       })
     })
   }, [setSubjects])
-  
+
   const {users} = useUsers()
-  
+
   return (
     <div style={{padding: 10, margin: '20px 0', background: 'orange'}}>
       {subjects.map(s => {
@@ -229,7 +229,7 @@ function SubjectList({subjects, setSubjects}) {
           </div>
         )
       })}
-      
+
       <div style={{marginTop: 20}}>
         <button
           type="button"
@@ -248,15 +248,15 @@ function SubjectItem({id, updateSubject}) {
   const [kind, setKind] = useState('User')
   const [subjectName, setSubjectName] = useState('')
   const {users} = useUsers()
-  
+
   useEffect(() => {
     setSubjectName(users[0].name)
   }, [kind, users])
-  
+
   useEffect(() => {
     updateSubject({id, kind, name: subjectName})
   }, [id, kind, subjectName, updateSubject])
-  
+
   return (
     <div>
       <div>

@@ -2,15 +2,15 @@
 builds:
   - skip: true
 checksum:
-  name_template: 'checksums.txt'
+  name_template: checksums.txt
 snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
 release:
   extra_files:
     - glob: deployments/kubernetes/seeds/crd.yml

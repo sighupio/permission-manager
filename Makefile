@@ -34,13 +34,14 @@ help: Makefile
 # Quality Targets
 # -------------------------------------------------------------------------------------------------
 
-# Lint ############################################################################################
+# Lint --------------------------------------------------------------------------------------------
+
 .PHONY: lint
 lint: lint-markdown lint-shell lint-yaml lint-dockerfile lint-makefile lint-json lint-file lint-helm-chart
 
 .PHONY: lint-markdown
 lint-markdown:
-	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_MARKDOWNLINT_IMAGE} "**/*.md" "#web-client/node_modules"
+	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data --entrypoint markdownlint-cli2-config ${_DOCKER_MARKDOWNLINT_IMAGE} ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
 
 .PHONY: lint-shell
 lint-shell:
@@ -60,7 +61,7 @@ lint-makefile:
 
 .PHONY: lint-json
 lint-json:
-	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './web-client/node_modules' *.json
+	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
 
 .PHONY: lint-file
 lint-file:
@@ -94,11 +95,12 @@ lint-helm-chart:
 	@docker run -it -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_CHART_TESTING_IMAGE} ct lint \
 	--charts helm_chart \
 	--validate-maintainers=false \
-	--config ct.yaml
+	--config .rules/ct.yaml
 
-# Format ##########################################################################################
+# Format ------------------------------------------------------------------------------------------
+
 .PHONY: format
-format: format-markdown format-shell format-yaml format-dockerfile format-makefile format-json format-file
+format: format-file format-shell format-markdown
 
 .PHONY: format-file
 format-file:
@@ -141,7 +143,8 @@ format-markdown:
 format-shell:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_SHFMT_IMAGE} -i 2 -ci -sr -w .
 
-# Test ############################################################################################
+# Test -------------------------------------------------------------------------------------------
+
 # test: Run server unit tests
 .PHONY: test
 test:
@@ -161,21 +164,23 @@ test-release:
 # Normal Targets
 # -------------------------------------------------------------------------------------------------
 
-# Development #####################################################################################
-# dev-up: Start the local development environment with Tilt. 
-# Use FORCE=true to recreate the self-signed TLS certificates.
+# Development -------------------------------------------------------------------------------------
+
+# dev-up: Start the local development environment with Tilt.
+# Use FORCE=true to recreate the self-signed TLS certificates
 .PHONY: dev-up
 
 dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CLUSTER_VERSION check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
 	@./development/up.sh $(CLUSTER_VERSION) $(FORCE)
 
-# dev-down: Tears down the local development environment. 
-# Use FORCE=true to delete local kind registry.
+# dev-down: Tears down the local development environment.
+# Use FORCE=true to delete local kind registry
 .PHONY: dev-down
 dev-down:
 	@./development/down.sh $(FORCE)
 
-# Run #############################################################################################
+# Run ---------------------------------------------------------------------------------------------
+
 # run: Run the permission-manager in local with the ui build
 .PHONY: run
 run:
@@ -187,7 +192,8 @@ run:
 run-ui:
 	@yarn --cwd ./web-client start
 
-# Build ###########################################################################################
+# Build -------------------------------------------------------------------------------------------
+
 # build: Build the permission-manager binary
 .PHONY: build
 build:
@@ -210,7 +216,8 @@ build-docker: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD c
 	-t permission-manager:${IMAGE_TAG_NAME} \
 	.
 
-# Deploy ##########################################################################################
+# Deploy ------------------------------------------------------------------------------------------
+
 # deploy: Install deployment for permission-manager
 .PHONY: deploy
 deploy: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE
