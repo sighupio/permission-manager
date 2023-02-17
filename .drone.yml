@@ -115,7 +115,6 @@ steps:
       - make build-ui
       - cp -r ./web-client/build ./static/
       - make test
-    depends_on: [clone]
 
   - name: e2e-test-k8s-v1.23
     image: docker:23.0.0-rc.2-dind-alpine3.17
@@ -133,7 +132,6 @@ steps:
       - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.23 tests
       - CLUSTER_VERSION=1.23.13 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-    depends_on: [clone]
 
   - name: e2e-test-k8s-v1.24
     image: docker:23.0.0-rc.2-dind-alpine3.17
@@ -151,7 +149,7 @@ steps:
       - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.24 tests
       - CLUSTER_VERSION=1.24.7 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-    
+
   - name: e2e-test-k8s-v1.25
     image: docker:23.0.0-rc.2-dind-alpine3.17
     pull: always
