@@ -104,7 +104,7 @@ lint-files:
 	--text \
 	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
 	--path .
-	file-shfmt \
+	file-utf8-bom \
 	--text \
 	--ignore '.git/,.github/,.vscode/,.idea/,static/build,web-client/node_modules,web-client/build' \
 	--path .

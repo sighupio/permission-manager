@@ -35,16 +35,59 @@ steps:
       - apk update
       - apk add make
       - make lint-files
-  - name: unit-test
-    image: golang:1.19
-    pull: always
+  - name: lint shells
+    image: koalaman/shellcheck:v0.9.0
     commands:
-      - apt-get update && apt-get install -y npm=7.5.2+ds-2
-      - npm install -g yarn@1.22.11
-      - cd web-client && yarn install && cd ..
-      - make build-ui
-      - cp -r ./web-client/build ./static/
-      - make test
+      - apk update
+      - apk add make
+      - make lint-shells
+  - name: lint yamls
+    image: cytopia/yamllint:1
+    commands:
+      - apk update
+      - apk add make
+      - make lint-yamls
+  - name: lint jsons
+    image: cytopia/jsonlint:1.6.0
+    commands:
+      - apk update
+      - apk add make
+      - make lint-jsons
+  - name: lint markdowns
+    image: davidanson/markdownlint-cli2:v0.6.0
+    commands:
+      - apk update
+      - apk add make
+      - make lint-markdowns
+  - name: lint makefile
+    image: cytopia/checkmake:latest-0.5
+    commands:
+      - apk update
+      - apk add make
+      - make lint-makefile
+  - name: lint dockerfile
+    image: hadolint/hadolint:v2.12.0
+    commands:
+      - apk update
+      - apk add make
+      - make lint-dockerfile
+  - name: lint helm chart
+    image: quay.io/helmpack/chart-testing:v3.5.0
+    commands:
+      - apk update
+      - apk add make
+      - make lint-helm
+
+  # - name: unit-test
+  #   image: golang:1.19
+  #   pull: always
+  #   commands:
+  #     - apt-get update && apt-get install -y npm=7.5.2+ds-2
+  #     - npm install -g yarn@1.22.11
+  #     - cd web-client && yarn install && cd ..
+  #     - make build-ui
+  #     - cp -r ./web-client/build ./static/
+  #     - make test
 
 ---
 kind: pipeline
