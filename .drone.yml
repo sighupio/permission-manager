@@ -36,6 +36,7 @@ steps:
     image: docker:20.10.8-dind
     pull: always
     commands:
+      - apk add make
       - make lint-files
   - name: unit-test
     image: golang:1.19
