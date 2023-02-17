@@ -56,8 +56,7 @@ steps:
   - name: lint markdowns
     image: davidanson/markdownlint-cli2:v0.6.0
     commands:
-      - sudo apk update
-      - sudo apk add make
+      - apk add make
       - make lint-markdowns
   - name: lint makefile
     image: cytopia/checkmake:latest-0.5
