@@ -20,6 +20,22 @@ _PROJECT_DIRECTORY=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
 # Utility functions
 # -------------------------------------------------------------------------------------------------
 
+# $1: type
+# $2: name
+# $3: command
+define find-exec
+	@find . \
+	-type $1 \
+	-not -path "**/node_modules/**" \
+	-not -path ".git" \
+	-not -path ".github" \
+	-not -path ".vscode" \
+	-not -path ".idea" \
+	-name $2 \
+	-print0 | \
+	xargs -I {} -0 sh -c $3
+endef
+
 # check-variable-%: Check if the variable is defined.
 check-variable-%:
 	@[[ "${${*}}" ]] || (echo '*** Please define variable `${*}` ***' && exit 1)
@@ -77,10 +93,10 @@ lint-makefile-docker:
 
 .PHONY: lint-jsons lint-jsons-docker
 lint-jsons:
-	@jsonlint -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
+	$(call find-exec,"f","*.json","jsonlint -c -q -t '  ' {}")
 
 lint-jsons-docker:
-	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
+	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i ./.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
 
 .PHONY: lint-files lint-files-docker
 lint-files:
