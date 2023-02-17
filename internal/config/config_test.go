@@ -18,7 +18,7 @@ func ExampleNew() {
 	fmt.Println(cfg.Cluster.Name)
 	fmt.Println(cfg.Cluster.ControlPlaneAddress)
 	fmt.Println(cfg.Cluster.Namespace)
-	
+
 	// Output:
 	// 4000
 	// my-cluster

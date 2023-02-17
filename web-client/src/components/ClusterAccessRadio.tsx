@@ -23,7 +23,7 @@ export default function ClusterAccessRadio({clusterAccess, setClusterAccess}: Cl
             />
             <span className="ml-2">none</span>
           </label>
-          
+
           <label className="block uppercase tracking-wide text-gray-700 text-xs mb-2">
             <input
               type="radio"
@@ -33,7 +33,7 @@ export default function ClusterAccessRadio({clusterAccess, setClusterAccess}: Cl
             />
             <span className="ml-2">read-only</span>
           </label>
-          
+
           <label className="block uppercase tracking-wide text-gray-700 text-xs mb-2">
             <input
               type="radio"

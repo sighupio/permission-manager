@@ -26,7 +26,7 @@ export interface AggregatedRoleBinding {
    * uuid v4
    */
   readonly id: string,
-  
+
   readonly namespaces: AggregatedRoleBindingNamespace
   /**
    * DO NOT REFACTOR THIS NAME
@@ -51,22 +51,22 @@ export interface ExtractedUserRoles {
 export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], username: string): ExtractedUserRoles {
   const rbs = (roleBindings || []).filter(rb => {
     const separatedResourceName = rb.metadata.name.split(resourceSeparator);
-    
+
     if (separatedResourceName.length === 0) return false
-    
+
     // the first split always contains the name of the user
     return separatedResourceName[0] === username
   })
-  
+
   const crbs = (clusterRoleBindings || []).filter(crb => {
     const separatedResourceName = crb.metadata.name.split(resourceSeparator);
-    
+
     if (separatedResourceName.length === 0) return false
-    
+
     // the first split always contains the name of the user
     return separatedResourceName[0] === username
   })
-  
+
   const normalizedRoleBindings: NormalizedRoleBinding[] = [...rbs, ...crbs]
     .filter(
       crb => !crb.metadata.name.includes(templateClusterResourceRolePrefix)
@@ -78,10 +78,10 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
       const namespace = mixedRoleBinding.metadata['namespace'] || 'ALL_NAMESPACES'
       return {template, namespace, name}
     })
-  
+
   const extractedPairItems: AggregatedRoleBinding[] = normalizedRoleBindings.reduce((acc, item) => {
     const has = acc.find(x => x.template === item.template)
-    
+
     if (has) {
       if (has.namespaces !== 'ALL_NAMESPACES') {
         if (item.namespace === 'ALL_NAMESPACES') {
@@ -97,9 +97,9 @@ export function extractUsersRoles(roleBindings: RoleBinding[], clusterRoleBindin
         template: item.template
       })
     }
-    
+
     return acc
   }, [])
-  
+
   return {rbs, crbs, extractedPairItems};
 }

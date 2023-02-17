@@ -68,4 +68,3 @@ export const resourceSeparator = '___'
 export const templateNamespacedResourceRolePrefix = 'template-namespaced-resources' + resourceSeparator
 
 export const templateClusterResourceRolePrefix = 'template-cluster-resources' + resourceSeparator
-

@@ -11,12 +11,12 @@ import {httpRequests} from "../services/httpRequests";
  */
 function getValidNamespaces(roleBindings: RoleBinding[], clusterRoleBindings: ClusterRoleBinding[], user: User): string[] {
   const {extractedPairItems} = extractUsersRoles(roleBindings, clusterRoleBindings, user.name);
-  
+
   const uniqueNamespaces = extractedPairItems.length === 0 ? [] : [...new Set(extractedPairItems.map(i => i.namespaces).flat(1))];
-  
+
   // we remove the invalid namespaces from the array
   const validNamespaces = uniqueNamespaces.filter(i => i !== "ALL_NAMESPACES");
-  
+
   //a) If no elements are present we add the default namespace to the extracted namespaces.
   if (validNamespaces.length === 0) {
     validNamespaces.push("default");
@@ -35,10 +35,10 @@ export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonPar
   const [copied, setCopied] = useState<boolean>(false);
   const {clusterRoleBindings, roleBindings} = useRbac()
   const validNamespaces = getValidNamespaces(roleBindings, clusterRoleBindings, user);
-  
+
   //b) we generate an array of unique namespaces.
   const [chosenNamespace, setChosenNamespace] = useState<string>(validNamespaces[0]);
-  
+
   useEffect(() => {
     // !kubeconfig.includes(chosenNamespace) is needed to remake the API request if the chosenNamespace changed
     if (showModal && (kubeconfig === '' || !kubeconfig.includes("namespace: " + chosenNamespace))) {
@@ -47,14 +47,14 @@ export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonPar
           setKubeconfig(data.kubeconfig)
         })
     }
-    
+
     // needed for properly refresh the state if the user has selected a namespace that doesn't exist anymore
     if (!validNamespaces.find(n => n === chosenNamespace)) {
       setChosenNamespace(validNamespaces[0])
     }
-    
+
   }, [kubeconfig, showModal, user.name, chosenNamespace, validNamespaces])
-  
+
   return (
     <span className="flex">
       <Dialog
@@ -95,7 +95,7 @@ export default function CreateKubeconfigButton({user}: CreateKubeconfigButtonPar
                 {copied ? 'Copied' : 'Copy'}
               </button>
             </div>
-  
+
             {kubeconfig ? (
               <div data-testid="yaml">
                 <Editor

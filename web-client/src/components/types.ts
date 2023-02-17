@@ -2,7 +2,7 @@ import {Rule} from "../hooks/useRbac";
 import {AggregatedRoleBinding} from "../services/role";
 
 export interface RuleSet {
-  
+
   readonly template?: string
   readonly rules: Rule[],
   /**

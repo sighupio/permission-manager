@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import {useRbac} from '../../hooks/useRbac'
 
 export function ClusterRoleSelect({ onSelected }) {
-  
+
   const [hideSystemClusterRoles, setHideSystemClusterRoles] = useState<boolean>(true)
   const { refreshRbacData, clusterRoles } = useRbac()
 

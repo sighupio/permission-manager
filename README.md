@@ -15,32 +15,33 @@ With Permission Manager, you can create users, assign namespaces/permissions, an
 
 ## Screenshots
 
-_First Page_
+### First Page
 
 ![First Page](docs/assets/first-page.png)
 
-_Creating a user_
+### Creating a user
 
 ![Creating a user](docs/assets/create-user.png)
 
-_Creating a user - Summary_
+### Creating a user - Summary
 
 ![Create user Sumary](docs/assets/create-user-summary.png)
 
-_User's Kubeconfig_
+### User's Kubeconfig
 
 ![User's Kubeconfig](docs/assets/users-kubeconfig.png)
 
-_Deleting a user_
+### Deleting a user
 
 ![Deleting a user](docs/assets/delete-user.png)
+
 ## Installation
 
 To deploy and run the Permission Manager on your cluster, follow the [installation guide](docs/installation.md)
 
 ## Development Setup
 
-We love contributions from the community :heart:.  
+We love contributions from the community :heart:.
 Learn [how-to-contribute](docs/how-to-contribute.md)
 
 ## FAQ

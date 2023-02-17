@@ -11,15 +11,15 @@ export default () => {
     hideSystemCusterRoleBindings,
     setHideSystemCusterRoleBindings
   ] = useState(true)
-  
+
   if (!clusterRoleBindings) return <div>no data</div>
-  
+
   const crbs = hideSystemCusterRoleBindings
     ? clusterRoleBindings.filter(c => {
       return !c.roleRef.name.startsWith('system:')
     })
     : clusterRoleBindings
-  
+
   return (
     <div>
       <div style={{display: 'flex'}}>
@@ -58,19 +58,19 @@ export default () => {
 
 function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingType | ClusterRoleBinding, fetchData }) {
   const [, setShowMore] = useState(false)
-  
+
   async function deleteRoleBinding(e) {
-    
+
     // we check if its a rolebinding
     if ("namespace" in rb.metadata) await httpRequests.rolebindingRequests.delete.rolebinding([(rb as RoleBindingType)])
     //cluster role binding case
     else await httpRequests.rolebindingRequests.delete.clusterRolebinding([rb])
-    
-    
+
+
     fetchData()
     return;
   }
-  
+
   return (
     <div
       onMouseEnter={() => setShowMore(true)}
@@ -78,7 +78,7 @@ function RoleBinding({rolebinding: rb, fetchData}: { rolebinding: RoleBindingTyp
       style={{padding: 20, margin: 30, background: 'aqua'}}
     >
       <button onClick={deleteRoleBinding}>delete</button>
-      
+
       <div>name: {rb.metadata.name}</div>
       <div>namespace: {rb.metadata['namespace'] ?? "global"}</div>
       <div>
@@ -106,10 +106,10 @@ function NewClusterRoleBindingForm({fetchData}) {
   const [roleName, setRoleName] = useState<string>('')
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [clusterRolebindingName, setClusterRolebindingName] = useState('')
-  
+
   async function onSubmit(e) {
     e.preventDefault()
-    
+
     await httpRequests.rolebindingRequests.create.clusterRolebinding({
       subjects: subjects.map(s => ({
         ...s,
@@ -118,10 +118,10 @@ function NewClusterRoleBindingForm({fetchData}) {
       template: roleName,
       clusterRolebindingName,
     })
-    
+
     fetchData()
   }
-  
+
   return (
     <form
       onSubmit={onSubmit}
@@ -139,9 +139,9 @@ function NewClusterRoleBindingForm({fetchData}) {
           />
         </label>
       </div>
-      
+
       <ClusterRoleSelect onSelected={cr => setRoleName(cr.metadata.name)}/>
-      
+
       <div>
         <h2>subjects</h2>
         <SubjectList
@@ -149,33 +149,33 @@ function NewClusterRoleBindingForm({fetchData}) {
           setSubjects={setSubjects}
         />
       </div>
-      
+
       <button type="submit">submit</button>
     </form>
   )
 }
 
 function SubjectList({subjects, setSubjects}: { subjects: Subject[], setSubjects(state: any): void }) {
-  
+
   const addSubject = s => setSubjects(state => [...state, s])
-  
+
   const removeSubject = id =>
     setSubjects(state => state.filter(sub => sub.id !== id))
-  
+
   const updateSubject = useCallback(s => {
     setSubjects(state => {
       return state.map(sub => {
         if (s.id === sub.id) {
           return s
         }
-        
+
         return sub
       })
     })
   }, [setSubjects])
-  
+
   const {users} = useUsers()
-  
+
   return (
     <div style={{padding: 10, margin: '20px 0', background: 'orange'}}>
       {subjects.map(s => {
@@ -189,7 +189,7 @@ function SubjectList({subjects, setSubjects}: { subjects: Subject[], setSubjects
           </div>
         )
       })}
-      
+
       <div style={{marginTop: 20}}>
         <button
           type="button"
@@ -208,15 +208,15 @@ function SubjectItem({id, updateSubject}) {
   const [kind, setKind] = useState<string>('User')
   const [subjectName, setSubjectName] = useState<string>('')
   const {users} = useUsers()
-  
+
   useEffect(() => {
     setSubjectName(users[0].name)
   }, [kind, users])
-  
+
   useEffect(() => {
     updateSubject({id, kind, name: subjectName})
   }, [id, kind, subjectName, updateSubject])
-  
+
   return (
     <div>
       <div>
@@ -248,7 +248,7 @@ function SubjectItem({id, updateSubject}) {
                 </option>
               )
             })}
-          
+
           </select>
         </label>
       </div>

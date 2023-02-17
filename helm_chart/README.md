@@ -39,4 +39,3 @@ The following table lists the configurable parameters of the Permission Manager 
 | `config.controlPlaneAddress` |  | "" |
 | `config.basicAuthPassword` |  | "" |
 | `config.templates` |  | [{"name": "operation", "rules": [{"apiGroups": ["*"], "resources": ["*"], "verbs": ["*"]}]}, {"name": "developer", "rules": [{"apiGroups": ["*"], "resources": ["configmaps", "endpoints", "persistentvolumeclaims", "pods", "pods/log", "pods/portforward", "podtemplates", "replicationcontrollers", "resourcequotas", "secrets", "services", "events", "daemonsets", "deployments", "replicasets", "ingresses", "networkpolicies", "poddisruptionbudgets"], "verbs": ["*"]}]}] |
-

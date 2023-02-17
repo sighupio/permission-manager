@@ -17,10 +17,12 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             [
+              # yamllint disable-line rule:line-length
               'curl -s --fail -X POST $(ENDPOINT) -H "Content-Type: application/json;charset=utf-8" -H "Authorization: Basic $(BASIC_AUTH)" --data ''{"generated_for_user":"test-user","roleName":"template-cluster-resources___admin","subjects":[{"kind":"ServiceAccount","name":"test-user","namespace":"permission-manager-e2e"}],"clusterRolebindingName":"test-user___template-cluster-resources___admin"}''',
             ]
           env:
             - name: ENDPOINT
+              # yamllint disable-line rule:line-length
               value: http://permission-manager.permission-manager-e2e.svc.cluster.local:80/api/create-cluster-rolebinding
             - name: BASIC_AUTH
               value: YWRtaW46YWRtaW4=
