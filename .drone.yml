@@ -57,7 +57,7 @@ steps:
   - name: lint markdowns
     image: davidanson/markdownlint-cli2:v0.6.0
     commands:
-      -  markdownlint-cli2-config ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
+      - markdownlint-cli2-config ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
   - name: lint makefile
     image: cytopia/checkmake:latest-0.5
     commands:
