@@ -77,7 +77,7 @@ steps:
     commands:
       - apk update
       - apk add make
-      - make lint-helm
+      - make lint-helm-chart
 
   # - name: unit-test
   #   image: golang:1.19
