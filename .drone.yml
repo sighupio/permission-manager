@@ -26,47 +26,62 @@ steps:
       - apk update
       - apk add make
       - make lint-files
+    depends_on: [clone]
+
   - name: lint shells
     image: koalaman/shellcheck-alpine:v0.9.0
     commands:
       - apk update
       - apk add make
       - make lint-shells
+    depends_on: [clone]
+
   - name: lint yamls
     image: cytopia/yamllint:1
     commands:
       - apk update
       - apk add make
       - make lint-yamls
+    depends_on: [clone]
+
   - name: lint jsons
     image: cytopia/jsonlint:1.6.0
     commands:
       - apk update
       - apk add make
       - make lint-jsons
+    depends_on: [clone]
+
   - name: lint markdowns
     image: davidanson/markdownlint-cli2:v0.6.0
     commands:
       # We can't install make because we need root permissions
       - markdownlint-cli2-config ".rules/.markdownlint.yaml" "**/*.md" "#web-client/node_modules"
+    depends_on: [clone]
+
   - name: lint makefile
     image: cytopia/checkmake:latest-0.5
     commands:
       - apk update
       - apk add make
       - make lint-makefile
+    depends_on: [clone]
+
   - name: lint dockerfile
     image: hadolint/hadolint:v2.12.0-alpine
     commands:
       - apk update
       - apk add make
       - make lint-dockerfile
+    depends_on: [clone]
+
   - name: lint helm chart
     image: quay.io/helmpack/chart-testing:v3.5.0
     commands:
       - apk update
       - apk add make
       - make lint-helm-chart
+    depends_on: [clone]
 
 ---
 kind: pipeline
@@ -100,6 +115,7 @@ steps:
       - make build-ui
       - cp -r ./web-client/build ./static/
       - make test
+    depends_on: [clone]
 
   - name: e2e-test-k8s-v1.23
     image: docker:23.0.0-rc.2-dind-alpine3.17
@@ -117,6 +133,7 @@ steps:
       - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.23 tests
       - CLUSTER_VERSION=1.23.13 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
+    depends_on: [clone]
 
   - name: e2e-test-k8s-v1.24
     image: docker:23.0.0-rc.2-dind-alpine3.17
@@ -134,7 +151,8 @@ steps:
       - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.24 tests
       - CLUSTER_VERSION=1.24.7 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
-
+    depends_on: [clone]
+    
   - name: e2e-test-k8s-v1.25
     image: docker:23.0.0-rc.2-dind-alpine3.17
     pull: always
