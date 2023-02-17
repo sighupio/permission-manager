@@ -114,7 +114,7 @@ steps:
       # Core dependencies
       - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.23 tests
       - CLUSTER_VERSION=1.23.13 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
 
@@ -131,7 +131,7 @@ steps:
       # Core dependencies
       - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.24 tests
       - CLUSTER_VERSION=1.24.7 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
 
@@ -148,7 +148,7 @@ steps:
       # Core dependencies
       - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.25 tests
       - CLUSTER_VERSION=1.25.3 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
 
@@ -165,7 +165,7 @@ steps:
       # Core dependencies
       - apk add util-linux bash make git bats jq=1.6-r2 yq=4.30.4-r2 gettext
       # Cypress dependencies
-      - apk add nodejs=18.12.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
+      - apk add nodejs=18.14.1-r0 npm=9.1.2-r0 yarn=1.22.19-r0
       # Execute 1.26 tests
       - CLUSTER_VERSION=1.26.0 KIND_VERSION=0.17.0 HELM_VERSION=3.11.1 make test-e2e
 
