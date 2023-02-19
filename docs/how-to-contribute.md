@@ -12,7 +12,7 @@ In order to setup the development environment you need to install the requiremen
 - helm 3.11.1
 - jq 1.6
 - kind 0.17.0
-- kubectl 1.26.0
+- kubectl >= 1.23.0
 - make 4.1
 - mkcert 1.4.4
 - nodejs 18.0.0
@@ -52,12 +52,15 @@ You can use your preferred package manager to install the requirements but we re
 
 We choose to use Tilt for our development environment. Tilt is a tool that allows you to develop your application in a local Kubernetes cluster. It watches your code and automatically rebuilds and deploys your application when you change code.
 
+Check the [Tilt documentation](https://docs.tilt.dev/) to learn more about Tilt.
+
 ### Start the development environment
 
 We provide a Makefile's target that contains all you need to start the development environment. Just run the following command:
 
 ``` shell
-make dev-up
+# Use FORCE=1 to recreate the self-signed TLS certificates
+make dev-up CLUSTER_VERSION=<k8s-version>
 ```
 
 This command will:
@@ -70,11 +73,20 @@ This command will:
 
     > **NOTE**: Remember to add ```0.0.0.0 permission-manager.dev``` line to your /etc/hosts file to be able to access the Permission Manager UI from ```https://permission-manager.dev```.
 
+### Stop the development environment
+To stop the development environment run the following command:
+
+``` shell
+# Use FORCE=1 to delete local kind registry
+make dev-down
+```
+
 ## Testing
 
 ### Unit Tests
 
-In order to run the server unit tests run `make test`.
+In order to run the server unit tests run `make test-unit`.
+> **NOTE**: You need to have a UI's build in the `static/build` directory to run the unit tests. You can build the UI using `make build-ui` command. 
 
 ### E2E Tests
 

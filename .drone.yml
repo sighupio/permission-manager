@@ -114,7 +114,7 @@ steps:
       - cd web-client && yarn install && cd ..
       - make build-ui
       - cp -r ./web-client/build ./static/
-      - make test
+      - make test-unit
 
   - name: e2e-test-k8s-v1.23
     image: docker:23.0.0-rc.2-dind-alpine3.17
