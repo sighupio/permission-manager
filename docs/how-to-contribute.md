@@ -74,6 +74,7 @@ This command will:
     > **NOTE**: Remember to add ```0.0.0.0 permission-manager.dev``` line to your /etc/hosts file to be able to access the Permission Manager UI from ```https://permission-manager.dev```.
 
 ### Stop the development environment
+
 To stop the development environment run the following command:
 
 ``` shell
@@ -86,7 +87,7 @@ make dev-down
 ### Unit Tests
 
 In order to run the server unit tests run `make test-unit`.
-> **NOTE**: You need to have a UI's build in the `static/build` directory to run the unit tests. You can build the UI using `make build-ui` command. 
+> **NOTE**: You need to have a UI's build in the `static/build` directory to run the unit tests. You can build the UI using `make build-ui` command.
 
 ### E2E Tests
 
