@@ -10,7 +10,7 @@ this guide refer to installing the permission manager on a running cluster
 kubectl create namespace permission-manager
 ```
 
-- Create a secret with the configuration for the application, for example:
+- Deploy the application's secret using the manifest that you can find in `deployments/kubernetes/secret.yml` with the configuration for the application, for example:
 
 ``` shell
 ---
@@ -32,7 +32,6 @@ stringData:
 ``` shell
 kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/crd.yml
 kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/seed.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/secret.yml
 kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/deploy.yml
 ```
 

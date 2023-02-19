@@ -253,9 +253,9 @@ format-shell-docker:
 # QC Targets
 # -------------------------------------------------------------------------------------------------
 
-# test: Run server unit tests
-.PHONY: test
-test:
+# test-unit: Run server unit tests
+.PHONY: test-unit
+test-unit:
 	@go test -v sighupio/permission-manager/...
 
 # test-e2e: Run e2e test in the kubectl current-context. Used for local development.
@@ -275,14 +275,14 @@ test-release:
 # Development -------------------------------------------------------------------------------------
 
 # dev-up: Start the local development environment with Tilt.
-# Use FORCE=true to recreate the self-signed TLS certificates
+# Use FORCE=1 to recreate the self-signed TLS certificates
 .PHONY: dev-up
 
 dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CLUSTER_VERSION check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
 	@./development/up.sh $(CLUSTER_VERSION) $(FORCE)
 
 # dev-down: Tears down the local development environment.
-# Use FORCE=true to delete local kind registry
+# Use FORCE=1 to delete local kind registry
 .PHONY: dev-down
 dev-down:
 	@./development/down.sh $(FORCE)
@@ -337,10 +337,10 @@ deploy: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-v
 	@cat deployments/kubernetes/deploy.yml | yq e 'select(document_index == 1).spec.template.spec.containers[0].image |= "permission-manager:${IMAGE_TAG_NAME}"' - | kubectl apply -f -
 	@kubectl wait --for=condition=Available deploy/permission-manager -n permission-manager --timeout=300s
 
-# deploy-helm: Install deployment for permission-manager using helm
+# deploy-helm: Install or update deployment for permission-manager using helm
 .PHONY: deploy-helm
 deploy-helm: check-variable-IMAGE_TAG_NAME check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE
-	@helm install permission-manager helm_chart -f helm_chart/values.yaml \
+	@helm upgrade -i permission-manager helm_chart -f helm_chart/values.yaml \
 	 --namespace ${NAMESPACE} \
 	 --set image.repository=permission-manager \
 	 --set image.tag=${IMAGE_TAG_NAME} \
