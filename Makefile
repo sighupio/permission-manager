@@ -96,7 +96,7 @@ lint-jsons:
 	$(call find-exec,"f","*.json","jsonlint -c -q -t '  ' {}")
 
 lint-jsons-docker:
-	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i ./.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
+	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data ${_DOCKER_JSONLINT_IMAGE} -t '  ' -i './.git/,./.github/,./.vscode/,./.idea/,./static/build,./web-client/node_modules,./web-client/build' *.json
 
 .PHONY: lint-files lint-files-docker
 lint-files:
@@ -239,14 +239,14 @@ format-files-docker:
 format-markdowns:
 	@markdownlint-cli2-fix "**/*.md" "#web-client/node_modules"
 
-format-markdown-docker:
+format-markdowns-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data --entrypoint="markdownlint-cli2-fix" ${_DOCKER_MARKDOWNLINT_IMAGE} "**/*.md" "#web-client/node_modules"
 
 .PHONY: format-shells format-shells-docker
 format-shells:
 	@shfmt -i 2 -ci -sr -w .
 
-format-shell-docker:
+format-shells-docker:
 	@docker run --rm -v ${_PROJECT_DIRECTORY}:/data -w /data ${_DOCKER_SHFMT_IMAGE} -i 2 -ci -sr -w .
 
 # -------------------------------------------------------------------------------------------------
