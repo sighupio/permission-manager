@@ -1,13 +1,13 @@
 import React from 'react'
 import TemplatePairSelect from './TemplatePairSelect'
-import {AggregatedRoleBinding} from "../services/role";
-import {AggregatedRoleBindingManager} from "./new-user-wizard";
+import { AggregatedRoleBinding } from "../services/role";
+import { AggregatedRoleBindingManager } from "./new-user-wizard";
 
 interface TemplatesParameters extends AggregatedRoleBindingManager {
   readonly pairItems: AggregatedRoleBinding[]
 }
 
-export default function Templates({pairItems, savePair, setPairItems, addEmptyPair}: TemplatesParameters) {
+export default function Templates({ pairItems, savePair, setPairItems, addEmptyPair }: TemplatesParameters) {
   const lastPair = pairItems[pairItems.length - 1]
   const addButtonDisabled =
     lastPair && lastPair.template && lastPair.namespaces.length === 0
@@ -47,15 +47,14 @@ export default function Templates({pairItems, savePair, setPairItems, addEmptyPa
                 </div>
               </div>
 
-              <hr className="my-4"/>
+              <hr className="my-4" />
             </div>
           )
         })}
 
         <button
-          className={`bg-white hover:bg-teal-500 hover:text-white text-gray-800 py-2 px-6 rounded shadow ${
-            addButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
-          }`}
+          className={`bg-white hover:bg-teal-500 hover:text-white text-gray-800 py-2 px-6 rounded shadow ${addButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
+            }`}
           type="button"
           disabled={addButtonDisabled}
           onClick={addEmptyPair}
