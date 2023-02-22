@@ -15,7 +15,7 @@ function setup_certs {
   CERTS_DIR=$2
   FORCE=$3
 
-  mkdir -p ${CERTS_DIR}
+  mkdir -p "${CERTS_DIR}"
 
   if [[ "${FORCE}" -eq "1" ]]; then
     rm "${MANIFESTS_DIR}/permission-manager.dev-tls.yaml"
