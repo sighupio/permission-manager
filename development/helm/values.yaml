@@ -103,7 +103,7 @@ config:
   controlPlaneAddress: ""
 
   # Password for basic auth to access the UI
-  basicAuthPassword: "pass"
+  basicAuthPassword: "admin"
 
   templates:
     - name: operation

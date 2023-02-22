@@ -15,13 +15,13 @@ load("ext://namespace", "namespace_create")
 load("ext://namespace", "namespace_inject")
 
 # Create k8s namespaces
-namespace_create("permission-manager-control-plane")
+namespace_create("permission-manager")
 
 # Create tls secrets
 permission_manager_tls = read_file("../manifests/permission-manager.dev-tls.yaml")
 permission_manager_wildcard_tls = read_file("../manifests/wildcard.permission-manager.dev-tls.yaml")
-k8s_yaml(namespace_inject(permission_manager_tls, "permission-manager-control-plane"))
-k8s_yaml(namespace_inject(permission_manager_wildcard_tls, "permission-manager-control-plane"))
+k8s_yaml(namespace_inject(permission_manager_tls, "permission-manager"))
+k8s_yaml(namespace_inject(permission_manager_wildcard_tls, "permission-manager"))
 
 # Load Ingress Controller
 load_dynamic("../tiltfiles/ingress-nginx.tiltfile")

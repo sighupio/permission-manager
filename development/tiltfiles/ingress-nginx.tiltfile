@@ -7,7 +7,7 @@ helm_remote(
   repo_name="ingress-nginx",
   repo_url="https://kubernetes.github.io/ingress-nginx",
   version="4.1.1",
-  namespace="permission-manager-control-plane",
+  namespace="permission-manager",
   release_name="ingress-nginx",
   values="../helm/ingress-nginx.yaml",
 )
