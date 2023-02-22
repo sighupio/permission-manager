@@ -17,7 +17,7 @@ export default function UserPage() {
   return (
     <div className=" bg-gray-200  pt-16">
       <div className="max-w-3xl mx-auto">
-        <div className=" bg-white shadow-md rounded px-8 pt-4 pb-8 mb-4">
+        <div className=" bg-white shadow-lg rounded-lg px-8 pt-4 pb-8 mb-4">
           {user ? <EditUser user={user} /> : 'loading user...'}
         </div>
 
