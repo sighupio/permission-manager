@@ -16,6 +16,7 @@ In order to setup the development environment you need to install the requiremen
 - make 4.1
 - mkcert 1.4.4
 - nodejs 18.0.0
+- shellcheck 0.9.0
 - tilt 0.31.1
 - yarn 1.22.11
 - yq 4.30.8
@@ -27,7 +28,7 @@ You can use your preferred package manager to install the requirements but we re
 1. Install and configure asdf and direnv as described in the [official documentation](https://asdf-vm.com/#/core-manage-asdf-vm?id=install) and [this article](https://blog.sighup.io/manage-tools-with-ease-direnv-asdf/)
 2. Add the required asdf plugins to your asdf installation
 
-    ``` shell
+    ```shell
     asdf plugin-add bats
     asdf plugin-add ctlptl
     asdf plugin-add direnv
@@ -39,6 +40,7 @@ You can use your preferred package manager to install the requirements but we re
     asdf plugin-add make
     asdf plugin-add mkcert
     asdf plugin-add nodejs
+    asdf plugin-add shellcheck
     asdf plugin-add tilt
     asdf plugin-add yarn
     asdf plugin-add yq
@@ -56,9 +58,12 @@ Check the [Tilt documentation](https://docs.tilt.dev/) to learn more about Tilt.
 
 ### Start the development environment
 
-We provide a Makefile's target that contains all you need to start the development environment. Just run the following command:
+We provide a Makefile's target that contains all you need to start the development environment. Just run the following commands:
 
-``` shell
+```shell
+# Run this one as root
+echo "0.0.0.0 permission-manager.dev" >> /etc/hosts
+
 # Use FORCE=1 to recreate the self-signed TLS certificates
 make dev-up CLUSTER_VERSION=<k8s-version>
 ```
@@ -71,13 +76,16 @@ This command will:
 
 2. Start the local Kubernetes cluster and Tilt using our provided [Tiltfile](/Tiltfile). Tilt will build and push the Permission Manager image and deploy it using the Helm chart into the cluster using the local environment variables declared in ```.envrc``` or ```.env-cluster``` file.
 
-    > **NOTE**: Remember to add ```0.0.0.0 permission-manager.dev``` line to your /etc/hosts file to be able to access the Permission Manager UI from ```https://permission-manager.dev```.
+### Access Permission Manager in your browser
+
+Open up [https://permission-manager.dev](https://permission-manager.dev) in your browser, and use `admin` / `admin` to login.
+Done and done!
 
 ### Stop the development environment
 
 To stop the development environment run the following command:
 
-``` shell
+```shell
 # Use FORCE=1 to delete local kind registry
 make dev-down
 ```
@@ -95,7 +103,7 @@ The E2E tests provide to create a k8s cluster using `helm` and `kind` to the ver
 
 So, Executing the `make test-e2e` command will create a kind cluster, install the CRDs, deploy the Permission Manager and run the E2E tests.
 
-``` shell
+```shell
 CLUSTER_NAME=<your cluster name> \
 CLUSTER_VERSION=<your cluster version> \
 KIND_VERSION=<your kind version> \
@@ -107,7 +115,7 @@ make test-e2e
 
 To build and publish a new Permission Manager release run
 
-``` shell
+```shell
 bumpversion {mayor,minor,patch}
 git push
 git push --tags
