@@ -188,20 +188,28 @@ export default function EditUser({ user }: EditUserParameters) {
         close={() => setShowLegacyMigrationModal(false)}
         username={username}></LegacyUserModal>
       }
-      <div className="flex items-center m-10 bg-blue-100 rounded-lg p-5 justify-items-center">
-        <div className="flex flex-col m-0 flex-auto">
-          <p className='text-gray-700 font-bold uppercase text-xs'>Username</p>
-          <h2 className="text-3xl text-gray-800 font-black">
-            <span data-testid="username-heading">{username}</span>
-          </h2>
+      {roleBindingNotFound && (
+        <div className="flex items-center m-10 bg-red-200 rounded-lg p-5 justify-items-center">
+          <div className="flex flex-col content-around">
+            <p className='text-gray-700 font-bold uppercase text-xs'>Error</p>
+            <p className="p-2">Permission Manager can't retrieve the user's permissions. This is usually caused by a manual action on the cluster. <strong>Try to recreate the permissions</strong></p>
+          </div>
+          <span className="bg-red-300 py-1 px-2 rounded hover:shadow text-gray-700 font-bold uppercase text-md">
+            ⚠️
+          </span>
         </div>
+      )}
+      <div className="flex content-between items-center mb-4">
+        <h2 className="text-3xl text-gray-800">
+          User: <span data-testid="username-heading">{username}</span>
+        </h2>
         <div>
           <button
             tabIndex={-1}
             type="button"
-            className="bg-red-300 hover:bg-red-600 hover:text-gray-100 py-1 px-2 rounded hover:shadow text-gray-700 font-bold uppercase text-xs "
+            className="bg-transparent hover:bg-red-600 text-gray-700 hover:text-gray-100 py-1 px-2 rounded hover:shadow ml-2 text-xs"
             onClick={() => {
-              const confirmed = window.confirm(
+            const confirmed = window.confirm(
                 `Confirm deletion of User ${username}`
               )
 
@@ -218,17 +226,6 @@ export default function EditUser({ user }: EditUserParameters) {
         </div>
       </div>
 
-      {roleBindingNotFound && (
-        <div className="flex items-center m-10 bg-red-200 rounded-lg p-5 justify-items-center">
-          <div className="flex flex-col content-around">
-            <p className='text-gray-700 font-bold uppercase text-xs'>Error</p>
-            <p className="p-2">Permission Manager can't retrieve the user's permissions. This is usually caused by a manual action on the cluster. <strong>Try to recreate the permissions</strong></p>
-          </div>
-          <span className="bg-red-300 py-1 px-2 rounded hover:shadow text-gray-700 font-bold uppercase text-md">
-            ⚠️
-          </span>
-        </div>
-      )}
       <form
         onSubmit={e => {
           e.preventDefault()
@@ -339,5 +336,3 @@ function LegacyUserModal({ close, user, username, upgradeUser }: LegacyUserModal
     </Dialog>
   )
 }
-
-
