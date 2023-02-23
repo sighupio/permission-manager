@@ -55,7 +55,7 @@ export default function EditUser({ user }: EditUserParameters) {
   }, [refreshRbacData])
 
   useEffect(() => {
-    let { rbs, crbs, extractedPairItems } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
+    let { extractedPairItems } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
     if (extractedPairItems.length === 0) {
       setRoleBindingNotFound(true);
@@ -65,12 +65,12 @@ export default function EditUser({ user }: EditUserParameters) {
 
     // we proceed to bootstrap aggregatedRoleBindings
     setAggregatedRoleBindings(extractedPairItems)
-  }, [roleBindings, clusterRoleBindings])
+  }, [roleBindings, username, clusterRoleBindings])
 
   useEffect(() => {
     setCanCheckLegacyUser(true);
 
-    let { rbs, crbs, extractedPairItems } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
+    let { crbs } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
     // we bootstrap clusterRoleBinding value.
     const clusterRoleBinding = crbs.find(crb => crb.metadata.name.includes(templateClusterResourceRolePrefix))
@@ -92,7 +92,7 @@ export default function EditUser({ user }: EditUserParameters) {
     }
 
     setClusterAccess(clusterBindingAccessValue)
-  }, [roleBindings, clusterRoleBindings, initialClusterAccess])
+  }, [roleBindings, username, clusterRoleBindings, initialClusterAccess])
 
   useEffect(() => {
     async function checkLegacyUser(): Promise<boolean> {
@@ -135,7 +135,7 @@ export default function EditUser({ user }: EditUserParameters) {
    * delete all the user-resources currently in the k8s cluster
    */
   async function deleteUserResources() {
-    let { rbs, crbs, extractedPairItems } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
+    let { rbs, crbs } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
     await httpRequests.rolebindingRequests.delete.rolebinding(rbs);
     await httpRequests.rolebindingRequests.delete.clusterRolebinding(crbs);
@@ -189,12 +189,12 @@ export default function EditUser({ user }: EditUserParameters) {
         username={username}></LegacyUserModal>
       }
       {roleBindingNotFound && (
-        <div className="flex items-center m-10 bg-red-200 rounded-lg p-5 justify-items-center">
+        <div className="flex items-center m-10 bg-red-200 rounded-lg p-5 justify-items-center" role='alert'>
           <div className="flex flex-col content-around">
             <p className='text-gray-700 font-bold uppercase text-xs'>Error</p>
             <p className="p-2">Permission Manager can't retrieve the user's permissions. This is usually caused by a manual action on the cluster. <strong>Try to recreate the permissions</strong></p>
           </div>
-          <span className="bg-red-300 py-1 px-2 rounded hover:shadow text-gray-700 font-bold uppercase text-md">
+          <span className="bg-red-300 py-1 px-2 rounded hover:shadow text-gray-700 font-bold uppercase text-md" role='img' aria-label='alert'>
             ⚠️
           </span>
         </div>
@@ -209,7 +209,7 @@ export default function EditUser({ user }: EditUserParameters) {
             type="button"
             className="bg-transparent hover:bg-red-600 text-gray-700 hover:text-gray-100 py-1 px-2 rounded hover:shadow ml-2 text-xs"
             onClick={() => {
-            const confirmed = window.confirm(
+              const confirmed = window.confirm(
                 `Confirm deletion of User ${username}`
               )
 

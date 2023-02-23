@@ -1,14 +1,13 @@
-import React, {useCallback, useEffect, useState} from 'react'
-import uuid from 'uuid'
-import {useHistory} from 'react-router-dom'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useHistory } from 'react-router-dom'
 import ClusterAccessRadio from './ClusterAccessRadio'
 import Templates from './Templates'
-import {FullScreenLoader} from './Loader'
+import { FullScreenLoader } from './Loader'
 import Summary from './Summary'
-import {useUsers} from '../hooks/useUsers'
-import {AggregatedRoleBinding} from "../services/role";
-import {ClusterAccess} from "./types";
-import {httpRequests} from "../services/httpRequests";
+import { useUsers } from '../hooks/useUsers'
+import { AggregatedRoleBinding } from "../services/role";
+import { ClusterAccess } from "./types";
+import { httpRequests } from "../services/httpRequests";
 
 
 export interface AggregatedRoleBindingManager {
@@ -28,7 +27,7 @@ export default function NewUserWizard() {
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none')
   const [formTouched, setFormTouched] = useState<boolean>(false)
   const [showLoader, setShowLoader] = useState<boolean>(false)
-  const {users} = useUsers()
+  const { users } = useUsers()
 
   const validateUsername = useCallback(() => {
     if (username.length < 3) {
@@ -104,14 +103,14 @@ export default function NewUserWizard() {
   }, [])
 
   const addEmptyPair = useCallback(() => {
-    setAggregatedRoleBindings(state => [...state, {id: '', namespaces: [], template: ''}])
+    setAggregatedRoleBindings(state => [...state, { id: '', namespaces: [], template: '' }])
   }, [])
 
   useEffect(addEmptyPair, [])
 
   return (
     <div>
-      {showLoader && <FullScreenLoader/>}
+      {showLoader && <FullScreenLoader />}
       <h2 className="text-3xl mb-4 text-gray-800">New User</h2>
       <form
         onSubmit={e => {
@@ -128,9 +127,8 @@ export default function NewUserWizard() {
               <input
                 autoFocus
                 placeholder="jane.doe"
-                className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${
-                  usernameError && formTouched ? 'border-red-500' : ''
-                }`}
+                className={`appearance-none block w-full  text-gray-700 border  rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white ${usernameError && formTouched ? 'border-red-500' : ''
+                  }`}
                 required
                 type="text"
                 value={username}
@@ -162,11 +160,10 @@ export default function NewUserWizard() {
             setClusterAccess={setClusterAccess}
           />
 
-          <hr className="my-6"/>
+          <hr className="my-6" />
           <button
-            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${
-              saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow ${saveButtonDisabled ? ' opacity-50 cursor-not-allowed' : ''
+              }`}
             disabled={saveButtonDisabled}
             type="submit"
           >
@@ -177,7 +174,7 @@ export default function NewUserWizard() {
 
       {aggregatedRoleBindings.length > 0 && aggregatedRoleBindings.some(p => p.namespaces.length > 0) ? (
         <>
-          <div className="mt-12 mb-4"/>
+          <div className="mt-12 mb-4" />
           <Summary pairItems={aggregatedRoleBindings}></Summary>
         </>
       ) : null}
