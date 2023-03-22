@@ -264,6 +264,11 @@ trigger:
     - main
   paths:
     - helm_chart/**
+  when:
+    event:
+      - push
+    exclude:
+      - pull_request
 
 steps:
   # We need to manually fetch the gh-pages branch because Drone by default
