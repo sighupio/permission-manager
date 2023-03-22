@@ -3,6 +3,33 @@ entries:
   permission-manager:
   - apiVersion: v2
     appVersion: 1.8.0
+    created: "2023-03-22T16:46:11.862482849Z"
+    description: A Helm chart for Permission Manager, a simple to use, web application
+      that enables a super-easy and user-friendly RBAC management for Kubernetes.
+    digest: 4ceb2ec7c28e79c675c9831849f2824364a0f7a4b68c06d591aceb51f17e7d80
+    home: https://sighup.io
+    icon: https://sighup.io/assets/sighup-logo-white.svg
+    keywords:
+    - permission manager
+    - rbac
+    - policy
+    - oss
+    - user management
+    - sighup
+    - ui
+    - dashboard
+    - web
+    - rego
+    - webapp
+    name: permission-manager
+    sources:
+    - https://github.com/sighupio/permission-manager/
+    type: application
+    urls:
+    - https://github.com/sighupio/permission-manager/releases/download/helm-chart-v0.1.1/permission-manager-0.1.1.tgz
+    version: 0.1.1
+  - apiVersion: v2
+    appVersion: 1.8.0
     created: "2023-02-02T11:23:27.755101486Z"
     description: A Helm chart for Permission Manager, a simple to use, web application
       that enables a super-easy and user-friendly RBAC management for Kubernetes.
@@ -28,4 +55,4 @@ entries:
     urls:
     - https://github.com/sighupio/permission-manager/releases/download/helm-chart-v0.1.0/permission-manager-0.1.0.tgz
     version: 0.1.0
-generated: "2023-02-02T11:23:27.755106224Z"
+generated: "2023-03-22T16:46:11.862505541Z"
