@@ -5,7 +5,7 @@ A Helm chart for Permission Manager, a simple to use, web application that enabl
 ## Configuration options
 
 The following table lists the configurable parameters of the Permission Manager chart and their default values.
-
+ 
 | Parameter | Description | Default |
 | --------- | ----------- | ------- |
 | `replicaCount` |  | 1 |
