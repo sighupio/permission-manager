@@ -6,7 +6,6 @@ metadata:
   name: template-namespaced-resources___{{ .name }}
 rules:
 {{.rules | toYaml}}
-- {{ . | toYaml }}
 {{ else }}
 []
 {{- end }}
