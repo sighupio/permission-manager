@@ -30,9 +30,9 @@ stringData:
 ### Deploy the application
 
 ``` shell
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/crd.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/seed.yml
-kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.8.0/deploy.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.9.0/crd.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.9.0/seed.yml
+kubectl apply -f https://github.com/sighupio/permission-manager/releases/download/v1.9.0/deploy.yml
 ```
 
 ### Visit the application
@@ -51,7 +51,7 @@ Then, execute:
 
 ``` shell
 helm repo add permission-manager https://sighupio.github.io/permission-manager
-helm upgrade --install --namespace permission-manager --set image.tag=v1.8.0 --values my-values.yaml permission-manager permission-manager/permission-manager
+helm upgrade --install --namespace permission-manager --set image.tag=v1.9.0 --values my-values.yaml permission-manager permission-manager/permission-manager
 ```
 
 > don't forget to replace `my-values.yaml` with the path to your values file.
