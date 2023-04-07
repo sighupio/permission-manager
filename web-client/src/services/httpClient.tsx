@@ -8,19 +8,19 @@ export function httpClientFactory(): AxiosInstance {
    * Useful for local development.
    */
   const httpClient = axios.create({
-    url: process.env.REACT_APP_BACKEND_URL ?? "",
-    baseURL: process.env.REACT_APP_BACKEND_URL ?? ""
+    baseURL: process.env.REACT_APP_API_URL ?? ""
   })
 
   /**
    * if a BASIC_AUTH_PASSWORD is passed we inject it into {httpClient}
    */
-  if (process.env.REACT_APP_BASIC_AUTH_PASSWORD) {
+  // if (process.env.REACT_APP_BASIC_AUTH_PASSWORD) {
     httpClient.defaults.auth = {
       username: "admin", // username is always admin
-      password: process.env.REACT_APP_BASIC_AUTH_PASSWORD
+      password: "admin"
+      // password: process.env.REACT_APP_BASIC_AUTH_PASSWORD
     }
-  }
+  // }
 
   return httpClient;
 }
