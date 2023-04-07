@@ -7,7 +7,7 @@ kind 0.17.0
 kubectl 1.26.0
 make 4.1
 mkcert 1.4.4
-nodejs 18.0.0
+nodejs 16.20.0
 shellcheck 0.9.0
 tilt 0.31.1
 yq 4.30.8
