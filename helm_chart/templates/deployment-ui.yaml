@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "permission-manager.fullname" . }}
+  name: {{ include "permission-manager.fullname" . }}-ui
   labels:
     {{- include "permission-manager.labels" . | nindent 4 }}
 spec:
@@ -19,6 +19,7 @@ spec:
     {{- end }}
       labels:
         {{- include "permission-manager.selectorLabels" . | nindent 8 }}
+        permission-manager: ui
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,7 +32,7 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: permission-manager-ui-image:local-dev
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: NAMESPACE
@@ -43,17 +44,17 @@ spec:
                 name: {{ include "permission-manager.fullname" . }}
           ports:
             - name: http
-              containerPort: 4000
+              containerPort: 4001
               protocol: TCP
           livenessProbe:
             # TODO: 'initialDelaySeconds' is a temporary patch to allow the
             # app to start. Switch this hardcoded values to usable variables
-            initialDelaySeconds: 60
+            initialDelaySeconds: 10
             tcpSocket:
-              port: 4000
+              port: 4001
           readinessProbe:
             tcpSocket:
-              port: 4000
+              port: 4001
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

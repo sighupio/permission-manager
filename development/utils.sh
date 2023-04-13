@@ -43,5 +43,5 @@ function setup_certs {
 # This function will start the ctlptl registry (which is local registry used by Tilt) and the kind cluster.
 function start {
   echo "Starting cluster and local registry..."
-  docker start permission-manager-kind-registry permission-manager-kind-control-plane
+  docker start permission-manager-kind-registry permission-manager-kind-control-plane permission-manager-ui
 }

@@ -8,7 +8,7 @@ export function httpClientFactory(): AxiosInstance {
    * Useful for local development.
    */
   const httpClient = axios.create({
-    baseURL: process.env.REACT_APP_API_URL ?? ""
+    baseURL: process.env.REACT_APP_DEV_API_URL ?? ""
   })
 
   /**
