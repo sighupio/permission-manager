@@ -1,12 +1,12 @@
 ## UI ##
-FROM node:18-alpine3.17 as ui-builder
-RUN mkdir /app
-COPY web-client /app
+# FROM node:18-alpine3.17 as ui-builder
+# RUN mkdir /app
+# COPY web-client /app
 
-ENV NODE_OPTIONS=--openssl-legacy-provider
+# ENV NODE_OPTIONS=--openssl-legacy-provider
 
-WORKDIR /app
-RUN yarn install && yarn build
+# WORKDIR /app
+# RUN yarn install && yarn build
 
 ## BACKEND ##
 FROM golang:1.19.5-alpine3.17 as go-base
@@ -39,10 +39,10 @@ RUN go mod download
 
 COPY cmd cmd
 COPY internal internal
-COPY static static
+# COPY static static
 
 FROM go-base as development
-COPY --from=ui-builder /app/build /app/static/build
+# COPY --from=ui-builder /app/build /app/static/build
 
 ENTRYPOINT ["go", "run", "cmd/run-server.go"]
 

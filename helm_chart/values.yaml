@@ -56,8 +56,10 @@ ingress:
   hosts:
     - host: permission-manager.domain.com
       paths:
-        - path: /
+        - path: /api/
           pathType: ImplementationSpecific
+        # - path: /
+        #   pathType: ImplementationSpecific
   # tls:
   #   - secretName: permission-manager-tls
   #     hosts:
@@ -88,6 +90,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+devEnv: false
 
 #
 # Application configuration:

@@ -1,9 +1,7 @@
 package server
 
 import (
-	"io/fs"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/go-playground/validator"
@@ -12,7 +10,6 @@ import (
 
 	"sighupio/permission-manager/internal/config"
 	"sighupio/permission-manager/internal/resources"
-	"sighupio/permission-manager/static"
 )
 
 func New(cfg config.Config) *echo.Echo {
@@ -47,18 +44,18 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
+	// if
+	// fsys, err := fs.Sub(static.WebClient, "build")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	fsys, err := fs.Sub(static.WebClient, "build")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
-		Root:       ".",
-		Filesystem: http.FS(fsys),
-		HTML5:      true,
-	}))
-
+	// e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
+	// 	Root:       ".",
+	// 	Filesystem: http.FS(fsys),
+	// 	HTML5:      true,
+	// }))
+	// end if
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			customContext := &AppContext{

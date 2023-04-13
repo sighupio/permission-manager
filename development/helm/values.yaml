@@ -60,7 +60,7 @@ ingress:
   hosts:
     - host: permission-manager.dev
       paths:
-        - path: /
+        - path: /api/
           pathType: ImplementationSpecific
   tls:
     - secretName: permission-manager.dev-tls
