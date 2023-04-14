@@ -278,7 +278,7 @@ test-release:
 # Use FORCE=1 to recreate the self-signed TLS certificates
 .PHONY: dev-up
 
-dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CLUSTER_VERSION check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT check-variable-DEV_ENV
+dev-up: check-variable-BASIC_AUTH_PASSWORD check-variable-CLUSTER_NAME check-variable-CLUSTER_VERSION check-variable-CONTROL_PLANE_ADDRESS check-variable-NAMESPACE check-variable-PORT
 	@./development/up.sh $(CLUSTER_VERSION) $(FORCE)
 
 # dev-down: Tears down the local development environment.

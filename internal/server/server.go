@@ -44,18 +44,7 @@ func addMiddlewareStack(e *echo.Echo, cfg config.Config) {
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 		Format: "method=${method}, uri=${uri}, status=${status}\n",
 	}))
-	// if
-	// fsys, err := fs.Sub(static.WebClient, "build")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
 
-	// e.Group("/*", middleware.StaticWithConfig(middleware.StaticConfig{
-	// 	Root:       ".",
-	// 	Filesystem: http.FS(fsys),
-	// 	HTML5:      true,
-	// }))
-	// end if
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			customContext := &AppContext{

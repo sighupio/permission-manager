@@ -8,13 +8,10 @@ ENV NODE_OPTIONS=--openssl-legacy-provider
 WORKDIR /app
 RUN yarn install && yarn build
 
-
-# Start Nginx and serve the static files
-CMD ["yarn", "start"]
+ENTRYPOINT ["yarn", "start"]
 
 # RELEASE
-# CMD ["nginx", "-g", "daemon off;"]
-
+# TODO create production behaviour
 # FROM nginx:latest
 
 # COPY --from=ui-builder /app/build /usr/share/nginx/html
@@ -22,3 +19,5 @@ CMD ["yarn", "start"]
 # COPY --from=ui-builder /app/nginx.conf etc/nginx/nginx.conf
 
 # EXPOSE 4001
+
+# CMD ["nginx", "-g", "daemon off;"]

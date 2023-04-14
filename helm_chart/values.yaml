@@ -91,8 +91,6 @@ tolerations: []
 
 affinity: {}
 
-devEnv: false
-
 #
 # Application configuration:
 config:
@@ -104,6 +102,8 @@ config:
 
   # Password for basic auth to access the UI
   basicAuthPassword: ""
+
+  initialDelaySeconds: 0
 
   templates:
     - name: operation
