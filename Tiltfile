@@ -25,7 +25,7 @@ docker_build_with_restart(
   entrypoint=["go", "run", "cmd/run-server.go"]
 )
 
-docker_build_with_restart(
+docker_build(
   "permission-manager-ui-image:local-dev",
   ".",
   dockerfile="Dockerfile-ui",
@@ -40,7 +40,7 @@ docker_build_with_restart(
     "NAMESPACE": os.getenv("NAMESPACE"),
     "PORT": os.getenv("PORT"),
   },
-  entrypoint=["yarn", "start"]
+  # entrypoint=["yarn", "start"]
 )
 
 k8s_yaml(

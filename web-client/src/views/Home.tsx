@@ -4,7 +4,6 @@ import {Link} from 'react-router-dom'
 
 export default function Home() {
   const { users, loading, loaded } = useUsers()
-  console.log('P1', process.env.REACT_APP_DEV_API_URL)
 
   return (
     <div className=" bg-gray-200  pt-16">

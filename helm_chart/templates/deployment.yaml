@@ -46,9 +46,7 @@ spec:
               containerPort: 4000
               protocol: TCP
           livenessProbe:
-            # TODO: 'initialDelaySeconds' is a temporary patch to allow the
-            # app to start. Switch this hardcoded values to usable variables
-            initialDelaySeconds: 60
+            initialDelaySeconds: {{ .Values.config.initialDelaySeconds }}
             tcpSocket:
               port: 4000
           readinessProbe:

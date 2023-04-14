@@ -105,6 +105,8 @@ config:
   # Password for basic auth to access the UI
   basicAuthPassword: "admin"
 
+  initialDelaySeconds: 60
+
   templates:
     - name: operation
       rules:
