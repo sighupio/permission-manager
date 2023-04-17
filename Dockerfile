@@ -29,15 +29,12 @@ RUN go mod download
 
 COPY cmd cmd
 COPY internal internal
-# COPY static static
 
 FROM go-base as development
-# COPY --from=ui-builder /app/build /app/static/build
 
 ENTRYPOINT ["go", "run", "cmd/run-server.go"]
 
 FROM go-base as builder
-COPY --from=ui-builder /app/build /app/static/build
 RUN go build --tags=release -o permission-manager cmd/run-server.go
 
 FROM scratch as release
