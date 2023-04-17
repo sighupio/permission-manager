@@ -1,5 +1,7 @@
 ## PERMISSION MANAGER UI ##
-FROM node:18-alpine3.17 as ui-builder
+
+# DEVELOPMENT
+FROM node:18-alpine3.17 as ui-development
 RUN mkdir /app
 COPY web-client /app
 
@@ -11,13 +13,13 @@ RUN yarn install && yarn build
 ENTRYPOINT ["yarn", "start"]
 
 # RELEASE
-# TODO create production behaviour
-# FROM nginx:latest
+# TODO test this draft and convert it for production
+FROM nginx:latest as release
 
-# COPY --from=ui-builder /app/build /usr/share/nginx/html
+COPY --from=ui-development /app/build /usr/share/nginx/html
 
-# COPY --from=ui-builder /app/nginx.conf etc/nginx/nginx.conf
+COPY --from=ui-development /app/nginx.conf etc/nginx/nginx.conf
 
-# EXPOSE 4001
+EXPOSE 4001
 
-# CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]

@@ -13,7 +13,6 @@ docker_build_with_restart(
     sync("./internal", "/app/internal"),
     sync("./go.mod", "/app/go.mod"),
     sync("./go.sum", "/app/go.sum"),
-    # sync("./web-client", "/app/web-client"),
   ],
   build_args={
     "CLUSTER_NAME": os.getenv("CLUSTER_NAME"),
@@ -29,7 +28,7 @@ docker_build(
   "permission-manager-ui-image:local-dev",
   ".",
   dockerfile="Dockerfile-ui",
-  # target="development",
+  target="ui-development",
   live_update=[
     sync("./web-client", "/app/web-client"),
   ],
@@ -39,8 +38,7 @@ docker_build(
     "BASIC_AUTH_PASSWORD": os.getenv("BASIC_AUTH_PASSWORD"),
     "NAMESPACE": os.getenv("NAMESPACE"),
     "PORT": os.getenv("PORT"),
-  },
-  # entrypoint=["yarn", "start"]
+  }
 )
 
 k8s_yaml(
