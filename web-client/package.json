@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@elastic/eui": "^77.1.0",
     "axios": "^0.21.2",
     "prettyjson": "^1.2.1",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
+    "react": "18.2.0",
     "react-json-pretty": "^2.2.0",
     "react-router": "^5.1.2",
     "react-router-dom": "^5.1.2",
@@ -39,6 +39,9 @@
     ]
   },
   "devDependencies": {
+    "@elastic/datemath": "^5.0.3",
+    "@emotion/css": "^11.10.6",
+    "@emotion/react": "^11.10.6",
     "@reach/dialog": "^0.2.9",
     "@types/bluebird": "^3.5.27",
     "@types/jest": "^26.0.19",
@@ -46,14 +49,16 @@
     "@types/prettier": "^1.18.1",
     "@types/prettyjson": "^0.0.29",
     "@types/reach__dialog": "^0.1.0",
-    "@types/react": "^17.0.0",
+    "@types/react": "^18.0.35",
     "@types/react-dom": "^17.0.0",
     "@types/react-router": "^5.1.2",
     "@types/react-router-dom": "^5.1.0",
     "@types/react-select": "^3.0.4",
     "@types/uuid": "^3.4.6",
     "@types/validator": "^10.11.2",
+    "moment": "^2.29.4",
     "prettier": "^1.19.1",
+    "react-dom": "^18.2.0",
     "sass": "1.3.0",
     "typescript": "^4.3.4"
   }
