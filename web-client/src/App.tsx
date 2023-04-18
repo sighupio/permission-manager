@@ -11,6 +11,8 @@ import NewUser from './views/NewUser'
 import Advanced from './deadcode/views/Advanced'
 import EditUser from './views/EditUser'
 
+import UsersList from './views/UsersList';
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -33,7 +35,8 @@ export default function App() {
                 <Route path="/advanced" exact component={Advanced} />
                 <Route path="/new-user" exact component={NewUser} />
                 <Route path="/users/:username" exact component={EditUser} />
-                <Route path="/" exact component={Home} />
+                {/* <Route path="/" exact component={Home} /> */}
+                <Route path="/" exact component={UsersList} />
               </Switch>
             </div>
 
