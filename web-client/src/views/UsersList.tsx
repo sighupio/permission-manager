@@ -1,6 +1,6 @@
 import React from 'react';
-import {useUsers} from '../hooks/useUsers';
-import {Link} from 'react-router-dom';
+import { useUsers } from '../hooks/useUsers';
+import { Link } from 'react-router-dom';
 import {
   EuiPanel,
   EuiButton,
@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 
 const UsersList = () => {
-  const { users, loading, loaded } = useUsers();
+  const { users, loading } = useUsers();
   return (
     <EuiPageTemplate
       grow={false}
