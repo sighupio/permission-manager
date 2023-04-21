@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import {useUsers} from '../hooks/useUsers';
 import {Link} from 'react-router-dom';
 import {
@@ -21,6 +21,12 @@ import {
   EuiTable,
   EuiBasicTable,
   EuiIcon,
+  EuiSplitPanel,
+  EuiPagination,
+  EuiButtonIcon,
+  EuiSuperSelect,
+  EuiTextColor,
+  EuiText,
 } from '@elastic/eui';
 import { useNamespaceList } from '../hooks/useNamespaceList';
 
@@ -40,15 +46,33 @@ const mockedItems: SummaryItem[] = [
   },
 ]
 
+const templateOptions = [
+  {
+    value: 'developer',
+    inputDisplay: 'Developer',
+  },
+  {
+    value: 'operation',
+    inputDisplay: 'Operation',
+  },
+]
+
 const TemplateSelect = () => {
   return (
-    <EuiFormRow label="Roles">
-      <EuiSelect
+    <EuiFormRow label="Template (of Role)">
+      <EuiSuperSelect
         onChange={() => {}}
-        options={[
-          { value: 'developer', text: 'Developer' },
-          { value: 'operation', text: 'Operation' },
-        ]}
+        options={templateOptions}
+        valueOfSelected='developer'
+        append={
+          <EuiButtonEmpty
+            iconType='iInCircle'
+            iconSide='right'
+            onClick={() => console.log('info')}
+          >
+            Info
+          </EuiButtonEmpty>
+        }
       />
     </EuiFormRow>
   )
@@ -85,10 +109,94 @@ const NameSpaceSelect = () => {
   )
 }
 
+const TemplatesSlider = (props: any) => {
+  const { children, index } = props;
+  const [currentPage, setCurrentPage] = React.useState(0);
+
+  const panelContainerRef = useRef<HTMLDivElement>(null);
+
+  const scrollLenght = 353;
+
+  const goToPage = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+    panelContainerRef.current?.scrollTo(scrollLenght * pageNumber, 0);
+  };
+
+  return (
+    <>
+      <EuiFlexGroup direction="row" alignItems='center' justifyContent='spaceBetween'>
+        <EuiFlexItem><EuiText color='subdued' size='xs'><b>TEMPLATES</b></EuiText></EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent='flexEnd' alignItems='center' gutterSize='xs'>
+            <EuiFlexItem>
+              <EuiButtonEmpty
+                iconType="plusInCircle"
+                iconSide='right'
+                size="s"
+                // onClick={() => {
+                //   const newIndex = children.size + 1;
+                //   const newPanel = Form.buildComponentFromSchema(
+                //         newIndex,
+                //         caller,
+                //         formFieldData.FormId
+                //       );
+                //       if (newPanel) {
+                //         newPanel.listenIndex({
+                //           changePathsWithIndex: newIndex,
+                //         });
+                //         addChild(newPanel);
+                //   }
+                // }}
+              >
+                Add
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiPagination
+                compressed
+                // aria-label={`${formFieldData.Label} pagination`}
+                pageCount={children.size}
+                activePage={currentPage}
+                onPageClick={(activePage) => goToPage(activePage)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+        </EuiFlexItem>
+
+      </EuiFlexGroup>
+      <EuiSpacer size='xs' />
+      <EuiSplitPanel.Outer>
+        <EuiSplitPanel.Inner>
+          <EuiFlexGroup direction='row' justifyContent='spaceBetween' alignItems='center'>
+            <EuiFlexItem>
+              <EuiTitle size='xs'><h5># {index}</h5></EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* <EuiButtonIcon iconType="trash" /> */}
+              <EuiButtonEmpty iconSide='right' iconType='trash' color='danger' disabled>
+                Delete
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size='s' />
+
+          <TemplateSelect />
+          <NameSpaceSelect />
+        </EuiSplitPanel.Inner>
+        {/* <EuiSplitPanel.Inner color="subdued">
+          <EuiButton onClick={() => console.log('add')}>Add</EuiButton>
+        </EuiSplitPanel.Inner> */}
+      </EuiSplitPanel.Outer>
+    </>
+  )
+}
+
 const CreateUser = () => {
   return (
     <>
-      <EuiPageTemplate restrictWidth={684}>
+      <EuiPageTemplate restrictWidth={1024}>
         <EuiPageTemplate.Header
           pageTitle="Create New User"
           // rightSideItems={[
@@ -97,9 +205,15 @@ const CreateUser = () => {
         />
         <EuiPageTemplate.Section>
           <EuiFlexGroup direction='row'>
-            <EuiFlexItem grow>
+            <EuiFlexItem grow style={{ maxWidth: 400 }}>
               <EuiFlexGroup direction='column'>
-                <EuiFlexItem><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
+                    <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill>SAVE</EuiButton></EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <EuiFormRow label="Username">
                     <EuiFieldText icon="user" placeholder="john.doe" />
@@ -128,46 +242,49 @@ const CreateUser = () => {
                     // }}
                   />
                   </EuiFormRow>
-                  <EuiFormRow label="Template">
-                    <EuiPanel>
-                      <NameSpaceSelect />
-                      <TemplateSelect />
-                    </EuiPanel>
-                  </EuiFormRow>
+                  <EuiSpacer size='m' />
+                  {/* Template - Roles */}
+                  <TemplatesSlider children={[]} />
+
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction='column'>
-                <EuiFlexItem grow={false}><EuiButton fill>SAVE</EuiButton></EuiFlexItem>
-                {/* <EuiFlexItem><EuiTitle size='xs'><h3>Summary result</h3></EuiTitle></EuiFlexItem> */}
-                <EuiFlexItem>
-                  <EuiBasicTable
-                    tableCaption="Summary"
-                    // rowHeader="firstName"
-                    tableLayout='auto'
-                    columns={[
-                      {field: 'resource', name: 'Resource', dataType: 'string'},
-                      {
-                        field: 'read',
-                        name: 'READ',
-                        dataType: 'boolean',
-                        render: (readValue: SummaryItem['read']) => {
+            <EuiFlexItem grow>
+              <EuiPanel color='subdued'>
+                <EuiFlexGroup direction='column'>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size='s'>
+                    <h3><EuiTextColor color="subdued">Summary</EuiTextColor></h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiBasicTable
+                      tableCaption="Summary"
+                      // rowHeader="firstName"
+                      tableLayout='auto'
+                      columns={[
+                        {field: 'resource', name: 'Resource', dataType: 'string'},
+                        {
+                          field: 'read',
+                          name: 'READ',
+                          dataType: 'boolean',
+                          render: (readValue: SummaryItem['read']) => {
+                            return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
+                          }
+                        },
+                        {field: 'write', name: 'WRITE', dataType: 'boolean',
+                        render: (readValue: SummaryItem['write']) => {
                           return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
-                        }
-                      },
-                      {field: 'write', name: 'WRITE', dataType: 'boolean',
-                      render: (readValue: SummaryItem['write']) => {
-                        return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
-                      }},
-                      {field: 'namespaces', name: 'Namespaces', width: '132px', textOnly: true},
-                    ]}
-                    items={mockedItems as SummaryItem[]}
-                    // rowProps={getRowProps}
-                    // cellProps={getCellProps}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                        }},
+                        {field: 'namespaces', name: 'Namespaces', textOnly: true},
+                      ]}
+                      items={mockedItems as any}
+                      // rowProps={getRowProps}
+                      // cellProps={getCellProps}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPageTemplate.Section>
