@@ -24,7 +24,7 @@ const UsersList = () => {
       <EuiPageTemplate.Header
         pageTitle="Users List"
         rightSideItems={[
-          <EuiButton color="success" href='/new-user' iconType='plus' iconSide='right'>Create New User</EuiButton>
+          <EuiButton color="success" href='/create-new-user' iconType='plus' iconSide='right'>Create New User</EuiButton>
         ]}
       />
       <EuiPageTemplate.Section>

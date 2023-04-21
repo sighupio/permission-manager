@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {useUsers} from '../hooks/useUsers';
 import {Link} from 'react-router-dom';
 import {
@@ -29,6 +29,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useNamespaceList } from '../hooks/useNamespaceList';
+import { httpRequests } from '../services/httpRequests';
+import { ClusterAccess } from "../components/types";
+
+import { AggregatedRoleBinding } from "../services/role";
 
 type SummaryItem = {
   resource: string,
@@ -46,6 +50,22 @@ const mockedItems: SummaryItem[] = [
   },
 ]
 
+const clusterAccessOptions = [
+  {
+    id: 'none',
+    label: 'none',
+
+  },
+  {
+    id: 'read',
+    label: 'read',
+  },
+  {
+    id: 'write',
+    label: 'write',
+  },
+];
+
 const templateOptions = [
   {
     value: 'developer',
@@ -55,7 +75,7 @@ const templateOptions = [
     value: 'operation',
     inputDisplay: 'Operation',
   },
-]
+];
 
 const TemplateSelect = () => {
   return (
@@ -78,13 +98,18 @@ const TemplateSelect = () => {
   )
 }
 
-const NameSpaceSelect = () => {
-  const {namespaceList} = useNamespaceList()
+const NameSpaceSelect = (props: any) => {
+  const {selectedNameSpaces, setSelectedNamespaces} = props;
+  const {namespaceList} = useNamespaceList();
 
-  const options = namespaceList
+  const nameSpaceOptions = namespaceList
     .map(ns => {
       return {label: ns.metadata.name, text: ns.metadata.name}
     })
+
+  useEffect(() => {
+    setSelectedNamespaces(namespaceList[0], namespaceList[1])
+  }, [])
 
   return (
     <EuiFormRow label="Namespace">
@@ -92,9 +117,10 @@ const NameSpaceSelect = () => {
         <EuiComboBox
           aria-label="Namespace"
           placeholder="Select or create options"
-          options={options}
-          onChange={() => {}}
-          onCreateOption={() => {}}
+          options={nameSpaceOptions}
+          selectedOptions={selectedNameSpaces}
+          onChange={(e) => setSelectedNamespaces(e)}
+          // onCreateOption={() => {}}
           isClearable={true}
         />
         <EuiSpacer size='xs' />
@@ -110,7 +136,7 @@ const NameSpaceSelect = () => {
 }
 
 const TemplatesSlider = (props: any) => {
-  const { children, index } = props;
+  const { children, index, selectedNamespaces, setSelectedNamespaces } = props;
   const [currentPage, setCurrentPage] = React.useState(0);
 
   const panelContainerRef = useRef<HTMLDivElement>(null);
@@ -173,7 +199,6 @@ const TemplatesSlider = (props: any) => {
               <EuiTitle size='xs'><h5># {index}</h5></EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              {/* <EuiButtonIcon iconType="trash" /> */}
               <EuiButtonEmpty iconSide='right' iconType='trash' color='danger' disabled>
                 Delete
               </EuiButtonEmpty>
@@ -183,7 +208,10 @@ const TemplatesSlider = (props: any) => {
           <EuiSpacer size='s' />
 
           <TemplateSelect />
-          <NameSpaceSelect />
+          <NameSpaceSelect
+            selectedNamespaces={selectedNamespaces}
+            setSelectedNamespaces={setSelectedNamespaces}
+          />
         </EuiSplitPanel.Inner>
         {/* <EuiSplitPanel.Inner color="subdued">
           <EuiButton onClick={() => console.log('add')}>Add</EuiButton>
@@ -194,14 +222,36 @@ const TemplatesSlider = (props: any) => {
 }
 
 const CreateUser = () => {
+  const [username, setUsername] = useState<string>('');
+  const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
+  const [selectedNamespaces, setSelectedNamespaces] = useState<any>([]);
+  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
+
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+
+    try {
+      await httpRequests.userRequests.create(username)
+      console.log('username', username)
+      await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
+        aggregatedRoleBindings,
+        username,
+        clusterAccess,
+      )
+
+      // history.push(`/users/${username}`)
+
+    } catch (e) {
+      // TODO add proper error modal
+      console.error(e)
+    }
+  }
   return (
     <>
       <EuiPageTemplate restrictWidth={1024}>
         <EuiPageTemplate.Header
           pageTitle="Create New User"
-          // rightSideItems={[
-          //   <EuiButton fill>Save</EuiButton>,
-          // ]}
         />
         <EuiPageTemplate.Section>
           <EuiFlexGroup direction='row'>
@@ -210,41 +260,29 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill>SAVE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
                   <EuiFormRow label="Username">
-                    <EuiFieldText icon="user" placeholder="john.doe" />
+                    <EuiFieldText icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
                   </EuiFormRow>
                   <EuiFormRow label="Access to cluster resources (non-namespaced)">
                   <EuiRadioGroup
-                    options={[
-                      {
-                        id: '1',
-                        label: 'none',
-                      },
-                      {
-                        id: '2',
-                        label: 'read-only',
-                      },
-                      {
-                        id: '3',
-                        label: 'read-write',
-                      },
-                    ]}
-                    idSelected="1"
-                    onChange={() => {}}
-                    name="radio group"
-                    // legend={{
-                    //   children: '(non-namespaced)',
-                    // }}
+                    name="cluster-access-config"
+                    options={clusterAccessOptions}
+                    idSelected={clusterAccess}
+                    onChange={(e) => {setClusterAccess(e as ClusterAccess)}}
                   />
                   </EuiFormRow>
                   <EuiSpacer size='m' />
                   {/* Template - Roles */}
-                  <TemplatesSlider children={[]} />
+                  <TemplatesSlider
+                    children={[]}
+                    selectedNamespaces={selectedNamespaces}
+                    setSelectedNamespaces={setSelectedNamespaces}
+                  />
 
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -254,7 +292,7 @@ const CreateUser = () => {
                 <EuiFlexGroup direction='column'>
                   <EuiFlexItem grow={false}>
                     <EuiTitle size='s'>
-                    <h3><EuiTextColor color="subdued">Summary</EuiTextColor></h3>
+                      <h3><EuiTextColor color="subdued">Summary</EuiTextColor></h3>
                     </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem>

@@ -40,7 +40,7 @@ export default function App() {
                 <Switch>
                   <Route path="/advanced" exact component={Advanced} />
                   <Route path="/new-user" exact component={NewUser} />
-                  <Route path="/new-user-test" exact component={CreateUser} />
+                  <Route path="/create-new-user" exact component={CreateUser} />
                   <Route path="/users/:username" exact component={EditUser} />
                   {/* <Route path="/" exact component={Home} /> */}
                   <Route path="/" exact component={UsersList} />
