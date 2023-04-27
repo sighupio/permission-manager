@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {useUsers} from '../hooks/useUsers';
 import {Link} from 'react-router-dom';
 import {
@@ -31,6 +31,7 @@ import {
 import { useNamespaceList } from '../hooks/useNamespaceList';
 import { httpRequests } from '../services/httpRequests';
 import { ClusterAccess } from "../components/types";
+// import { rolebinding } from "../services/rolebindingCreateRequests";
 
 import { AggregatedRoleBinding } from "../services/role";
 
@@ -77,13 +78,19 @@ const templateOptions = [
   },
 ];
 
-const TemplateSelect = () => {
+const TemplateSelect = (props: any) => {
+  const { selectedTemplateRole, setSelectedTemplateRole } = props;
+
+  const onChange = (selectedOptions) => {
+    setSelectedTemplateRole(selectedOptions);
+  };
+
   return (
     <EuiFormRow label="Template (of Role)">
       <EuiSuperSelect
-        onChange={() => {}}
+        onChange={onChange}
         options={templateOptions}
-        valueOfSelected='developer'
+        valueOfSelected={selectedTemplateRole}
         append={
           <EuiButtonEmpty
             iconType='iInCircle'
@@ -99,28 +106,34 @@ const TemplateSelect = () => {
 }
 
 const NameSpaceSelect = (props: any) => {
-  const {selectedNameSpaces, setSelectedNamespaces} = props;
+  const {selectedNamespaces, setSelectedNamespaces} = props;
   const {namespaceList} = useNamespaceList();
 
   const nameSpaceOptions = namespaceList
     .map(ns => {
-      return {label: ns.metadata.name, text: ns.metadata.name}
+      return {label: ns.metadata.name, value: ns.metadata.name}
     })
 
   useEffect(() => {
-    setSelectedNamespaces(namespaceList[0], namespaceList[1])
-  }, [])
+    nameSpaceOptions.length && setSelectedNamespaces([nameSpaceOptions[0], nameSpaceOptions[1]])
+  }, [namespaceList])
+
+  const onChange = (selectedOptions) => {
+    setSelectedNamespaces(selectedOptions);
+  };
 
   return (
     <EuiFormRow label="Namespace">
       <>
         <EuiComboBox
-          aria-label="Namespace"
-          placeholder="Select or create options"
+          // async
+          aria-label="Namespace Selection"
+          placeholder="Select Namespaces..."
           options={nameSpaceOptions}
-          selectedOptions={selectedNameSpaces}
-          onChange={(e) => setSelectedNamespaces(e)}
+          selectedOptions={selectedNamespaces}
+          onChange={onChange}
           // onCreateOption={() => {}}
+          isLoading={nameSpaceOptions.length < 1}
           isClearable={true}
         />
         <EuiSpacer size='xs' />
@@ -136,7 +149,7 @@ const NameSpaceSelect = (props: any) => {
 }
 
 const TemplatesSlider = (props: any) => {
-  const { children, index, selectedNamespaces, setSelectedNamespaces } = props;
+  const { children, index, selectedNamespaces, setSelectedNamespaces, selectedTemplateRole, setSelectedTemplateRole } = props;
   const [currentPage, setCurrentPage] = React.useState(0);
 
   const panelContainerRef = useRef<HTMLDivElement>(null);
@@ -199,7 +212,12 @@ const TemplatesSlider = (props: any) => {
               <EuiTitle size='xs'><h5># {index}</h5></EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconSide='right' iconType='trash' color='danger' disabled>
+              <EuiButtonEmpty
+                iconSide='right'
+                iconType='trash'
+                color='danger'
+                disabled
+                onClick={() => console.log('delete template')}>
                 Delete
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -207,7 +225,10 @@ const TemplatesSlider = (props: any) => {
 
           <EuiSpacer size='s' />
 
-          <TemplateSelect />
+          <TemplateSelect
+            selectedTemplateRole={selectedTemplateRole}
+            setSelectedTemplateRole={setSelectedTemplateRole}
+          />
           <NameSpaceSelect
             selectedNamespaces={selectedNamespaces}
             setSelectedNamespaces={setSelectedNamespaces}
@@ -224,9 +245,14 @@ const TemplatesSlider = (props: any) => {
 const CreateUser = () => {
   const [username, setUsername] = useState<string>('');
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
-  const [selectedNamespaces, setSelectedNamespaces] = useState<any>([]);
+  const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
   const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
 
+  const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer')
+
+  console.log(
+    'page', selectedNamespaces
+  )
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -247,6 +273,22 @@ const CreateUser = () => {
       console.error(e)
     }
   }
+
+  const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
+    setAggregatedRoleBindings(state => {
+      if (state.find(x => x.id === p.id)) {
+        return state.map(x => x.id === p.id ? p : x)
+      }
+      return [...state, p]
+    })
+  }, [])
+
+  const addEmptyPair = useCallback(() => {
+    setAggregatedRoleBindings(state => [...state, { id: '', namespaces: [], template: '' }])
+  }, [])
+
+  useEffect(addEmptyPair, [])
+
   return (
     <>
       <EuiPageTemplate restrictWidth={1024}>
@@ -282,6 +324,9 @@ const CreateUser = () => {
                     children={[]}
                     selectedNamespaces={selectedNamespaces}
                     setSelectedNamespaces={setSelectedNamespaces}
+
+                    selectedTemplateRole={selectedTemplateRole}
+                    setSelectedTemplateRole={setSelectedTemplateRole}
                   />
 
                 </EuiFlexItem>
