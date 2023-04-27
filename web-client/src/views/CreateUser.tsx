@@ -1,4 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+  QueryClient,
+  QueryClientProvider,
+} from 'react-query';
 import {useUsers} from '../hooks/useUsers';
 import {Link} from 'react-router-dom';
 import {
@@ -31,9 +38,12 @@ import {
 import { useNamespaceList } from '../hooks/useNamespaceList';
 import { httpRequests } from '../services/httpRequests';
 import { ClusterAccess } from "../components/types";
+import { httpClient } from "../services/httpClient";
 // import { rolebinding } from "../services/rolebindingCreateRequests";
 
 import { AggregatedRoleBinding } from "../services/role";
+import { method } from 'bluebird';
+import { Subject } from '../hooks/useRbac';
 
 type SummaryItem = {
   resource: string,
@@ -77,6 +87,172 @@ const templateOptions = [
     inputDisplay: 'Operation',
   },
 ];
+
+interface UserCreationParams {
+  generate_for_user: string,
+  roleName: string, // params.template,
+  namespace: string, // params.namespace,
+  roleKind: string, // params.roleKind,
+  subjects: Subject[], // params.subjects,
+  roleBindingName: string,// params.roleBindingName
+};
+
+
+const CreateUser = () => {
+  const [username, setUsername] = useState<string>('');
+  const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
+  const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
+  // const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
+
+  const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer')
+
+  // Queries
+  // const listUsers = useQuery('testQuery', useUsers)
+
+
+  // Mutations
+  // const mutation = useMutation(postTodo, {
+  //   onSuccess: () => {
+  //     // Invalidate and refetch
+  //     queryClient.invalidateQueries('todos')
+  //   },
+  // })
+
+  const createUser = useMutation({
+    mutationFn: (username: string) => {
+      return httpRequests.userRequests.create(username)
+    },
+  });
+
+  const createRoleBindings = useMutation({
+    mutationFn: (params: UserCreationParams) => {
+      return httpClient.post('/api/create-rolebinding', params);
+    }
+  });
+
+  async function handleSubmit(e) {
+    e.preventDefault()
+
+    // mutation.mutate({
+    //   id: Date.now(),
+    //   title: 'Do Laundry',
+    // })
+
+    try {
+      // await httpRequests.userRequests.create(username)
+      // Promise.all([
+        createUser.mutate(username)
+
+        createRoleBindings.mutate({
+          roleName: `template-namespaced-resources___${selectedTemplateRole}`,
+          namespace: selectedNamespaces[1].value,
+          roleKind: 'ClusterRole',
+          subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+          roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${selectedNamespaces[1].value}`,
+          generate_for_user: username,
+        })
+      // ])
+
+      // await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
+      //   aggregatedRoleBindings,
+      //   username,
+      //   clusterAccess,
+      // )
+
+      // history.push(`/users/${username}`)
+
+    } catch (e) {
+      // TODO add proper error modal
+      console.error('user creation error', e)
+    }
+  }
+
+  return (
+    <>
+      <EuiPageTemplate restrictWidth={1024}>
+        <EuiPageTemplate.Header
+          pageTitle="Create New User"
+        />
+        <EuiPageTemplate.Section>
+          <EuiFlexGroup direction='row'>
+            <EuiFlexItem grow style={{ maxWidth: 400 }}>
+              <EuiFlexGroup direction='column'>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
+                    <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiFormRow label="Username">
+                    <EuiFieldText icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
+                  </EuiFormRow>
+                  <EuiFormRow label="Access to cluster resources (non-namespaced)">
+                  <EuiRadioGroup
+                    name="cluster-access-config"
+                    options={clusterAccessOptions}
+                    idSelected={clusterAccess}
+                    onChange={(e) => {setClusterAccess(e as ClusterAccess)}}
+                  />
+                  </EuiFormRow>
+                  <EuiSpacer size='m' />
+                  {/* Template - Roles */}
+                  <TemplatesSlider
+                    children={[]}
+                    selectedNamespaces={selectedNamespaces}
+                    setSelectedNamespaces={setSelectedNamespaces}
+
+                    selectedTemplateRole={selectedTemplateRole}
+                    setSelectedTemplateRole={setSelectedTemplateRole}
+                  />
+
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiPanel color='subdued'>
+                <EuiFlexGroup direction='column'>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size='s'>
+                      <h3><EuiTextColor color="subdued">Summary</EuiTextColor></h3>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiBasicTable
+                      tableCaption="Summary"
+                      // rowHeader="firstName"
+                      tableLayout='auto'
+                      columns={[
+                        {field: 'resource', name: 'Resource', dataType: 'string'},
+                        {
+                          field: 'read',
+                          name: 'READ',
+                          dataType: 'boolean',
+                          render: (readValue: SummaryItem['read']) => {
+                            return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
+                          }
+                        },
+                        {field: 'write', name: 'WRITE', dataType: 'boolean',
+                        render: (readValue: SummaryItem['write']) => {
+                          return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
+                        }},
+                        {field: 'namespaces', name: 'Namespaces', textOnly: true},
+                      ]}
+                      items={mockedItems as any}
+                      // rowProps={getRowProps}
+                      // cellProps={getCellProps}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPageTemplate.Section>
+      </EuiPageTemplate>
+    </>
+  )
+}
 
 const TemplateSelect = (props: any) => {
   const { selectedTemplateRole, setSelectedTemplateRole } = props;
@@ -238,140 +414,6 @@ const TemplatesSlider = (props: any) => {
           <EuiButton onClick={() => console.log('add')}>Add</EuiButton>
         </EuiSplitPanel.Inner> */}
       </EuiSplitPanel.Outer>
-    </>
-  )
-}
-
-const CreateUser = () => {
-  const [username, setUsername] = useState<string>('');
-  const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
-  const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
-  const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
-
-  const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer')
-
-  console.log(
-    'page', selectedNamespaces
-  )
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-
-    try {
-      await httpRequests.userRequests.create(username)
-      console.log('username', username)
-      await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
-        aggregatedRoleBindings,
-        username,
-        clusterAccess,
-      )
-
-      // history.push(`/users/${username}`)
-
-    } catch (e) {
-      // TODO add proper error modal
-      console.error(e)
-    }
-  }
-
-  const savePair: (p: AggregatedRoleBinding) => void = useCallback(p => {
-    setAggregatedRoleBindings(state => {
-      if (state.find(x => x.id === p.id)) {
-        return state.map(x => x.id === p.id ? p : x)
-      }
-      return [...state, p]
-    })
-  }, [])
-
-  const addEmptyPair = useCallback(() => {
-    setAggregatedRoleBindings(state => [...state, { id: '', namespaces: [], template: '' }])
-  }, [])
-
-  useEffect(addEmptyPair, [])
-
-  return (
-    <>
-      <EuiPageTemplate restrictWidth={1024}>
-        <EuiPageTemplate.Header
-          pageTitle="Create New User"
-        />
-        <EuiPageTemplate.Section>
-          <EuiFlexGroup direction='row'>
-            <EuiFlexItem grow style={{ maxWidth: 400 }}>
-              <EuiFlexGroup direction='column'>
-                <EuiFlexItem>
-                  <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
-                    <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Username">
-                    <EuiFieldText icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
-                  </EuiFormRow>
-                  <EuiFormRow label="Access to cluster resources (non-namespaced)">
-                  <EuiRadioGroup
-                    name="cluster-access-config"
-                    options={clusterAccessOptions}
-                    idSelected={clusterAccess}
-                    onChange={(e) => {setClusterAccess(e as ClusterAccess)}}
-                  />
-                  </EuiFormRow>
-                  <EuiSpacer size='m' />
-                  {/* Template - Roles */}
-                  <TemplatesSlider
-                    children={[]}
-                    selectedNamespaces={selectedNamespaces}
-                    setSelectedNamespaces={setSelectedNamespaces}
-
-                    selectedTemplateRole={selectedTemplateRole}
-                    setSelectedTemplateRole={setSelectedTemplateRole}
-                  />
-
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiPanel color='subdued'>
-                <EuiFlexGroup direction='column'>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size='s'>
-                      <h3><EuiTextColor color="subdued">Summary</EuiTextColor></h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiBasicTable
-                      tableCaption="Summary"
-                      // rowHeader="firstName"
-                      tableLayout='auto'
-                      columns={[
-                        {field: 'resource', name: 'Resource', dataType: 'string'},
-                        {
-                          field: 'read',
-                          name: 'READ',
-                          dataType: 'boolean',
-                          render: (readValue: SummaryItem['read']) => {
-                            return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
-                          }
-                        },
-                        {field: 'write', name: 'WRITE', dataType: 'boolean',
-                        render: (readValue: SummaryItem['write']) => {
-                          return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
-                        }},
-                        {field: 'namespaces', name: 'Namespaces', textOnly: true},
-                      ]}
-                      items={mockedItems as any}
-                      // rowProps={getRowProps}
-                      // cellProps={getCellProps}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPageTemplate.Section>
-      </EuiPageTemplate>
     </>
   )
 }
