@@ -130,27 +130,31 @@ const CreateUser = () => {
     }
   });
 
-  async function handleSubmit(e) {
-    e.preventDefault()
+  const createClusterRoleBindings = useMutation({
+    mutationFn: (params: any) => {
+      return httpClient.post('/api/create-cluster-rolebinding', params);
+    }
+  });
 
-    // mutation.mutate({
-    //   id: Date.now(),
-    //   title: 'Do Laundry',
-    // })
+  async function handleSubmit(e) {
+    e.preventDefault();
 
     try {
       // await httpRequests.userRequests.create(username)
       // Promise.all([
-        createUser.mutate(username)
+        createUser.mutate(username);
+        // API as of now needs to be called one time for each namespace
+        selectedNamespaces.forEach(ns => {
+          createRoleBindings.mutate({
+            roleName: `template-namespaced-resources___${selectedTemplateRole}`,
+            namespace: ns.value,
+            roleKind: 'ClusterRole',
+            subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+            roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${ns.value}`,
+            generated_for_user: username,
+          })
+        });
 
-        createRoleBindings.mutate({
-          roleName: `template-namespaced-resources___${selectedTemplateRole}`,
-          namespace: selectedNamespaces[1].value,
-          roleKind: 'ClusterRole',
-          subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-          roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${selectedNamespaces[1].value}`,
-          generated_for_user: username,
-        })
       // ])
 
       // await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
@@ -282,17 +286,27 @@ const TemplateSelect = (props: any) => {
 }
 
 const NameSpaceSelect = (props: any) => {
+  // Repeat the call for every namespace
   const {selectedNamespaces, setSelectedNamespaces} = props;
-  const {namespaceList} = useNamespaceList();
+  // const {namespaceList} = useNamespaceList();
+  const {data, isError, isLoading, isSuccess } = useQuery({
+    queryKey: ['listNamespaces'],
+    queryFn: () => httpRequests.namespaceList(),
+  })
 
-  const nameSpaceOptions = namespaceList
+  console.log('ns req', data, isLoading, isError);
+
+
+  const nameSpaceOptions = !isLoading && !isError && data.data.namespaces
     .map(ns => {
-      return {label: ns.metadata.name, value: ns.metadata.name}
+      return {label: ns, value: ns}
     })
 
-  useEffect(() => {
-    nameSpaceOptions.length && setSelectedNamespaces([nameSpaceOptions[0], nameSpaceOptions[1]])
-  }, [namespaceList])
+  // useEffect(() => {
+  //   nameSpaceOptions.length && setSelectedNamespaces([nameSpaceOptions[0], nameSpaceOptions[1]])
+  // }, [data])
+
+  console.log('test', nameSpaceOptions)
 
   const onChange = (selectedOptions) => {
     setSelectedNamespaces(selectedOptions);
@@ -305,7 +319,7 @@ const NameSpaceSelect = (props: any) => {
           // async
           aria-label="Namespace Selection"
           placeholder="Select Namespaces..."
-          options={nameSpaceOptions}
+          options={isSuccess ? nameSpaceOptions : []}
           selectedOptions={selectedNamespaces}
           onChange={onChange}
           // onCreateOption={() => {}}
