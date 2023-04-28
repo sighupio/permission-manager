@@ -89,7 +89,7 @@ const templateOptions = [
 ];
 
 interface UserCreationParams {
-  generate_for_user: string,
+  generated_for_user: string,
   roleName: string, // params.template,
   namespace: string, // params.namespace,
   roleKind: string, // params.roleKind,
@@ -149,7 +149,7 @@ const CreateUser = () => {
           roleKind: 'ClusterRole',
           subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
           roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${selectedNamespaces[1].value}`,
-          generate_for_user: username,
+          generated_for_user: username,
         })
       // ])
 
