@@ -21,8 +21,8 @@ import Header from './components/Header-eui';
 import {
   QueryClient,
   QueryClientProvider,
-} from 'react-query';
-import { ReactQueryDevtools } from 'react-query/devtools';
+} from '@tanstack/react-query';
+// import { ReactQueryDevtools } from '@tanstack/react-query/devtools';
 
 const queryClient = new QueryClient();
 
@@ -64,7 +64,7 @@ export default function App() {
           </UsersProvider>
         </RbacProvider>
       </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   )
 }
