@@ -5,7 +5,7 @@ import {
   useQueryClient,
   QueryClient,
   QueryClientProvider,
-} from 'react-query';
+} from '@tanstack/react-query';
 import {useUsers} from '../hooks/useUsers';
 import {Link} from 'react-router-dom';
 import {
@@ -44,6 +44,7 @@ import { httpClient } from "../services/httpClient";
 import { AggregatedRoleBinding } from "../services/role";
 import { method } from 'bluebird';
 import { Subject } from '../hooks/useRbac';
+import { ClusterRolebindingCreate } from '../services/rolebindingCreateRequests';
 
 type SummaryItem = {
   resource: string,
@@ -65,7 +66,6 @@ const clusterAccessOptions = [
   {
     id: 'none',
     label: 'none',
-
   },
   {
     id: 'read',
@@ -76,6 +76,12 @@ const clusterAccessOptions = [
     label: 'write',
   },
 ];
+
+const clusterRoleMap = {
+  none: false,
+  read: 'read-only',
+  write: 'admin'
+}
 
 const templateOptions = [
   {
@@ -133,6 +139,12 @@ const CreateUser = () => {
   const createClusterRoleBindings = useMutation({
     mutationFn: (params: any) => {
       return httpClient.post('/api/create-cluster-rolebinding', params);
+
+      // return httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
+      //   [],
+      //   username,
+      //   clusterAccess,
+      // )
     }
   });
 
@@ -140,22 +152,26 @@ const CreateUser = () => {
     e.preventDefault();
 
     try {
-      // await httpRequests.userRequests.create(username)
-      // Promise.all([
-        createUser.mutate(username);
-        // API as of now needs to be called one time for each namespace
-        selectedNamespaces.forEach(ns => {
-          createRoleBindings.mutate({
-            roleName: `template-namespaced-resources___${selectedTemplateRole}`,
-            namespace: ns.value,
-            roleKind: 'ClusterRole',
-            subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-            roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${ns.value}`,
-            generated_for_user: username,
-          })
-        });
-
-      // ])
+      // Create User Queries
+      createUser.mutate(username);
+      // API as of now needs to be called one time for each namespace
+      selectedNamespaces.forEach(ns => {
+        createRoleBindings.mutate({
+          roleName: `template-namespaced-resources___${selectedTemplateRole}`,
+          namespace: ns.value,
+          roleKind: 'ClusterRole',
+          subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+          roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${ns.value}`,
+          generated_for_user: username,
+        })
+      });
+      // Call to define Cluster Resources Access
+      clusterAccess !== 'none' && createClusterRoleBindings.mutate({
+        // aggregatedRoleBindings:[{}],
+        roleName: `template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
+        subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+        clusterRolebindingName: `${username}___template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
+      })
 
       // await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
       //   aggregatedRoleBindings,
@@ -197,7 +213,10 @@ const CreateUser = () => {
                     name="cluster-access-config"
                     options={clusterAccessOptions}
                     idSelected={clusterAccess}
-                    onChange={(e) => {setClusterAccess(e as ClusterAccess)}}
+                    onChange={(e) => {
+                      console.log('radio', e)
+                      setClusterAccess(e as any)
+                    }}
                   />
                   </EuiFormRow>
                   <EuiSpacer size='m' />
