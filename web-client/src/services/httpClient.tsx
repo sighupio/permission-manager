@@ -14,12 +14,12 @@ export function httpClientFactory(): AxiosInstance {
   /**
    * if a BASIC_AUTH_PASSWORD is passed we inject it into {httpClient}
    */
-  // if (process.env.REACT_APP_BASIC_AUTH_PASSWORD) {
+  if (process.env.REACT_APP_BASIC_AUTH_PASSWORD) {
     httpClient.defaults.auth = {
       username: "admin", // username is always admin
       password: process.env.REACT_APP_BASIC_AUTH_PASSWORD ?? ""
     }
-  // }
+  }
 
   return httpClient;
 }
