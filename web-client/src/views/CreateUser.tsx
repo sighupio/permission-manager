@@ -3,11 +3,12 @@ import {
   useQuery,
   useMutation,
   useQueryClient,
+  QueriesObserver,
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
 import {useUsers} from '../hooks/useUsers';
-import {Link} from 'react-router-dom';
+import {useHistory} from 'react-router-dom';
 import {
   EuiPanel,
   EuiButton,
@@ -34,6 +35,11 @@ import {
   EuiSuperSelect,
   EuiTextColor,
   EuiText,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
 } from '@elastic/eui';
 import { useNamespaceList } from '../hooks/useNamespaceList';
 import { httpRequests } from '../services/httpRequests';
@@ -103,15 +109,26 @@ interface UserCreationParams {
   roleBindingName: string,// params.roleBindingName
 };
 
+interface Template {
+  id: number,
+  namespaces: string[],
+  role: string,
+};
+
 
 const CreateUser = () => {
   const [username, setUsername] = useState<string>('');
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
-  const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
-  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
+  const [templates, setTemplates] = useState<Template[]>([{
+    id: 0,
+    namespaces: [],
+    role: '',
+  }]);
+
+  const [successModal, setSuccessModal] = useState<boolean>(false);
+  const [errorModal, setErrorModal] = useState<boolean | string>(false);
   // const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
 
-  const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer')
 
   // Queries
   // const listUsers = useQuery('testQuery', useUsers)
@@ -124,6 +141,15 @@ const CreateUser = () => {
   //     queryClient.invalidateQueries('todos')
   //   },
   // })
+
+  // const observer = new QueryObserver(queryClient, { queryKey: ['posts'] })
+
+  // const unsubscribe = observer.subscribe(result => {
+  //   console.log(result)
+  //   unsubscribe()
+  // })
+
+  const history = useHistory();
 
   const createUser = useMutation({
     mutationFn: (username: string) => {
@@ -155,17 +181,20 @@ const CreateUser = () => {
     try {
       // Create User Queries
       createUser.mutate(username);
-      // API as of now needs to be called one time for each namespace
-      selectedNamespaces.forEach(ns => {
-        createRoleBindings.mutate({
-          roleName: `template-namespaced-resources___${selectedTemplateRole}`,
-          namespace: ns.value,
-          roleKind: 'ClusterRole',
-          subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-          roleBindingName: `${username}___template-namespaced-resources___${selectedTemplateRole}___${ns.value}`,
-          generated_for_user: username,
-        })
-      });
+      // Make a query for each template
+      templates.forEach((template) => {
+        // API as of now needs to be called one time for each namespace
+        template.namespaces.forEach(ns => {
+          createRoleBindings.mutate({
+            roleName: `template-namespaced-resources___${template.role}`,
+            namespace: ns,
+            roleKind: 'ClusterRole',
+            subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+            roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns}`,
+            generated_for_user: username,
+          })
+        });
+      })
       // Call to define Cluster Resources Access
       clusterAccess !== 'none' && createClusterRoleBindings.mutate({
         // aggregatedRoleBindings:[{}],
@@ -180,10 +209,13 @@ const CreateUser = () => {
       //   clusterAccess,
       // )
 
+      setSuccessModal(true);
+
       // history.push(`/users/${username}`)
 
     } catch (e) {
       // TODO add proper error modal
+      setErrorModal(true);
       console.error('user creation error', e)
     }
   }
@@ -201,7 +233,7 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={templates.length < 1} onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
@@ -223,14 +255,15 @@ const CreateUser = () => {
                   <EuiSpacer size='m' />
                   {/* Template - Roles */}
                   <TemplatesSlider
-                    children={[]}
-                    allNamespaces={allNamespaces}
-                    setAllNamespaces={setAllNamespaces}
-                    selectedNamespaces={selectedNamespaces}
-                    setSelectedNamespaces={setSelectedNamespaces}
+                    templates={templates}
+                    setTemplates={setTemplates}
+                    // allNamespaces={allNamespaces}
+                    // setAllNamespaces={setAllNamespaces}
+                    // selectedNamespaces={selectedNamespaces}
+                    // setSelectedNamespaces={setSelectedNamespaces}
 
-                    selectedTemplateRole={selectedTemplateRole}
-                    setSelectedTemplateRole={setSelectedTemplateRole}
+                    // selectedTemplateRole={selectedTemplateRole}
+                    // setSelectedTemplateRole={setSelectedTemplateRole}
                   />
 
                 </EuiFlexItem>
@@ -278,11 +311,66 @@ const CreateUser = () => {
           </EuiFlexGroup>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
+
+      {successModal &&
+        <EuiModal
+          onClose={() => {
+            setSuccessModal(false);
+            history.push('/')
+          }}
+        >
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Good</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            User succesfully created
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton
+              onClick={() => {
+                setSuccessModal(false);
+                history.push('/')
+              }}
+              fill
+            >
+              OK
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      }
+
+      {errorModal &&
+        <EuiModal onClose={() => {
+          setErrorModal(false);
+        }}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Error</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            {errorModal}
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton
+              fill
+              color='danger'
+              onClick={() => {
+                setErrorModal(false);
+              }}
+            >
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      }
     </>
   )
 }
 
-const TemplateSelect = (props: any) => {
+const RoleSelect = (props: any) => {
   const { selectedTemplateRole, setSelectedTemplateRole } = props;
 
   const onChange = (selectedOptions) => {
@@ -369,20 +457,17 @@ const NameSpaceSelect = (props: any) => {
 
 const TemplatesSlider = (props: any) => {
   const {
-    index,
-    children,
-    allNamespaces,
-    setAllNamespaces,
-    selectedNamespaces,
-    setSelectedNamespaces,
-    selectedTemplateRole,
-    setSelectedTemplateRole
+    templates,
+    setTemplates,
   } = props;
-  const [currentPage, setCurrentPage] = React.useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
+  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
+  const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer');
 
   const panelContainerRef = useRef<HTMLDivElement>(null);
 
-  const scrollLenght = 353;
+  const scrollLenght = 424;
 
   const goToPage = (pageNumber: number) => {
     setCurrentPage(pageNumber);
@@ -400,20 +485,13 @@ const TemplatesSlider = (props: any) => {
                 iconType="plusInCircle"
                 iconSide='right'
                 size="s"
-                // onClick={() => {
-                //   const newIndex = children.size + 1;
-                //   const newPanel = Form.buildComponentFromSchema(
-                //         newIndex,
-                //         caller,
-                //         formFieldData.FormId
-                //       );
-                //       if (newPanel) {
-                //         newPanel.listenIndex({
-                //           changePathsWithIndex: newIndex,
-                //         });
-                //         addChild(newPanel);
-                //   }
-                // }}
+                onClick={() => {
+                  setTemplates([...templates, {
+                    id: templates.length + 1,
+                    role: selectedTemplateRole,
+                    namespaces: [],
+                  }]);
+                }}
               >
                 Add
               </EuiButtonEmpty>
@@ -421,9 +499,9 @@ const TemplatesSlider = (props: any) => {
             <EuiFlexItem>
               <EuiPagination
                 compressed
-                // aria-label={`${formFieldData.Label} pagination`}
-                pageCount={children.size}
                 activePage={currentPage}
+                pageCount={templates.length}
+                aria-label="templates pagination"
                 onPageClick={(activePage) => goToPage(activePage)}
               />
             </EuiFlexItem>
@@ -433,41 +511,56 @@ const TemplatesSlider = (props: any) => {
 
       </EuiFlexGroup>
       <EuiSpacer size='xs' />
-      <EuiSplitPanel.Outer>
-        <EuiSplitPanel.Inner>
-          <EuiFlexGroup direction='row' justifyContent='spaceBetween' alignItems='center'>
-            <EuiFlexItem>
-              <EuiTitle size='xs'><h5># {index}</h5></EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconSide='right'
-                iconType='trash'
-                color='danger'
-                disabled
-                onClick={() => console.log('delete template')}>
-                Delete
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+      <div
+        ref={panelContainerRef}
+        className='templates-container'
+        style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', scrollBehavior: 'smooth', margin: '-8px -12px -24px'}}
+      >
+        {templates.map((template, index) => {
+          return(
+            <div key={`template_${index}`} style={{flex: '0 0 auto', width: '100%', padding: '8px 12px 24px'}}>
+              <EuiPanel grow={false}>
+                <EuiFlexGroup direction='row' justifyContent='spaceBetween' alignItems='center'>
+                  <EuiFlexItem>
+                    <EuiTitle size='xs'><h5># {index + 1}</h5></EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      iconSide='right'
+                      iconType='trash'
+                      color='danger'
+                      disabled={template.id === 0}
+                      onClick={() => {
+                        // Deleting template
+                        console.log('delete template', template.id);
+                        setTemplates(templates.filter(t => t.id !== template.id))
+                      }}
+                    >
+                      Delete
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
 
-          <EuiSpacer size='s' />
+                <EuiSpacer size='s' />
 
-          <TemplateSelect
-            selectedTemplateRole={selectedTemplateRole}
-            setSelectedTemplateRole={setSelectedTemplateRole}
-          />
-          <NameSpaceSelect
-            allNamespaces={allNamespaces}
-            setAllNamespaces={setAllNamespaces}
-            selectedNamespaces={selectedNamespaces}
-            setSelectedNamespaces={setSelectedNamespaces}
-          />
-        </EuiSplitPanel.Inner>
-        {/* <EuiSplitPanel.Inner color="subdued">
-          <EuiButton onClick={() => console.log('add')}>Add</EuiButton>
-        </EuiSplitPanel.Inner> */}
-      </EuiSplitPanel.Outer>
+                <RoleSelect
+                  selectedTemplateRole={selectedTemplateRole}
+                  setSelectedTemplateRole={setSelectedTemplateRole}
+                />
+                <NameSpaceSelect
+                  allNamespaces={allNamespaces}
+                  setAllNamespaces={setAllNamespaces}
+                  selectedNamespaces={selectedNamespaces}
+                  setSelectedNamespaces={setSelectedNamespaces}
+                />
+              </EuiPanel>
+              {/* <EuiSplitPanel.Inner color="subdued">
+                <EuiButton onClick={() => console.log('add')}>Add</EuiButton>
+              </EuiSplitPanel.Inner> */}
+            </div>
+          )
+        })}
+      </div>
     </>
   )
 }
