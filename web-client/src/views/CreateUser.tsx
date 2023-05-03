@@ -108,6 +108,7 @@ const CreateUser = () => {
   const [username, setUsername] = useState<string>('');
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
   const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
+  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
   // const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
 
   const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer')
@@ -223,6 +224,8 @@ const CreateUser = () => {
                   {/* Template - Roles */}
                   <TemplatesSlider
                     children={[]}
+                    allNamespaces={allNamespaces}
+                    setAllNamespaces={setAllNamespaces}
                     selectedNamespaces={selectedNamespaces}
                     setSelectedNamespaces={setSelectedNamespaces}
 
@@ -256,10 +259,12 @@ const CreateUser = () => {
                             return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
                           }
                         },
-                        {field: 'write', name: 'WRITE', dataType: 'boolean',
-                        render: (readValue: SummaryItem['write']) => {
-                          return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
-                        }},
+                        {
+                          field: 'write', name: 'WRITE', dataType: 'boolean',
+                          render: (readValue: SummaryItem['write']) => {
+                            return <EuiIcon id='read1' type={readValue ? 'check' : 'cross'} />;
+                          }
+                        },
                         {field: 'namespaces', name: 'Namespaces', textOnly: true},
                       ]}
                       items={mockedItems as any}
@@ -306,7 +311,7 @@ const TemplateSelect = (props: any) => {
 
 const NameSpaceSelect = (props: any) => {
   // Repeat the call for every namespace
-  const {selectedNamespaces, setSelectedNamespaces} = props;
+  const {selectedNamespaces, setSelectedNamespaces, allNamespaces, setAllNamespaces} = props;
   // const {namespaceList} = useNamespaceList();
   const {data, isError, isLoading, isSuccess } = useQuery({
     queryKey: ['listNamespaces'],
@@ -331,6 +336,10 @@ const NameSpaceSelect = (props: any) => {
     setSelectedNamespaces(selectedOptions);
   };
 
+  const onCheck = (e) => {
+    setAllNamespaces(e.target.checked);
+  };
+
   return (
     <EuiFormRow label="Namespace">
       <>
@@ -339,8 +348,9 @@ const NameSpaceSelect = (props: any) => {
           aria-label="Namespace Selection"
           placeholder="Select Namespaces..."
           options={isSuccess ? nameSpaceOptions : []}
-          selectedOptions={selectedNamespaces}
+          selectedOptions={allNamespaces ? [{label: 'All', value: 'all'}] : selectedNamespaces}
           onChange={onChange}
+          isDisabled={allNamespaces}
           // onCreateOption={() => {}}
           isLoading={nameSpaceOptions.length < 1}
           isClearable={true}
@@ -349,8 +359,8 @@ const NameSpaceSelect = (props: any) => {
         <EuiCheckbox
           id="check1"
           label="All Namespaces"
-          checked={false}
-          onChange={() => {}}
+          checked={allNamespaces}
+          onChange={onCheck}
         />
       </>
     </EuiFormRow>
@@ -358,7 +368,16 @@ const NameSpaceSelect = (props: any) => {
 }
 
 const TemplatesSlider = (props: any) => {
-  const { children, index, selectedNamespaces, setSelectedNamespaces, selectedTemplateRole, setSelectedTemplateRole } = props;
+  const {
+    index,
+    children,
+    allNamespaces,
+    setAllNamespaces,
+    selectedNamespaces,
+    setSelectedNamespaces,
+    selectedTemplateRole,
+    setSelectedTemplateRole
+  } = props;
   const [currentPage, setCurrentPage] = React.useState(0);
 
   const panelContainerRef = useRef<HTMLDivElement>(null);
@@ -439,6 +458,8 @@ const TemplatesSlider = (props: any) => {
             setSelectedTemplateRole={setSelectedTemplateRole}
           />
           <NameSpaceSelect
+            allNamespaces={allNamespaces}
+            setAllNamespaces={setAllNamespaces}
             selectedNamespaces={selectedNamespaces}
             setSelectedNamespaces={setSelectedNamespaces}
           />
