@@ -125,7 +125,7 @@ const CreateUser = () => {
   const [username, setUsername] = useState<string>('');
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
   const [templates, setTemplates] = useState<Template[]>([{
-    id: 0,
+    id: 1,
     namespaces: [],
     role: '',
   }]);
@@ -190,7 +190,6 @@ const CreateUser = () => {
       templates.forEach((template) => {
         // API as of now needs to be called one time for each namespace
         template.namespaces.forEach((ns) => {
-          console.log('ns', ns)
           createRoleBindings.mutate({
             roleName: `template-namespaced-resources___${template.role}`,
             namespace: ns.value,
@@ -220,12 +219,12 @@ const CreateUser = () => {
       // history.push(`/users/${username}`)
 
     } catch (e) {
-      setErrorModal(true);
+      setErrorModal(e);
       console.error('user creation error', e)
     }
   }
 
-  let formIsFilled = templates[0].namespaces.length && templates[0].role !== "";
+  // let formIsFilled = templates[0].namespaces.length && templates[0].role !== "";
 
   return (
     <>
@@ -240,7 +239,7 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={false} onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
@@ -264,13 +263,6 @@ const CreateUser = () => {
                   <TemplatesSlider
                     templates={templates}
                     setTemplates={setTemplates}
-                    // allNamespaces={allNamespaces}
-                    // setAllNamespaces={setAllNamespaces}
-                    // selectedNamespaces={selectedNamespaces}
-                    // setSelectedNamespaces={setSelectedNamespaces}
-
-                    // selectedTemplateRole={selectedTemplateRole}
-                    // setSelectedTemplateRole={setSelectedTemplateRole}
                   />
 
                 </EuiFlexItem>
@@ -380,13 +372,18 @@ const CreateUser = () => {
 const RoleSelect = (props: any) => {
   const { templates, setTemplates, templateId } = props;
 
-  const onChange = (selectedOptions) => {
+  const onChange = (selectedRole) => {
     setTemplates(templates.map(template => {
       if (template.id === templateId) {
-        return {...template, role: selectedOptions}
-      }
-    }))
+        console.log('t', template, {...template, role: selectedRole})
+        return {...template, role: selectedRole}
+      } else {
+        return template;
+      };
+    }));
   };
+
+  console.log('Role', templateId, templates);
 
   return (
     <EuiFormRow label="Template (of Role)">
@@ -409,16 +406,16 @@ const RoleSelect = (props: any) => {
 }
 
 const NameSpaceSelect = (props: any) => {
-  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
   const { templates, setTemplates, templateId } = props;
+  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
   // const {namespaceList} = useNamespaceList();
-  const {data, isError, isLoading, isSuccess } = useQuery({
+  const { data, isError, isLoading, isSuccess } = useQuery({
     queryKey: ['listNamespaces'],
     queryFn: () => httpRequests.namespaceList(),
   })
 
   const nameSpaceOptions = !isLoading && !isError && data.data.namespaces
-    .map(ns => {
+    .map((ns: NamespaceOption) => {
       return {label: ns, value: ns}
     });
 
@@ -426,9 +423,13 @@ const NameSpaceSelect = (props: any) => {
     setTemplates(templates.map(template => {
       if (template.id === templateId) {
         return {...template, namespaces: selectedOptions}
+      } else {
+        return template
       }
     }))
   };
+
+  console.log('Namespaces', templateId, templates)
 
   const onCheck = (e) => {
     setAllNamespaces(e.target.checked);
@@ -446,7 +447,7 @@ const NameSpaceSelect = (props: any) => {
           onChange={onChange}
           isDisabled={allNamespaces}
           // onCreateOption={() => {}}
-          isLoading={nameSpaceOptions.length < 1}
+          isLoading={!nameSpaceOptions}
           isClearable={true}
         />
         <EuiSpacer size='xs' />
@@ -462,10 +463,7 @@ const NameSpaceSelect = (props: any) => {
 }
 
 const TemplatesSlider = (props: any) => {
-  const {
-    templates,
-    setTemplates,
-  } = props;
+  const { templates, setTemplates } = props;
   const [currentPage, setCurrentPage] = useState(0);
   const panelContainerRef = useRef<HTMLDivElement>(null);
 
@@ -475,6 +473,8 @@ const TemplatesSlider = (props: any) => {
     setCurrentPage(pageNumber);
     panelContainerRef.current?.scrollTo(scrollLenght * pageNumber, 0);
   };
+
+  console.log('Slider', templates)
 
   return (
     <>
@@ -490,8 +490,8 @@ const TemplatesSlider = (props: any) => {
                 onClick={() => {
                   setTemplates([...templates, {
                     id: templates.length + 1,
-                    role: '',
                     namespaces: [],
+                    role: templateOptions[0].value,
                   }]);
                 }}
               >
@@ -519,8 +519,9 @@ const TemplatesSlider = (props: any) => {
         style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', scrollBehavior: 'smooth', margin: '-8px -12px -24px'}}
       >
         {templates.map((template, index) => {
+          console.log('template render', template)
           return(
-            <div key={`template_${index}`} style={{flex: '0 0 auto', width: '100%', padding: '8px 12px 24px'}}>
+            <div key={`template_${index + 1}`} style={{flex: '0 0 auto', width: '100%', padding: '8px 12px 24px'}}>
               <EuiPanel grow={false}>
                 <EuiFlexGroup direction='row' justifyContent='spaceBetween' alignItems='center'>
                   <EuiFlexItem>
@@ -531,7 +532,7 @@ const TemplatesSlider = (props: any) => {
                       iconSide='right'
                       iconType='trash'
                       color='danger'
-                      disabled={template.id === 0}
+                      isDisabled={template.id === 1}
                       onClick={() => {
                         // Deleting template
                         console.log('delete template', template.id);
@@ -546,12 +547,12 @@ const TemplatesSlider = (props: any) => {
                 <EuiSpacer size='s' />
 
                 <RoleSelect
-                  templateId={index}
+                  templateId={index + 1}
                   templates={templates}
                   setTemplates={setTemplates}
                   />
                 <NameSpaceSelect
-                  templateId={index}
+                  templateId={index + 1}
                   templates={templates}
                   setTemplates={setTemplates}
                 />
