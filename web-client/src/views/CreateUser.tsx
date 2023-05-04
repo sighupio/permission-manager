@@ -375,15 +375,12 @@ const RoleSelect = (props: any) => {
   const onChange = (selectedRole) => {
     setTemplates(templates.map(template => {
       if (template.id === templateId) {
-        console.log('t', template, {...template, role: selectedRole})
         return {...template, role: selectedRole}
       } else {
         return template;
       };
     }));
   };
-
-  console.log('Role', templateId, templates);
 
   return (
     <EuiFormRow label="Template (of Role)">
@@ -429,8 +426,6 @@ const NameSpaceSelect = (props: any) => {
     }))
   };
 
-  console.log('Namespaces', templateId, templates)
-
   const onCheck = (e) => {
     setAllNamespaces(e.target.checked);
   };
@@ -473,8 +468,6 @@ const TemplatesSlider = (props: any) => {
     setCurrentPage(pageNumber);
     panelContainerRef.current?.scrollTo(scrollLenght * pageNumber, 0);
   };
-
-  console.log('Slider', templates)
 
   return (
     <>
@@ -519,7 +512,6 @@ const TemplatesSlider = (props: any) => {
         style={{display: 'flex', flexWrap: 'nowrap', overflowX: 'hidden', scrollBehavior: 'smooth', margin: '-8px -12px -24px'}}
       >
         {templates.map((template, index) => {
-          console.log('template render', template)
           return(
             <div key={`template_${index + 1}`} style={{flex: '0 0 auto', width: '100%', padding: '8px 12px 24px'}}>
               <EuiPanel grow={false}>
