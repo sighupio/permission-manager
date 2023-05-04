@@ -109,9 +109,14 @@ interface UserCreationParams {
   roleBindingName: string,// params.roleBindingName
 };
 
+type NamespaceOption = {
+  label: string,
+  value: string,
+}
+
 interface Template {
   id: number,
-  namespaces: string[],
+  namespaces: NamespaceOption[],
   role: string,
 };
 
@@ -184,13 +189,14 @@ const CreateUser = () => {
       // Make a query for each template
       templates.forEach((template) => {
         // API as of now needs to be called one time for each namespace
-        template.namespaces.forEach(ns => {
+        template.namespaces.forEach((ns) => {
+          console.log('ns', ns)
           createRoleBindings.mutate({
             roleName: `template-namespaced-resources___${template.role}`,
-            namespace: ns,
+            namespace: ns.value,
             roleKind: 'ClusterRole',
             subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-            roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns}`,
+            roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns.value}`,
             generated_for_user: username,
           })
         });
@@ -214,11 +220,12 @@ const CreateUser = () => {
       // history.push(`/users/${username}`)
 
     } catch (e) {
-      // TODO add proper error modal
       setErrorModal(true);
       console.error('user creation error', e)
     }
   }
+
+  let formIsFilled = templates[0].namespaces.length && templates[0].role !== "";
 
   return (
     <>
@@ -233,7 +240,7 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={templates.length < 1} onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
@@ -371,10 +378,14 @@ const CreateUser = () => {
 }
 
 const RoleSelect = (props: any) => {
-  const { selectedTemplateRole, setSelectedTemplateRole } = props;
+  const { templates, setTemplates, templateId } = props;
 
   const onChange = (selectedOptions) => {
-    setSelectedTemplateRole(selectedOptions);
+    setTemplates(templates.map(template => {
+      if (template.id === templateId) {
+        return {...template, role: selectedOptions}
+      }
+    }))
   };
 
   return (
@@ -382,7 +393,7 @@ const RoleSelect = (props: any) => {
       <EuiSuperSelect
         onChange={onChange}
         options={templateOptions}
-        valueOfSelected={selectedTemplateRole}
+        valueOfSelected={templates.find(t => t.id === templateId).role}
         append={
           <EuiButtonEmpty
             iconType='iInCircle'
@@ -398,30 +409,25 @@ const RoleSelect = (props: any) => {
 }
 
 const NameSpaceSelect = (props: any) => {
-  // Repeat the call for every namespace
-  const {selectedNamespaces, setSelectedNamespaces, allNamespaces, setAllNamespaces} = props;
+  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
+  const { templates, setTemplates, templateId } = props;
   // const {namespaceList} = useNamespaceList();
   const {data, isError, isLoading, isSuccess } = useQuery({
     queryKey: ['listNamespaces'],
     queryFn: () => httpRequests.namespaceList(),
   })
 
-  console.log('ns req', data, isLoading, isError);
-
-
   const nameSpaceOptions = !isLoading && !isError && data.data.namespaces
     .map(ns => {
       return {label: ns, value: ns}
-    })
-
-  // useEffect(() => {
-  //   nameSpaceOptions.length && setSelectedNamespaces([nameSpaceOptions[0], nameSpaceOptions[1]])
-  // }, [data])
-
-  console.log('test', nameSpaceOptions)
+    });
 
   const onChange = (selectedOptions) => {
-    setSelectedNamespaces(selectedOptions);
+    setTemplates(templates.map(template => {
+      if (template.id === templateId) {
+        return {...template, namespaces: selectedOptions}
+      }
+    }))
   };
 
   const onCheck = (e) => {
@@ -436,7 +442,7 @@ const NameSpaceSelect = (props: any) => {
           aria-label="Namespace Selection"
           placeholder="Select Namespaces..."
           options={isSuccess ? nameSpaceOptions : []}
-          selectedOptions={allNamespaces ? [{label: 'All', value: 'all'}] : selectedNamespaces}
+          selectedOptions={allNamespaces ? [{label: 'All', value: 'all'}] : templates.find(t => t.id === templateId).namespaces}
           onChange={onChange}
           isDisabled={allNamespaces}
           // onCreateOption={() => {}}
@@ -461,10 +467,6 @@ const TemplatesSlider = (props: any) => {
     setTemplates,
   } = props;
   const [currentPage, setCurrentPage] = useState(0);
-  const [selectedNamespaces, setSelectedNamespaces] = useState<any[]>([]);
-  const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
-  const [selectedTemplateRole, setSelectedTemplateRole] = useState<string>('developer');
-
   const panelContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollLenght = 424;
@@ -488,7 +490,7 @@ const TemplatesSlider = (props: any) => {
                 onClick={() => {
                   setTemplates([...templates, {
                     id: templates.length + 1,
-                    role: selectedTemplateRole,
+                    role: '',
                     namespaces: [],
                   }]);
                 }}
@@ -544,14 +546,14 @@ const TemplatesSlider = (props: any) => {
                 <EuiSpacer size='s' />
 
                 <RoleSelect
-                  selectedTemplateRole={selectedTemplateRole}
-                  setSelectedTemplateRole={setSelectedTemplateRole}
-                />
+                  templateId={index}
+                  templates={templates}
+                  setTemplates={setTemplates}
+                  />
                 <NameSpaceSelect
-                  allNamespaces={allNamespaces}
-                  setAllNamespaces={setAllNamespaces}
-                  selectedNamespaces={selectedNamespaces}
-                  setSelectedNamespaces={setSelectedNamespaces}
+                  templateId={index}
+                  templates={templates}
+                  setTemplates={setTemplates}
                 />
               </EuiPanel>
               {/* <EuiSplitPanel.Inner color="subdued">
