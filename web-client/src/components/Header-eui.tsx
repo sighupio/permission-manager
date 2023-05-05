@@ -25,13 +25,20 @@ const Header = () => {
     >
       <EuiFlexGroup
         direction='row'
-        alignItems='flexEnd'
+        alignItems='center'
       >
         <EuiFlexItem grow={false}>
           <EuiTitle size='s'><h2 style={{color: 'white'}}>Permission Manager</h2></EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <Link to="/"><EuiText color='ghost'>Users List</EuiText></Link>
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent='spaceBetween' alignItems='center'>
+            <EuiFlexItem grow={false}>
+              <Link to="/"><EuiText color='ghost'>Users List</EuiText></Link>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton color="success" href='/create-new-user' iconType='plus' iconSide='right'>Create New User</EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
