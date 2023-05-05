@@ -23,9 +23,9 @@ const UsersList = () => {
     >
       <EuiPageTemplate.Header
         pageTitle="Users List"
-        rightSideItems={[
-          <EuiButton color="success" href='/create-new-user' iconType='plus' iconSide='right'>Create New User</EuiButton>
-        ]}
+        // rightSideItems={[
+        //   <EuiButton color="success" href='/create-new-user' iconType='plus' iconSide='right'>Create New User</EuiButton>
+        // ]}
       />
       <EuiPageTemplate.Section>
         {
@@ -67,7 +67,7 @@ const UsersList = () => {
                 iconType='users'
                 title={<h5>Still no users defined</h5>}
                 titleSize='s'
-                actions={<EuiButtonEmpty color="success" href='/new-user' iconSide='right' iconType="plus">Create New User</EuiButtonEmpty>}
+                actions={<EuiButtonEmpty color="success" href='/create-new-user' iconSide='right' iconType="plus">Create New User</EuiButtonEmpty>}
               />
         }
       </EuiPageTemplate.Section>
