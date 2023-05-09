@@ -1,6 +1,8 @@
 package server
 
 import (
+	"fmt"
+
 	"github.com/labstack/echo/v4"
 	rbacv1 "k8s.io/api/rbac/v1"
 )
@@ -19,7 +21,8 @@ func createClusterRolebinding(c echo.Context) error {
 	err := ac.validateAndBindRequest(r)
 
 	if err != nil {
-		return err
+		validateAndBindErr := fmt.Sprintf("Validate Cluster Role Binding: %s", err)
+		return ac.errorResponse(validateAndBindErr)
 	}
 
 	// This is only a workaround: https://github.com/sighupio/permission-manager/issues/140
@@ -32,7 +35,8 @@ func createClusterRolebinding(c echo.Context) error {
 	_, err = ac.ResourceManager.ClusterRoleBindingCreate(r.ClusterRolebindingName, r.Username, r.RoleName, subjs)
 
 	if err != nil {
-		return err
+		clusterRoleBindingErr := fmt.Sprintf("ClusterRoleBinding creation: %s", err)
+		return ac.errorResponse(clusterRoleBindingErr)
 	}
 
 	return ac.okResponse()
