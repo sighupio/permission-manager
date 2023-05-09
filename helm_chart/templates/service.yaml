@@ -18,3 +18,4 @@ spec:
       {{- end }}
   selector:
     {{- include "permission-manager.selectorLabels" . | nindent 4 }}
+    permission-manager: api
