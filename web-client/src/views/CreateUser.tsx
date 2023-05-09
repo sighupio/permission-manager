@@ -132,6 +132,8 @@ const CreateUser = () => {
 
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [errorModal, setErrorModal] = useState<boolean | string>(false);
+
+  const [mutationsDone, setMutationsDone] = useState<any>([])
   // const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
 
 
@@ -156,75 +158,97 @@ const CreateUser = () => {
 
   const history = useHistory();
 
+  let usernameDone = false;
+  let bindingsDone = false;
+  let clusterBindingsDone = false;
+
   const createUser = useMutation({
     mutationFn: (username: string) => {
-      return httpRequests.userRequests.create(username)
+      return httpClient.post('/api/create-user', {name: username});
+    },
+    onError(error, variables, context) {
+      console.log('user', error, variables, context)
+      setErrorModal(error.toString());
+    },
+    onSuccess() {
+      console.log('username done')
+      usernameDone = true;
     },
   });
 
   const createRoleBindings = useMutation({
     mutationFn: (params: UserCreationParams) => {
       return httpClient.post('/api/create-rolebinding', params);
-    }
+    },
+    onError(error, variables, context) {
+      console.log('role', error, variables, context)
+      setErrorModal(error.toString());
+    },
+    onSuccess(data, variables, context) {
+      console.log('bindings done')
+      bindingsDone = true;
+    },
   });
 
   const createClusterRoleBindings = useMutation({
     mutationFn: (params: any) => {
       return httpClient.post('/api/create-cluster-rolebinding', params);
-
-      // return httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
-      //   [],
-      //   username,
-      //   clusterAccess,
-      // )
-    }
+    },
+    onError(error, variables, context) {
+      setErrorModal(error.toString())
+    },
+    onSuccess(data, variables, context) {
+      console.log('cluster bindings done')
+      clusterBindingsDone = true;
+    },
   });
 
   async function handleSubmit(e) {
     e.preventDefault();
 
     try {
-      // Create User Queries
-      createUser.mutate(username);
-      // Make a query for each template
-      templates.forEach((template) => {
-        // API as of now needs to be called one time for each namespace
-        template.namespaces.forEach((ns) => {
-          createRoleBindings.mutate({
-            roleName: `template-namespaced-resources___${template.role}`,
-            namespace: ns.value,
-            roleKind: 'ClusterRole',
-            subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-            roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns.value}`,
-            generated_for_user: username,
-          })
-        });
-      })
-      // Call to define Cluster Resources Access
-      clusterAccess !== 'none' && createClusterRoleBindings.mutate({
-        // aggregatedRoleBindings:[{}],
-        roleName: `template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
-        subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-        clusterRolebindingName: `${username}___template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
-      })
+      Promise.all([
+        // Create User Queries
+        createUser.mutate(username),
 
-      // await httpRequests.rolebindingRequests.create.fromAggregatedRolebindings(
-      //   aggregatedRoleBindings,
-      //   username,
-      //   clusterAccess,
-      // )
+        // Make a query for each template
+        templates.forEach((template) => {
+          // API as of now needs to be called one time for each namespace
+          template.namespaces.forEach((ns) => {
+            createRoleBindings.mutate({
+              roleName: `template-namespaced-resources___${template.role}`,
+              namespace: ns.value,
+              roleKind: 'ClusterRole',
+              subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+              roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns.value}`,
+              generated_for_user: username,
+            })
+          });
+        }),
 
-      setSuccessModal(true);
+        // Call to define Cluster Resources Access
+        clusterAccess !== 'none' && createClusterRoleBindings.mutate({
+          // aggregatedRoleBindings:[{}],
+          roleName: `template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
+          subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+          clusterRolebindingName: `${username}___template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
+        })
+      ]).then(res => {
+        console.log('calls done', res);
+      })
 
       // history.push(`/users/${username}`)
 
     } catch (e) {
-      setErrorModal(e);
+      setErrorModal(e.toString());
       console.error('user creation error', e)
+    } finally {
+      console.log('finished')
+      setSuccessModal(true);
     }
   }
 
-  // let formIsFilled = templates[0].namespaces.length && templates[0].role !== "";
+  let formIsFilled = templates[0].namespaces.length && templates[0].role !== "";
 
   return (
     <>
@@ -239,7 +263,7 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={false} onClick={handleSubmit}>SAVE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit}>CREATE</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
@@ -387,7 +411,8 @@ const RoleSelect = (props: any) => {
       <EuiSuperSelect
         onChange={onChange}
         options={templateOptions}
-        valueOfSelected={templates.find(t => t.id === templateId).role}
+        // TODO: check deletion corner cases
+        valueOfSelected={templates.find(t => t.id === templateId)?.role ?? ''}
         append={
           <EuiButtonEmpty
             iconType='iInCircle'
@@ -438,7 +463,8 @@ const NameSpaceSelect = (props: any) => {
           aria-label="Namespace Selection"
           placeholder="Select Namespaces..."
           options={isSuccess ? nameSpaceOptions : []}
-          selectedOptions={allNamespaces ? [{label: 'All', value: 'all'}] : templates.find(t => t.id === templateId).namespaces}
+          // TODO: check deletion corner cases
+          selectedOptions={allNamespaces ? [{label: 'All', value: 'all'}] : (templates.find(t => t.id === templateId)?.namespaces ?? [])}
           onChange={onChange}
           isDisabled={allNamespaces}
           // onCreateOption={() => {}}
@@ -468,6 +494,14 @@ const TemplatesSlider = (props: any) => {
     setCurrentPage(pageNumber);
     panelContainerRef.current?.scrollTo(scrollLenght * pageNumber, 0);
   };
+
+  useEffect(() => {
+    // Automatic scroll after template Add
+    if (templates.length > 1) {
+      setCurrentPage(templates.length - 1)
+      panelContainerRef.current?.scrollTo(scrollLenght * templates.length -1 , 0);
+    }
+  }, [templates.length])
 
   return (
     <>
