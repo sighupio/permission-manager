@@ -65,7 +65,7 @@ const UsersList = () => {
                 css={{textAlign: 'center', padding: '24px 32px'}}
                 color='plain'
                 iconType='users'
-                title={<h5>Still no users defined</h5>}
+                title={<h5>No users defined yet</h5>}
                 titleSize='s'
                 actions={<EuiButtonEmpty color="success" href='/create-new-user' iconSide='right' iconType="plus">Create New User</EuiButtonEmpty>}
               />
