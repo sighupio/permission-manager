@@ -75,11 +75,11 @@ const clusterAccessOptions = [
   },
   {
     id: 'read',
-    label: 'read',
+    label: 'read-only',
   },
   {
     id: 'write',
-    label: 'write',
+    label: 'read-write',
   },
 ];
 
@@ -87,7 +87,7 @@ const clusterRoleMap = {
   none: false,
   read: 'read-only',
   write: 'admin'
-}
+};
 
 const templateOptions = [
   {
@@ -133,7 +133,31 @@ const CreateUser = () => {
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [errorModal, setErrorModal] = useState<boolean | string>(false);
 
-  const [mutationsDone, setMutationsDone] = useState<any>([])
+  const [usernameError, setUsernameError] = useState<string | null>(null)
+
+  const { users } = useUsers()
+
+  const validateUsername = () => {
+    if (username.length < 3) {
+      setUsernameError('Required to be at least 3 characters long')
+      return false
+    }
+
+    if (
+      !username.match(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/)) {
+      setUsernameError(`username must be DNS-1123 compliant, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'jane.doe')`)
+      return false
+    }
+
+    if (users.map(u => u.name).includes(username)) {
+      setUsernameError(`user ${username} already exists`)
+      return false
+    }
+
+    setUsernameError(null)
+    return true
+
+  };
   // const [aggregatedRoleBindings, setAggregatedRoleBindings] = useState<AggregatedRoleBinding[]>([])
 
 
@@ -245,10 +269,19 @@ const CreateUser = () => {
     } finally {
       console.log('finished')
       setSuccessModal(true);
-    }
-  }
+    };
+  };
 
-  let formIsFilled = templates[0].namespaces.length && templates[0].role !== "";
+  let formIsFilled =
+    templates.every(t => t.namespaces.length) &&
+    templates.every(t => t.role !== "") &&
+    usernameError === null;
+
+  useEffect(() => {
+    if (username !== '') {
+      validateUsername();
+    };
+  }, [username]);
 
   return (
     <>
@@ -268,7 +301,7 @@ const CreateUser = () => {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Username">
+                  <EuiFormRow label="Username" error={usernameError} isInvalid={usernameError !== null}>
                     <EuiFieldText icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
                   </EuiFormRow>
                   <EuiFormRow label="Access to cluster resources (non-namespaced)">
