@@ -237,22 +237,31 @@ const CreateUser = () => {
 
         // Make a query for each template
         templates.forEach((template) => {
-          // API as of now needs to be called one time for each namespace
-          template.namespaces.forEach((ns) => {
-            createRoleBindings.mutate({
-              roleName: `template-namespaced-resources___${template.role}`,
-              namespace: ns.value,
-              roleKind: 'ClusterRole',
+          // Check for ALL_NAMESPACES case (that can be composed by one namespace only)
+          if (template.namespaces[0].value === 'all') {
+            createClusterRoleBindings.mutate({
+              roleName: `template-cluster-resources___${template.role}`,
               subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-              roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns.value}`,
-              generated_for_user: username,
+              clusterRolebindingName: `${username}___template-cluster-resources___${template.role}all_namespaces`,
             })
-          });
-        }),
+            return
+          } else {
+            // API as of now needs to be called one time for each namespace
+            template.namespaces.forEach((ns) => {
+              createRoleBindings.mutate({
+                roleName: `template-namespaced-resources___${template.role}`,
+                namespace: ns.value,
+                roleKind: 'ClusterRole',
+                subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
+                roleBindingName: `${username}___template-namespaced-resources___${template.role}___${ns.value}`,
+                generated_for_user: username,
+              })
+            });
+          }
+          }),
 
         // Call to define Cluster Resources Access
         clusterAccess !== 'none' && createClusterRoleBindings.mutate({
-          // aggregatedRoleBindings:[{}],
           roleName: `template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
           subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
           clusterRolebindingName: `${username}___template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
@@ -268,7 +277,7 @@ const CreateUser = () => {
       console.error('user creation error', e)
     } finally {
       console.log('finished')
-      setSuccessModal(true);
+      !errorModal && setSuccessModal(true);
     };
   };
 
@@ -483,6 +492,22 @@ const NameSpaceSelect = (props: any) => {
       }
     }))
   };
+
+  useEffect(() => {
+    if (allNamespaces) {
+      console.log('all')
+      // remove all namespaces and fill with ['all']
+      setTemplates(templates.map(template => {
+        if (template.id === templateId) {
+          return {...template, namespaces: [{value: 'all', label: 'All'}]}
+        } else {
+          return template
+        }
+      }))
+    } else {
+      console.log('not all')
+    }
+  }, [allNamespaces]);
 
   const onCheck = (e) => {
     setAllNamespaces(e.target.checked);
