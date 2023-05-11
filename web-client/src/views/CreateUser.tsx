@@ -49,7 +49,7 @@ import { httpClient } from "../services/httpClient";
 
 import { AggregatedRoleBinding } from "../services/role";
 import { method } from 'bluebird';
-import { Subject } from '../hooks/useRbac';
+import { Subject, useRbac } from '../hooks/useRbac';
 import { ClusterRolebindingCreate } from '../services/rolebindingCreateRequests';
 
 type SummaryItem = {
@@ -57,7 +57,7 @@ type SummaryItem = {
   read: boolean,
   write: boolean,
   namespaces: string[],
-}
+};
 
 const mockedItems: SummaryItem[] = [
   {
@@ -66,7 +66,7 @@ const mockedItems: SummaryItem[] = [
     write: false,
     namespaces: ['my-namespace', 'another-namespace'],
   },
-]
+];
 
 const clusterAccessOptions = [
   {
@@ -112,7 +112,7 @@ interface UserCreationParams {
 type NamespaceOption = {
   label: string,
   value: string,
-}
+};
 
 interface Template {
   id: number,
@@ -135,7 +135,7 @@ const CreateUser = () => {
 
   const [usernameError, setUsernameError] = useState<string | null>(null)
 
-  const { users } = useUsers()
+  const { users } = useUsers();
 
   const validateUsername = () => {
     if (username.length < 3) {
@@ -143,8 +143,7 @@ const CreateUser = () => {
       return false
     }
 
-    if (
-      !username.match(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/)) {
+    if (!username.match(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/)) {
       setUsernameError(`username must be DNS-1123 compliant, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'jane.doe')`)
       return false
     }
@@ -191,11 +190,9 @@ const CreateUser = () => {
       return httpClient.post('/api/create-user', {name: username});
     },
     onError(error, variables, context) {
-      console.log('user', error, variables, context)
       setErrorModal(error.toString());
     },
     onSuccess() {
-      console.log('username done')
       usernameDone = true;
     },
   });
@@ -205,11 +202,9 @@ const CreateUser = () => {
       return httpClient.post('/api/create-rolebinding', params);
     },
     onError(error, variables, context) {
-      console.log('role', error, variables, context)
       setErrorModal(error.toString());
     },
     onSuccess(data, variables, context) {
-      console.log('bindings done')
       bindingsDone = true;
     },
   });
@@ -222,7 +217,6 @@ const CreateUser = () => {
       setErrorModal(error.toString())
     },
     onSuccess(data, variables, context) {
-      console.log('cluster bindings done')
       clusterBindingsDone = true;
     },
   });
@@ -258,7 +252,7 @@ const CreateUser = () => {
               })
             });
           }
-          }),
+        }),
 
         // Call to define Cluster Resources Access
         clusterAccess !== 'none' && createClusterRoleBindings.mutate({
@@ -268,7 +262,7 @@ const CreateUser = () => {
         })
       ]).then(res => {
         console.log('calls done', res);
-      })
+      });
 
       // history.push(`/users/${username}`)
 
@@ -319,7 +313,6 @@ const CreateUser = () => {
                     options={clusterAccessOptions}
                     idSelected={clusterAccess}
                     onChange={(e) => {
-                      console.log('radio', e)
                       setClusterAccess(e as any)
                     }}
                   />
@@ -438,10 +431,36 @@ const CreateUser = () => {
 const RoleSelect = (props: any) => {
   const { templates, setTemplates, templateId } = props;
 
+  const { clusterRoles } = useRbac();
+  // Extrac roles from rbac info
+  const templateNames = (clusterRoles || [])
+    .map(role => role.metadata.name)
+    .filter(role => role.startsWith('template-namespaced-resources___'));
+
+  // Map roles into selectable options
+  const options = templateNames.map(templateRole => {
+    const parsedRoleName = templateRole.replace('template-namespaced-resources___', '');
+    return {
+      value: parsedRoleName,
+      inputDisplay: parsedRoleName,
+    };
+  });
+
+  useEffect(() => {
+    // Set preselected role
+    options.length && setTemplates(templates.map(template => {
+      if (template.id === templateId) {
+        return {...template, role: options[0].value};
+      } else {
+        return template;
+      };
+    }));
+  }, [options.length]);
+
   const onChange = (selectedRole) => {
     setTemplates(templates.map(template => {
       if (template.id === templateId) {
-        return {...template, role: selectedRole}
+        return {...template, role: selectedRole};
       } else {
         return template;
       };
@@ -452,9 +471,8 @@ const RoleSelect = (props: any) => {
     <EuiFormRow label="Template (of Role)">
       <EuiSuperSelect
         onChange={onChange}
-        options={templateOptions}
-        // TODO: check deletion corner cases
-        valueOfSelected={templates.find(t => t.id === templateId)?.role ?? ''}
+        options={options}
+        valueOfSelected={templates.find(t => t.id === templateId)?.role}
         append={
           <EuiButtonEmpty
             iconType='iInCircle'
@@ -495,7 +513,6 @@ const NameSpaceSelect = (props: any) => {
 
   useEffect(() => {
     if (allNamespaces) {
-      console.log('all')
       // remove all namespaces and fill with ['all']
       setTemplates(templates.map(template => {
         if (template.id === templateId) {
