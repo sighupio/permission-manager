@@ -8,7 +8,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query';
 import {useUsers} from '../hooks/useUsers';
-import {useHistory} from 'react-router-dom';
+import {useHistory, useParams} from 'react-router-dom';
 import {
   EuiPanel,
   EuiButton,
@@ -40,12 +40,14 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { useNamespaceList } from '../hooks/useNamespaceList';
 import { httpRequests } from '../services/httpRequests';
 import { ClusterAccess } from "../components/types";
 import { httpClient } from "../services/httpClient";
 import { Subject, useRbac } from '../hooks/useRbac';
+import { extractUsersRoles } from '../services/role';
 
 type SummaryItem = {
   resource: string,
@@ -105,8 +107,9 @@ interface Template {
 };
 
 
-const CreateUser = () => {
-  const [username, setUsername] = useState<string>('');
+
+const EditUser = () => {
+  const { username }: {username: string} = useParams();
   const [clusterAccess, setClusterAccess] = useState<ClusterAccess>('none');
   const [templates, setTemplates] = useState<Template[]>([{
     id: 1,
@@ -117,30 +120,41 @@ const CreateUser = () => {
   const [successModal, setSuccessModal] = useState<boolean>(false);
   const [errorModal, setErrorModal] = useState<boolean | string>(false);
 
-  const [usernameError, setUsernameError] = useState<string | null>(null)
-
   const { users } = useUsers();
+  const { clusterRoleBindings, roleBindings, refreshRbacData } = useRbac();
 
-  const validateUsername = () => {
-    if (username.length < 3) {
-      setUsernameError('Required to be at least 3 characters long')
-      return false
-    }
+  console.log(useRbac())
 
-    if (!username.match(/^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$/)) {
-      setUsernameError(`username must be DNS-1123 compliant, it must consist of lower case alphanumeric characters, '-' or '.', and must start and end with an alphanumeric character (e.g. 'jane.doe')`)
-      return false
-    }
 
-    if (users.map(u => u.name).includes(username)) {
-      setUsernameError(`user ${username} already exists`)
-      return false
-    }
+  useEffect(() => {
+    let { extractedPairItems, crbs } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
-    setUsernameError(null)
-    return true
+    const reFormatTemplates = extractedPairItems.map((template, index) => {
+      // Format templates
+      return {
+        id: index + 1,
+        namespaces: (template.namespaces as string[]).map(ns => {
+          return {
+            value: ns,
+            label: ns,
+          }
+        }),
+        role: template.template //.replace('template-namespaced-resources___','')
+      };
+    });
 
-  };
+    const clusterAccess = crbs.find(crb => crb.metadata.name.includes('template-cluster-resources___'))
+    const formattedClusterAccess = clusterAccess && clusterAccess.roleRef.name.replace('template-cluster-resources___', '')
+
+    const entries = Object.entries(clusterAccessOptions);
+
+    console.log('ENTRUE', entries)
+
+    // const access = entries.find(c => c.value === formattedClusterAccess)
+
+    setClusterAccess(formattedClusterAccess as ClusterAccess);
+    setTemplates(reFormatTemplates as any);
+  }, [roleBindings, clusterRoleBindings, username]);
 
   const history = useHistory();
 
@@ -224,20 +238,15 @@ const CreateUser = () => {
 
   let formIsFilled =
     templates.every(t => t.namespaces.length) &&
-    templates.every(t => t.role !== "") &&
-    usernameError === null;
+    templates.every(t => t.role !== "")
 
-  useEffect(() => {
-    if (username !== '') {
-      validateUsername();
-    };
-  }, [username]);
+  let formIsModified = null;
 
   return (
     <>
       <EuiPageTemplate restrictWidth={1024}>
         <EuiPageTemplate.Header
-          pageTitle="Create New User"
+          pageTitle="Edit User"
         />
         <EuiPageTemplate.Section>
           <EuiFlexGroup direction='row'>
@@ -246,13 +255,17 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit}>CREATE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton color='danger' onClick={() => console.log('delete')}>Delete</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit}>EDIT</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiFormRow label="Username" error={usernameError} isInvalid={usernameError !== null}>
-                    <EuiFieldText icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
+                  <EuiFormRow label="Username" isDisabled={true}>
+                    <>
+                      <EuiText size='m'><strong>{username}</strong></EuiText>
+                      <EuiHorizontalRule margin='xs' />
+                    </>
                   </EuiFormRow>
                   <EuiFormRow label="Access to cluster resources (non-namespaced)">
                   <EuiRadioGroup
@@ -419,7 +432,7 @@ const RoleSelect = (props: any) => {
       <EuiSuperSelect
         onChange={onChange}
         options={options}
-        valueOfSelected={templates.find(t => t.id === templateId)?.role}
+        valueOfSelected={templates.find(t => t.id === templateId)?.role.replace('template-namespaced-resources___', '')}
         append={
           <EuiButtonEmpty
             iconType='iInCircle'
@@ -436,12 +449,13 @@ const RoleSelect = (props: any) => {
 
 const NameSpaceSelect = (props: any) => {
   const { templates, setTemplates, templateId } = props;
+  console.log('templates', templates)
   const [allNamespaces, setAllNamespaces] = useState<boolean>(false);
   // const {namespaceList} = useNamespaceList();
   const { data, isError, isLoading, isSuccess } = useQuery({
     queryKey: ['listNamespaces'],
     queryFn: () => httpRequests.namespaceList(),
-  })
+  });
 
   const nameSpaceOptions = !isLoading && !isError && data.data.namespaces
     .map((ns: NamespaceOption) => {
@@ -479,6 +493,11 @@ const NameSpaceSelect = (props: any) => {
       }))
     }
   }, [allNamespaces]);
+
+  useEffect(() => {
+    // Force re-render on load
+    setTemplates([...templates]);
+  }, [])
 
   const onCheck = (e) => {
     setAllNamespaces(e.target.checked);
@@ -621,4 +640,4 @@ const TemplatesSlider = (props: any) => {
   )
 }
 
-export default CreateUser;
+export default EditUser;
