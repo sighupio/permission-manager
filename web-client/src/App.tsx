@@ -12,7 +12,8 @@ import Footer from './components/Footer'
 import Home from './views/Home'
 import NewUser from './views/NewUser'
 import Advanced from './deadcode/views/Advanced'
-import EditUser from './views/EditUser'
+// import EditUser from './views/EditUser'
+import EditUser from './views/EditUserNew'
 
 import UsersList from './views/UsersList';
 import CreateUser from './views/CreateUser';
@@ -22,7 +23,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query';
-// import { ReactQueryDevtools } from '@tanstack/react-query/devtools';
 
 const queryClient = new QueryClient();
 
@@ -48,7 +48,7 @@ export default function App() {
                 {/* <div style={{ flexGrow: 1, backgroundColor: '#edf2f7' }}> */}
                   <Switch>
                     <Route path="/advanced" exact component={Advanced} />
-                    <Route path="/new-user" exact component={NewUser} />
+                    {/* <Route path="/new-user" exact component={NewUser} /> */}
                     <Route path="/create-new-user" exact component={CreateUser} />
                     <Route path="/users/:username" exact component={EditUser} />
                     {/* <Route path="/" exact component={Home} /> */}
