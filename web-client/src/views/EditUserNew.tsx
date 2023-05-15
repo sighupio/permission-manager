@@ -56,6 +56,12 @@ type SummaryItem = {
   namespaces: string[],
 };
 
+type clusterAccessOption = {
+  id: ClusterAccess,
+  label: string,
+  backendvalue: string,
+};
+
 const mockedItems: SummaryItem[] = [
   {
     resource: '*',
@@ -65,26 +71,29 @@ const mockedItems: SummaryItem[] = [
   },
 ];
 
-const clusterAccessOptions = [
+const clusterAccessOptions: clusterAccessOption[] = [
   {
     id: 'none',
     label: 'none',
+    backendvalue: 'none',
   },
   {
     id: 'read',
     label: 'read-only',
+    backendvalue: 'read',
   },
   {
     id: 'write',
     label: 'read-write',
+    backendvalue: 'admin',
   },
 ];
 
-const clusterRoleMap = {
-  none: false,
-  read: 'read-only',
-  write: 'admin'
-};
+// const clusterAccessMap = {
+//   none: {value: false, displayValue: 'none'},
+//   read: {value: 'read', displayValue: 'read-only'},
+//   write: {value: 'admin', displayValue: 'read-write'},
+// };
 
 interface UserCreationParams {
   generated_for_user: string,
@@ -126,8 +135,9 @@ const EditUser = () => {
   console.log(useRbac())
 
 
+  const { extractedPairItems, crbs } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
+
   useEffect(() => {
-    let { extractedPairItems, crbs } = extractUsersRoles(roleBindings, clusterRoleBindings, username);
 
     const reFormatTemplates = extractedPairItems.map((template, index) => {
       // Format templates
@@ -146,13 +156,10 @@ const EditUser = () => {
     const clusterAccess = crbs.find(crb => crb.metadata.name.includes('template-cluster-resources___'))
     const formattedClusterAccess = clusterAccess && clusterAccess.roleRef.name.replace('template-cluster-resources___', '')
 
-    const entries = Object.entries(clusterAccessOptions);
+    const selectedAccess = clusterAccessOptions.find((c: clusterAccessOption) => c.backendvalue === formattedClusterAccess);
+    console.log('ENTRUE', formattedClusterAccess, selectedAccess)
 
-    console.log('ENTRUE', entries)
-
-    // const access = entries.find(c => c.value === formattedClusterAccess)
-
-    setClusterAccess(formattedClusterAccess as ClusterAccess);
+    selectedAccess && setClusterAccess(selectedAccess.id);
     setTemplates(reFormatTemplates as any);
   }, [roleBindings, clusterRoleBindings, username]);
 
@@ -220,9 +227,9 @@ const EditUser = () => {
 
         // Call to define Cluster Resources Access
         clusterAccess !== 'none' && createClusterRoleBindings.mutate({
-          roleName: `template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
+          roleName: `template-cluster-resources___${clusterAccessOptions.find((c: clusterAccessOption) => c.id === clusterAccess).backendvalue}`,
           subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-          clusterRolebindingName: `${username}___template-cluster-resources___${clusterRoleMap[clusterAccess]}`,
+          clusterRolebindingName: `${username}___template-cluster-resources___${clusterAccessOptions.find((c: clusterAccessOption) => c.id === clusterAccess).backendvalue}`,
         })
       ]).then(res => {
         console.log('calls done', res);
@@ -273,6 +280,7 @@ const EditUser = () => {
                     options={clusterAccessOptions}
                     idSelected={clusterAccess}
                     onChange={(e) => {
+                      console.log('event', e)
                       setClusterAccess(e as any)
                     }}
                   />
