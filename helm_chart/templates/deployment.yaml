@@ -38,9 +38,15 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+          {{ if .Values.secret.exists }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.secret.name }}
+          {{ else }}
           envFrom:
             - secretRef:
                 name: {{ include "permission-manager.fullname" . }}
+          {{ end }}
           ports:
             - name: http
               containerPort: 4000

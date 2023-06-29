@@ -89,6 +89,13 @@ tolerations: []
 
 affinity: {}
 
+secret:
+  # If you want to use your own secret, just set "exist" to true and create the secret in the correct namespace.
+  exist: false
+  # If the secret exist, set the name below
+  name: permission-manager
+  # Annotations to add to the secret
+  annotations: {}
 #
 # Application configuration:
 config:
