@@ -100,13 +100,13 @@ secret:
 # Application configuration:
 config:
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> name
-  clusterName: "test"
+  clusterName: ""
 
   # Can be found in /etc/kubernetes/admin.conf: clusters -> cluster -> server
-  controlPlaneAddress: "test"
+  controlPlaneAddress: ""
 
   # Password for basic auth to access the UI
-  basicAuthPassword: "test"
+  basicAuthPassword: ""
 
   templates:
     - name: operation
