@@ -57,5 +57,12 @@ spec:
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: permission-manager-ui
+                port:
+                  number: 80
     {{- end }}
 {{- end }}
