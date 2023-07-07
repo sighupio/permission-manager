@@ -56,8 +56,10 @@ ingress:
   hosts:
     - host: permission-manager.domain.com
       paths:
-        - path: /
+        - path: /api/
           pathType: ImplementationSpecific
+        # - path: /
+        #   pathType: ImplementationSpecific
   # tls:
   #   - secretName: permission-manager-tls
   #     hosts:
@@ -100,6 +102,8 @@ config:
 
   # Password for basic auth to access the UI
   basicAuthPassword: ""
+
+  initialDelaySeconds: 0
 
   templates:
     - name: operation
