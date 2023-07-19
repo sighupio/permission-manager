@@ -67,7 +67,17 @@ const UsersList = () => {
                 iconType='users'
                 title={<h5>No users defined yet</h5>}
                 titleSize='s'
-                actions={<EuiButtonEmpty color="success" href='/create-new-user' iconSide='right' iconType="plus">Create New User</EuiButtonEmpty>}
+                actions={
+                  <EuiButtonEmpty
+                    color="success"
+                    iconType="plus"
+                    iconSide="right"
+                    href='/create-new-user'
+                    data-test-subj="create-user"
+                  >
+                    Create New User
+                  </EuiButtonEmpty>
+                }
               />
         }
       </EuiPageTemplate.Section>

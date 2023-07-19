@@ -209,9 +209,9 @@ const CreateUser = () => {
 
         // Call to define Cluster Resources Access
         clusterAccess !== 'none' && createClusterRoleBindings.mutate({
-          roleName: `template-cluster-resources___${clusterAccessOptions.find((c: clusterAccessOption) => c.id === clusterAccess).backendvalue}`,
+          roleName: `template-cluster-resources___${clusterAccessOptions.find((c: clusterAccessOption) => c.id === clusterAccess)?.backendvalue}`,
           subjects: [{kind: 'ServiceAccount', name: username, namespace: 'permission-manager'}],
-          clusterRolebindingName: `${username}___template-cluster-resources___${clusterAccessOptions.find((c: clusterAccessOption) => c.id === clusterAccess).backendvalue}`,
+          clusterRolebindingName: `${username}___template-cluster-resources___${clusterAccessOptions.find((c: clusterAccessOption) => c.id === clusterAccess)?.backendvalue}`,
         })
       ]).then(res => {
         console.log('calls done', res);
@@ -249,7 +249,7 @@ const CreateUser = () => {
                 <EuiFlexItem>
                   <EuiFlexGroup direction='row' justifyContent='spaceBetween'>
                     <EuiFlexItem grow={false}><EuiTitle><h3>User data</h3></EuiTitle></EuiFlexItem>
-                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit}>CREATE</EuiButton></EuiFlexItem>
+                    <EuiFlexItem grow={false}><EuiButton fill isDisabled={!formIsFilled} onClick={handleSubmit} data-test-subj='submit'>CREATE</EuiButton></EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
 
