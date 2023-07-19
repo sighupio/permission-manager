@@ -3,9 +3,10 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "test": "cypress run --headless"
+    "test": "playwright test --ui"
   },
   "devDependencies": {
+    "@playwright/test": "^1.36.1",
     "@testing-library/cypress": "^5.0.2",
     "@types/testing-library__cypress": "^5.0.1",
     "cypress": "^3.8.2",
