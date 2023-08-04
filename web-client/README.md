@@ -1,6 +1,6 @@
 # Permission manager UI
 
-app create using `create-react-app`
+app created using `create-react-app`
 
 ## usage
 
@@ -9,6 +9,10 @@ install dependencies
 ``` shell
 yarn install
 ```
+build the project (this let CRA to load the `.env` variables)
+``` shell
+sudo yarn build
+```
 
 run application
 
@@ -16,4 +20,6 @@ run application
 yarn start
 ```
 
-the application expect the api to run at <http://localhost:4000>
+Now you can access the UI on [localhost:4001](http://localhost:4001) and every time you save a file the app automatically reloads 💾 🔃
+### API URL
+the API URL is defined in the `.env` file by the `REACT_APP_API_URL` variable

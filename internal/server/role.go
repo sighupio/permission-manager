@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sighupio/permission-manager/internal/resources"
 
 	"github.com/labstack/echo/v4"
@@ -73,7 +74,8 @@ func createRoleBinding(c echo.Context) error {
 	err := ac.validateAndBindRequest(r)
 
 	if err != nil {
-		return err
+		validateAndBindErr := fmt.Sprintf("Validate Role: %s", err)
+		return ac.errorResponse(validateAndBindErr)
 	}
 
 	// This is only a workaround: https://github.com/sighupio/permission-manager/issues/140
@@ -91,7 +93,8 @@ func createRoleBinding(c echo.Context) error {
 	})
 
 	if err != nil {
-		return err
+		RoleErr := fmt.Sprintf("Role creation: %s", err)
+		return ac.errorResponse(RoleErr)
 	}
 
 	return ac.okResponse()

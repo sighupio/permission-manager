@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"sighupio/permission-manager/internal/resources"
 
 	"github.com/labstack/echo/v4"
@@ -42,7 +43,8 @@ func createUser(c echo.Context) error {
 	u, err := ac.ResourceManager.V1Alpha1PermissionManagerUser.Create(r.Name)
 
 	if err != nil {
-		return err
+		userErr := fmt.Sprintf("User creation: %s", err)
+		return ac.errorResponse(userErr)
 	}
 
 	return ac.okResponseWithData(response{Name: u.Name})
