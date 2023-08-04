@@ -255,7 +255,7 @@ const CreateUser = () => {
 
                 <EuiFlexItem grow={false}>
                   <EuiFormRow label="Username" error={usernameError} isInvalid={usernameError !== null}>
-                    <EuiFieldText icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
+                    <EuiFieldText data-test-subj='username' icon="user" placeholder="john.doe" onChange={(e) => setUsername(e.target.value)} />
                   </EuiFormRow>
                   <EuiFormRow label="Access to cluster resources (non-namespaced)">
                   <EuiRadioGroup

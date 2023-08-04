@@ -25,6 +25,8 @@ export default defineConfig({
 
     // Collect trace when retrying the failed test.
     trace: 'on-first-retry',
+
+    // Test ID
     testIdAttribute: 'data-test-subj',
   },
   // Configure projects for major browsers.
