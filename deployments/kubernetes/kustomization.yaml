@@ -1,0 +1,9 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: permission-manager
+
+resources:
+  - namespace.yml
+  - seeds/crd.yml
+  - seeds/seed.yml
+  - deploy.yml

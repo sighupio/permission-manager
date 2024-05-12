@@ -11,14 +11,14 @@ spec:
       storage: true
       schema:
         openAPIV3Schema:
-        type: object
-        properties:
-          spec:
-            type: object
-            properties:
-              name:
-                type: string
-                minLength: 2
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 2
   scope: Cluster
   names:
     plural: permissionmanagerusers
