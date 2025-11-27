@@ -18,7 +18,7 @@ spec:
           args:
             [
               # yamllint disable-line rule:line-length
-              'curl -s --fail -X POST $(ENDPOINT) -H "Content-Type: application/json;charset=utf-8" -H "Authorization: Basic $(BASIC_AUTH)" --data ''{"generated_for_user":"test-user","roleName":"template-namespaced-resources___developer","namespace":"permission-manager-e2e","roleKind":"ClusterRole","subjects":[{"kind":"ServiceAccount","name":"test-user","namespace":"permission-manager-e2e"}],"rolebindingName":"test-user___template-namespaced-resources___developer___permission-manager"}''',
+              'curl -s --fail -X POST $(ENDPOINT) -H "Content-Type: application/json;charset=utf-8" -H "Authorization: Basic $(BASIC_AUTH)" --data ''{"generated_for_user":"test-user","roleName":"template-namespaced-resources___developer","namespace":"permission-manager-e2e","roleKind":"ClusterRole","subjects":[{"kind":"ServiceAccount","name":"test-user","namespace":"permission-manager-e2e"},{"apiGroup":"rbac.authorization.k8s.io","kind":"User","name":"test-user"}],"rolebindingName":"test-user___template-namespaced-resources___developer___permission-manager"}''',
             ]
           env:
             - name: ENDPOINT

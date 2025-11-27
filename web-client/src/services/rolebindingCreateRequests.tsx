@@ -1,4 +1,4 @@
-import {resourceSeparator, templateClusterResourceRolePrefix} from "../constants";
+import {resourceSeparator, templateClusterResourceRolePrefix, ADDITIONAL_SUBJECT_KIND} from "../constants";
 import {ClusterAccess} from "../components/types";
 import {AxiosInstance, AxiosResponse} from "axios";
 import {AggregatedRoleBinding} from "./role";
@@ -139,6 +139,11 @@ export class RolebindingCreateRequests {
         kind: 'ServiceAccount',
         name: username,
         namespace: 'permission-manager'
+      },
+      {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: ADDITIONAL_SUBJECT_KIND,
+        name: username
       }
     ]
 

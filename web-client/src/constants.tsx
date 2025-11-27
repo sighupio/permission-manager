@@ -68,3 +68,7 @@ export const resourceSeparator = '___'
 export const templateNamespacedResourceRolePrefix = 'template-namespaced-resources' + resourceSeparator
 
 export const templateClusterResourceRolePrefix = 'template-cluster-resources' + resourceSeparator
+
+// Subject kind to add alongside ServiceAccount for user-generated bindings
+// Can be 'User' or 'Group'
+export const ADDITIONAL_SUBJECT_KIND = 'User'
